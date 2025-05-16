@@ -18,6 +18,14 @@ const getAllTestimonial = async () => {
     where: {
       isdisplay: true,
     },
+    include: {
+      user: {
+        select:{
+          firstName: true,
+          lastName: true
+        }
+      }
+    }
   });
 
   return testimonial;
