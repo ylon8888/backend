@@ -3,72 +3,91 @@ import ApiError from "../../../errors/ApiErrors";
 import prisma from "../../../shared/prisma";
 import { ITestimonial } from "./testimonial.interface";
 
+const createTestimonial = async (testimonialdata: ITestimonial) => {
+  const testimonial = await prisma.testimonial.create({
+    data: {
+      ...testimonialdata,
+    },
+  });
 
-const createTestimonial = async(testimonialdata: ITestimonial) =>{
-    const testimonial = await prisma.testimonial.create({
-        data: {
-            ...testimonialdata
-        }
-    })
+  return testimonial;
+};
 
-    return testimonial;
-}
+const getAllTestimonial = async () => {
+  const testimonial = await prisma.testimonial.findMany({
+    where: {
+      isdisplay: true,
+    },
+  });
 
+  return testimonial;
+};
 
-const getAllTestimonial = async() => {
-    const testimonial = await prisma.testimonial.findMany({
-      where: {
-        isdisplay: true
-      }
-    });
+const displayTestimonial = async (id: string) => {
+  const isExist = await prisma.testimonial.findUnique({
+    where: {
+      id,
+    },
+  });
 
-    return testimonial;
-}
+  if (!isExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Testimonial not found");
+  }
 
-const displayTestimonial = async(id: string) => {
-    const isExist = await prisma.testimonial.findUnique({
-        where: {
-            id
-        }
-    })
+  const testimonial = await prisma.testimonial.update({
+    where: {
+      id,
+    },
+    data: {
+      isdisplay: true,
+    },
+  });
 
-    if(!isExist){
-        throw new ApiError(httpStatus.NOT_FOUND, "Testimonial not found")
-    }
+  return testimonial;
+};
 
-    const testimonial = await prisma.testimonial.update({
-        where: {
-            id
-        },
-        data:{
-            isdisplay: true
-        }
-    })
+const deleteTestimonial = async (id: string) => {
+  const isExist = await prisma.testimonial.findUnique({
+    where: {
+      id,
+    },
+  });
 
-    return testimonial;
-}
+  if (!isExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Testimonial not found");
+  }
 
-const deleteTestimonial = async(id: string) => {
-        const isExist = await prisma.testimonial.findUnique({
-        where: {
-            id
-        }
-    })
+  await prisma.testimonial.delete({
+    where: {
+      id,
+    },
+  });
+};
 
-    if(!isExist){
-        throw new ApiError(httpStatus.NOT_FOUND, "Testimonial not found")
-    }
+const singleTestimonial = async (id: string) => {
+  const isExist = await prisma.testimonial.findUnique({
+    where: {
+      id,
+    },
+  });
 
-    await prisma.testimonial.delete({
-        where: {
-            id
-        },
-    })
-}
+  if (!isExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Testimonial not found");
+  }
+
+  const testimonial = await prisma.testimonial.findUnique({
+    where: {
+      id,
+    },
+  });
+
+  return testimonial;
+};
 
 export const TestimonialService = {
-    createTestimonial,
-    getAllTestimonial,
-    displayTestimonial,
-    deleteTestimonial
-}
+  createTestimonial,
+  getAllTestimonial,
+  displayTestimonial,
+  deleteTestimonial,
+  singleTestimonial
+};

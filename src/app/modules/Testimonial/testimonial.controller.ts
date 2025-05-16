@@ -65,9 +65,25 @@ const deleteTestimonial = catchAsync(async (req: Request, res: Response) => {
   });
 })
 
+const singleTestimonial = catchAsync(async (req: Request, res: Response) => {
+
+    const id = req.params.id;
+
+    const testimonial = await TestimonialService.singleTestimonial(id)
+
+    sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Testimonial retrive successfully",
+    data: testimonial,
+  });
+})
+
+
 export const TestimonialController = {
     createTestimonial,
     getAllTestimonial,
     displayTestimonial,
-    deleteTestimonial
+    deleteTestimonial,
+    singleTestimonial
 }
