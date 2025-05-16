@@ -66,3 +66,15 @@ model Contact {
 
   @@map("contacts")
 }
+
+model Blog {
+  id String @id @default(cuid())
+
+  title       String
+  subtitle    String
+  description String
+  blogImage   String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
