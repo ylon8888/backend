@@ -30,8 +30,22 @@ model User {
   accessToken  String?
   refreshToken String?
 
+  testimonials Testimonial?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("users")
+}
+
+model Testimonial {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  rating  Int @default(1)
+  message String
+  isdisplay Boolean @default(false)
+
+  @@map("testimonials")
 }
