@@ -120,9 +120,23 @@ const getSingleBlog = async (id: string) => {
     throw new ApiError(httpStatus.NOT_FOUND, "Blog not found");
   }
 
-  return await prisma.blog.findUnique({
-    where: { id },
-  });
+  const relatedBlog = await prisma.blog.findMany({
+    where: {
+      category: blog.category,
+      NOT: {
+        id
+      }
+    },
+    take: 3,
+    orderBy: {
+      createdAt: "desc"
+    }
+  })
+
+  return {
+    blog,
+    relatedBlog
+  };
 };
 
 
