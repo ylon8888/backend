@@ -83,3 +83,17 @@ model Blog {
 
   @@map("blogs")
 }
+
+model Class {
+  id String @id @default(cuid())
+
+  subject     String
+  description String
+  thumbnail   String
+  class       String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("classes")
+}
