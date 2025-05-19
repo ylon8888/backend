@@ -87,13 +87,30 @@ model Blog {
 model Class {
   id String @id @default(cuid())
 
-  subject     String
-  description String
-  thumbnail   String
-  class       String
+  className        String
+  classDescription String
+  isDeleted        Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  subjects Subject[]
+
   @@map("classes")
+}
+
+model Subject {
+  id      String @id @default(cuid())
+  classId String
+  class   Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  subjectName String
+  subjectDescription String
+  banner String
+  isVisible Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("subjects")
 }

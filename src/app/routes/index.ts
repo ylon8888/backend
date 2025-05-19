@@ -5,6 +5,8 @@ import { TestimonialRoutes } from "../modules/Testimonial/testimonial.routes";
 import { ContactRoutes } from "../modules/Contact/contact.routes";
 import { BlogRoutes } from "../modules/Blog/blog.route";
 import { StudentRoutes } from "../modules/Student/student.route";
+import { classRoutes } from "../modules/Class/class.route";
+import { subjectRoutes } from "../modules/Subject/subject.routes";
 
 const router = express.Router();
 
@@ -28,6 +30,14 @@ const moduleRoutes = [
   {
     path: "/student",
     route: StudentRoutes
+  },
+  {
+    path: "/class",
+    route: classRoutes
+  },
+  {
+    path: "/subject",
+    route: subjectRoutes
   }
 ];
 
