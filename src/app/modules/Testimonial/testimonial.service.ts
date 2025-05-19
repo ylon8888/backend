@@ -4,6 +4,14 @@ import prisma from "../../../shared/prisma";
 import { ITestimonial } from "./testimonial.interface";
 
 const createTestimonial = async (testimonialdata: ITestimonial) => {
+   const existing = await prisma.testimonial.findUnique({
+    where: { userId: testimonialdata?.userId }
+  });
+
+  if (existing) {
+    return;
+  }
+
   const testimonial = await prisma.testimonial.create({
     data: {
       ...testimonialdata,

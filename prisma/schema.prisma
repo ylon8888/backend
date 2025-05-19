@@ -43,6 +43,7 @@ model Testimonial {
   userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  courseId  String
   rating    Int     @default(1)
   message   String
   isdisplay Boolean @default(false)

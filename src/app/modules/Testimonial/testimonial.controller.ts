@@ -7,10 +7,12 @@ import { TestimonialService } from "./testimonial.service";
 
 
 const createTestimonial = catchAsync(async (req: Request, res: Response) => {
-    const userId =  "cmacfrkn90000ijixd4dzbwby";
+    const userId = req.user?.id;
+    const courseId = req.params.id;
     
     const body = {
         userId,
+        courseId,
         ...req.body
     }
 
