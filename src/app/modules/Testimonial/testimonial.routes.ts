@@ -7,7 +7,8 @@ import auth from "../../middlewares/auth";
 const router = express.Router();
 
 router.post('/:id', auth(), TestimonialController.createTestimonial)
-router.get('/', TestimonialController.getAllTestimonial)
+router.get('/course-testimonial/:id', TestimonialController.getStudentTestimonial)
+router.get('/admin-testimonial', TestimonialController.getAdminTestimonial);
 router.get('/:id', TestimonialController.singleTestimonial)
 router.patch('/:id', TestimonialController.displayTestimonial)
 router.delete('/:id', TestimonialController.deleteTestimonial)

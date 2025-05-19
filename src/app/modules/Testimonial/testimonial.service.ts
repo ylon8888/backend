@@ -2,6 +2,9 @@ import httpStatus from "http-status";
 import ApiError from "../../../errors/ApiErrors";
 import prisma from "../../../shared/prisma";
 import { ITestimonial } from "./testimonial.interface";
+import { IPaginationOptions } from "../../../interfaces/paginations";
+import { paginationHelpers } from "../../../helpars/paginationHelper";
+import { Prisma } from "@prisma/client";
 
 const createTestimonial = async (testimonialdata: ITestimonial) => {
    const existing = await prisma.testimonial.findUnique({
@@ -21,10 +24,11 @@ const createTestimonial = async (testimonialdata: ITestimonial) => {
   return testimonial;
 };
 
-const getAllTestimonial = async () => {
+const getStudentTestimonial = async (id: string) => {
   const testimonial = await prisma.testimonial.findMany({
     where: {
       isdisplay: true,
+      courseId: id
     },
     include: {
       user: {
@@ -37,6 +41,66 @@ const getAllTestimonial = async () => {
   });
 
   return testimonial;
+};
+
+
+
+
+const getAdminTestimonial = async (
+  filters: {
+    searchTerm?: string;
+  },
+  options: IPaginationOptions
+) => {
+  const { searchTerm } = filters;
+  const { page, skip, limit, sortBy, sortOrder } =
+    paginationHelpers.calculatePagination(options);
+
+  const andConditions = [];
+
+  if (searchTerm) {
+    andConditions.push({
+      OR: ["title", "category"].map((field) => ({
+        [field]: {
+          contains: searchTerm,
+          mode: "insensitive",
+        },
+      })),
+    });
+  }
+
+  const whereConditions: Prisma.TestimonialWhereInput = {
+    AND: [...andConditions, ],
+  };
+
+  const blogs = await prisma.testimonial.findMany({
+    where: {
+      ...whereConditions,
+    },
+    skip,
+    take: limit,
+    orderBy:
+      sortBy && sortOrder
+        ? { [sortBy]: sortOrder }
+        : {
+            createdAt: "desc",
+          },
+  });
+
+  const total = await prisma.testimonial.count({
+    where: {
+      ...whereConditions,
+    },
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: blogs,
+  };
 };
 
 const displayTestimonial = async (id: string) => {
@@ -61,6 +125,9 @@ const displayTestimonial = async (id: string) => {
 
   return testimonial;
 };
+
+
+
 
 const deleteTestimonial = async (id: string) => {
   const isExist = await prisma.testimonial.findUnique({
@@ -102,8 +169,9 @@ const singleTestimonial = async (id: string) => {
 
 export const TestimonialService = {
   createTestimonial,
-  getAllTestimonial,
+  getStudentTestimonial,
   displayTestimonial,
+  getAdminTestimonial,
   deleteTestimonial,
   singleTestimonial
 };

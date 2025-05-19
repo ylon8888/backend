@@ -4,6 +4,8 @@ import config from "../../../config";
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 import { TestimonialService } from "./testimonial.service";
+import pick from "../../../shared/pick";
+import { paginationFields } from "../../../constants/pagination";
 
 
 const createTestimonial = catchAsync(async (req: Request, res: Response) => {
@@ -26,10 +28,10 @@ const createTestimonial = catchAsync(async (req: Request, res: Response) => {
   });
 })
 
-const getAllTestimonial = catchAsync(async (req: Request, res: Response) => {
+const getStudentTestimonial = catchAsync(async (req: Request, res: Response) => {
+  const id = req.params.id;
 
-
-    const testimonial = await TestimonialService.getAllTestimonial();
+    const testimonial = await TestimonialService.getStudentTestimonial(id);
 
     sendResponse(res, {
     success: true,
@@ -38,6 +40,23 @@ const getAllTestimonial = catchAsync(async (req: Request, res: Response) => {
     data: testimonial,
   });
 })
+
+
+
+
+const getAdminTestimonial = catchAsync(async (req: Request, res: Response) => {
+  const filters = pick(req.query, ["searchTerm"]);
+  const options = pick(req.query, paginationFields);
+
+  const testimonial = await TestimonialService.getAdminTestimonial(filters, options);
+
+      sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "Testimonial retrive successfully",
+    data: testimonial,
+  });
+});
 
 const displayTestimonial = catchAsync(async (req: Request, res: Response) => {
 
@@ -84,8 +103,9 @@ const singleTestimonial = catchAsync(async (req: Request, res: Response) => {
 
 export const TestimonialController = {
     createTestimonial,
-    getAllTestimonial,
+    getStudentTestimonial,
     displayTestimonial,
     deleteTestimonial,
-    singleTestimonial
+    singleTestimonial,
+    getAdminTestimonial
 }
