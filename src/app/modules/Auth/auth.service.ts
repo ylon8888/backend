@@ -172,10 +172,8 @@ const loginUser = async (
 
     return {
       id: userData.id,
-      firstName: userData.firstName,
-      lastName: userData.lastName,
       email: userData.email,
-      role: userData.role,
+      message: "OTP sent! Please verify your email"
     };
   } else {
     const accessToken = jwtHelpers.generateToken(

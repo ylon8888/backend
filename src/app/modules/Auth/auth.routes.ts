@@ -15,7 +15,7 @@ router.patch("/verify-otp", AuthController.verifyUserByOTP);
 
 router.patch(
   "/logout",
-  auth(UserRole.ADMIN, UserRole.USER),
+  auth(UserRole.ADMIN, UserRole.STUDENT),
   AuthController.logOutUser
 );
 
@@ -23,7 +23,7 @@ router.get("/refresh-token", AuthController.refreshToken);
 
 router.get(
   "/me",
-  auth(UserRole.ADMIN, UserRole.USER),
+  auth(UserRole.ADMIN, UserRole.STUDENT),
   AuthController.getMyProfile
 );
 

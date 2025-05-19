@@ -9,7 +9,7 @@ generator client {
 }
 
 enum UserRole {
-  USER
+  STUDENT
   ADMIN
 }
 
@@ -21,7 +21,7 @@ model User {
   email     String @unique
   password  String
 
-  role UserRole @default(USER)
+  role UserRole @default(STUDENT)
 
   otp          String?
   otpExpiresAt DateTime?

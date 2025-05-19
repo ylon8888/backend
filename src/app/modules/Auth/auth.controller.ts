@@ -98,7 +98,7 @@ const resetPassword = catchAsync(async (req: Request, res: Response) => {
 });
 
 const logOutUser = catchAsync(async (req: Request, res: Response) => {
-  const email = req.body.email;
+  const email = req.user?.email;
 
   const result = await AuthServices.logOutUser(email);
 
