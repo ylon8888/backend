@@ -13,5 +13,6 @@ const fileUpload = upload.single("file");
 router.post('/:id', fileUpload, SubjectController.createSubject);
 router.patch('/update-visibility/:id', SubjectController.updatevisibility);
 router.get('/', SubjectController.getAllSubjects);
+router.get('/subject-wise-chapter/:id', SubjectController.subjectWiseChapter);
 
 export const subjectRoutes = router;

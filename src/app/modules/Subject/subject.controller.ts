@@ -64,8 +64,24 @@ const updatevisibility = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const subjectWiseChapter = catchAsync(async (req: Request, res: Response) => {
+  const subjectId = req.params.id;
+
+  const classVisibility = await SubjectService.subjectWiseChapter(
+    subjectId
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Chapter retrieved successfully",
+    data: classVisibility,
+  });
+});
+
 export const SubjectController = {
   createSubject,
   updatevisibility,
-  getAllSubjects
+  getAllSubjects,
+  subjectWiseChapter
 };

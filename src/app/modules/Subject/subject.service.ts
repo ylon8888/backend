@@ -11,63 +11,81 @@ import prisma from "../../../shared/prisma";
 import { UserRole } from "@prisma/client";
 import { Isubject } from "./subject.interface";
 
-
 const createSubject = async (subjectData: Isubject) => {
+  const classExist = await prisma.class.findUnique({
+    where: {
+      id: subjectData.classId,
+    },
+  });
 
-    const classExist = await prisma.class.findUnique({
-        where: {
-            id: subjectData.classId
-        }
-    })
+  if (!classExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Class not found");
+  }
 
-    if(!classExist){
-        throw new ApiError(httpStatus.NOT_FOUND, "Class not found");
-    }
+  const subject = await prisma.subject.create({
+    data: {
+      classId: subjectData.classId,
+      subjectName: subjectData.subjectName,
+      subjectDescription: subjectData.subjectDescription,
+      banner: subjectData.banner,
+    },
+  });
 
-    const subject = await prisma.subject.create({
-        data: {
-            classId: subjectData.classId,
-            subjectName: subjectData.subjectName,
-            subjectDescription: subjectData.subjectDescription,
-            banner: subjectData.banner,
-        }
-    })
+  return subject;
+};
 
-    return subject;
-}
+const getAllSubjects = async () => {
+  const subject = await prisma.subject.findMany();
 
-const getAllSubjects =  async () => {
-    const subject = await prisma.subject.findMany();
-
-    return subject;
-}
+  return subject;
+};
 
 const updatevisibility = async (subjectId: string, isVisible: boolean) => {
-    const subject = await prisma.subject.findUnique({
-        where: {
-            id: subjectId
-        }
-    })
-
-    if(!subject){
-        throw new ApiError(httpStatus.NOT_FOUND, "Subject not found");
-    }
-
-   const updatevisibility = await prisma.subject.update({
+  const subject = await prisma.subject.findUnique({
     where: {
-        id: subject.id
+      id: subjectId,
+    },
+  });
+
+  if (!subject) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Subject not found");
+  }
+
+  const updatevisibility = await prisma.subject.update({
+    where: {
+      id: subject.id,
     },
     data: {
-        isVisible: isVisible
-    }
-   })
+      isVisible: isVisible,
+    },
+  });
 
-   return updatevisibility;
-}
+  return updatevisibility;
+};
 
+const subjectWiseChapter = async (subjectId: string) => {
+  const subject = await prisma.subject.findUnique({
+    where: {
+      id: subjectId,
+    },
+  });
+
+  if (!subject) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Subject not found");
+  }
+
+  const chapters = await prisma.chapter.findMany({
+    where: {
+      subjectId: subject.id,
+    },
+  });
+
+  return { chapters };
+};
 
 export const SubjectService = {
-    createSubject,
-    updatevisibility,
-    getAllSubjects
-}
+  createSubject,
+  updatevisibility,
+  getAllSubjects,
+  subjectWiseChapter,
+};

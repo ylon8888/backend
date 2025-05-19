@@ -104,13 +104,32 @@ model Subject {
   classId String
   class   Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
 
-  subjectName String
+  subjectName        String
   subjectDescription String
-  banner String
-  isVisible Boolean @default(true)
+  banner             String
+  isVisible          Boolean @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  chapters Chapter[]
+
   @@map("subjects")
+}
+
+model Chapter {
+  id String @id @default(cuid())
+
+  subjectId String
+  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  chapterName        String
+  chapterDescription String
+  thumbnail          String
+  isDeleted          Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("chapters")
 }
