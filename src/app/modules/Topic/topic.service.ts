@@ -25,7 +25,7 @@ const createTopic = async(topicData: ITopic) => {
         }
     })
 
-    return topic;
+    return {topic};
 }
 
 

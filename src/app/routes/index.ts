@@ -9,6 +9,7 @@ import { classRoutes } from "../modules/Class/class.route";
 import { subjectRoutes } from "../modules/Subject/subject.routes";
 import { ChapterRoutes } from "../modules/Chapter/chapter.routes";
 import { topicRoutes } from "../modules/Topic/topic.routes";
+import { PodcastRoutes } from "../modules/Podcast/podcast.routes";
 
 const router = express.Router();
 
@@ -48,7 +49,11 @@ const moduleRoutes = [
   {
     path: "/topic",
     route: topicRoutes
-  }
+  },
+  {
+    path: "/podcast",
+    route: PodcastRoutes
+  },
 ];
 
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

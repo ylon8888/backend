@@ -131,7 +131,8 @@ model Chapter {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  topic Topic[]
+  topic   Topic[]
+  podcast Podcast[]
 
   @@map("chapters")
 }
@@ -149,5 +150,24 @@ model Topic {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  podcast Podcast[]
+
   @@map("topics")
+}
+
+model Podcast {
+  id        String @id @default(cuid())
+  chapterId String
+  topicId   String
+
+  podcastName    String
+  podcastContent String
+
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  topic   Topic   @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("podcasts")
 }
