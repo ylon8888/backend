@@ -131,5 +131,23 @@ model Chapter {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  topic Topic[]
+
   @@map("chapters")
+}
+
+model Topic {
+  id        String  @id @default(cuid())
+  chapterId String
+  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  topicName        String
+  topicDescription String?
+  topicVideo       String
+  questionAnswer   Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("topics")
 }
