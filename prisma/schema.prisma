@@ -133,7 +133,7 @@ model Chapter {
 
   topic   Topic[]
   podcast Podcast[]
-  quiz   Quiz[]
+  quiz    Quiz[]
 
   @@map("chapters")
 }
@@ -179,12 +179,32 @@ model Quiz {
   chapterId       String
   quizName        String
   quizDescription String
-  isDisable      Boolean @default(false)
+  isDisable       Boolean @default(false)
 
   chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Question  QuizQuestion?
+
+  @@map("quizes")
+}
+
+model QuizQuestion {
+  id String @id @default(cuid())
+
+  quizId        String @unique
+  questionText  String
+  optionA       String
+  optionB       String
+  optionC       String
+  optionD       String
+  correctAnswer String
+
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("quizes")
+  @@map("quizQuestions")
 }
