@@ -11,5 +11,9 @@ const upload = multer({ storage: createStorage("podcast") });
 const fileUpload = upload.single("file");
 
 router.post("/", fileUpload, PodcastController.createPodcast);
+router.get(
+  "/chapters/:chapterId/topics/:topicId",
+  PodcastController.getChapterPodcast
+);
 
 export const PodcastRoutes = router;

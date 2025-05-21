@@ -36,6 +36,21 @@ const createPodcast = catchAsync(async (req: Request, res: Response) => {
 });
 
 
+const getChapterPodcast = catchAsync(async (req: Request, res: Response) => {
+  const { chapterId, topicId } = req.params;
+
+
+  const podcast = await PodcastService.getChapterPodcast(chapterId, topicId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Retrive podcast successfully",
+    data: podcast,
+  });
+});
+
 export const PodcastController = {
-    createPodcast
+    createPodcast,
+    getChapterPodcast
 }
