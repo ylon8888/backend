@@ -20,6 +20,7 @@ model User {
   lastName  String
   email     String @unique
   password  String
+  profile   String?
 
   role UserRole @default(STUDENT)
 

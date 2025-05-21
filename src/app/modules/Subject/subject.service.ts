@@ -6,7 +6,6 @@ import { otpEmail } from "../../../emails/otpEmail";
 import ApiError from "../../../errors/ApiErrors";
 import emailSender from "../../../helpars/emailSender/emailSender";
 import { jwtHelpers } from "../../../helpars/jwtHelpers";
-import stripe from "../../../helpars/stripe/stripe";
 import prisma from "../../../shared/prisma";
 import { UserRole } from "@prisma/client";
 import { Isubject } from "./subject.interface";

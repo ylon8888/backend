@@ -32,7 +32,48 @@ const courseDetails = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+const courseReview = catchAsync(async (req: Request, res: Response) => {
+  const chapterId = req.params.chapterId;
+  const useId = req.user.id;
+
+  const body = {
+    chapterId,
+    useId,
+    ...req.body
+  }
+
+  const classVisibility = await StudentService.courseReview(body)
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Create course review successfully",
+    data: classVisibility,
+  });
+});
+
+
+const getCourseReview = catchAsync(async (req: Request, res: Response) => {
+  const subjectId = req.params.subjectId;
+
+  const classVisibility = await StudentService.getCourseReview(
+    subjectId
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Retrieved course review successfully",
+    data: classVisibility,
+  });
+});
+
+
+
 export const StudentController = {
   registration,
-  courseDetails
+  courseDetails,
+  courseReview,
+  getCourseReview
 };

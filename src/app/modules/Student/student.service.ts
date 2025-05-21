@@ -6,7 +6,6 @@ import { otpEmail } from "../../../emails/otpEmail";
 import ApiError from "../../../errors/ApiErrors";
 import emailSender from "../../../helpars/emailSender/emailSender";
 import { jwtHelpers } from "../../../helpars/jwtHelpers";
-import stripe from "../../../helpars/stripe/stripe";
 import prisma from "../../../shared/prisma";
 import { IUser } from "./student.interface";
 import { UserRole } from "@prisma/client";
@@ -31,7 +30,6 @@ const registration = async (userData: IUser) => {
   const randomOtp = Math.floor(100000 + Math.random() * 900000).toString();
   const otpExpiry = new Date(Date.now() + 5 * 60 * 1000);
 
-
   const newUser = await prisma.user.create({
     data: {
       firstName: userData.firstName,
@@ -51,33 +49,95 @@ const registration = async (userData: IUser) => {
   return {
     id: newUser.id,
     email: newUser.email,
-    message: "OTP sent! Please verify your email to complete registration."
+    message: "OTP sent! Please verify your email to complete registration.",
   };
-
 };
-
 
 const courseDetails = async (subjectId: string) => {
   const subject = await prisma.subject.findUnique({
     where: {
       id: subjectId,
     },
-    select:{
+    select: {
+      id: true,
       subjectName: true,
-      subjectDescription: true
-    }
+      subjectDescription: true,
+    },
   });
 
   if (!subject) {
     throw new ApiError(httpStatus.NOT_FOUND, "Subject not found");
   }
-  
+
   return {
-    course: subject
+    course: subject,
+  };
+};
+
+const courseReview = async (reviewData: any) => {
+  const review = await prisma.courseReview.create({
+    data: {
+      ...reviewData,
+    },
+  });
+
+  return {
+    review,
+  };
+};
+
+const getCourseReview = async (subjectId: string) => {
+  const subject = await prisma.subject.findUnique({
+    where: { id: subjectId },
+  });
+
+  if (!subject) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Course not found");
   }
+
+  const courseData = await prisma.subject.findMany({
+    where: { id: subjectId },
+    select: {
+      chapters: {
+        select: {
+          CourseReview: {
+            select: {
+              rating: true,
+              message: true,
+              user: {
+                select: {
+                  firstName: true,
+                  lastName: true,
+                  email: true,
+                  profile: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  // Flatten all reviews into array of objects
+  const reviews = courseData.flatMap((course) =>
+    course.chapters.flatMap((chapter) =>
+      chapter.CourseReview.map((review) => ({
+        name: `${review.user.firstName} ${review.user.lastName}`,
+        email: review.user.email,
+        profile: review.user.profile,
+        rating: review.rating,
+        message: review.message,
+      }))
+    )
+  );
+
+  return { reviews };
 };
 
 export const StudentService = {
   registration,
-  courseDetails
+  courseDetails,
+  courseReview,
+  getCourseReview,
 };
