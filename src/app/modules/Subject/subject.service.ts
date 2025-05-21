@@ -37,7 +37,7 @@ const createSubject = async (subjectData: Isubject) => {
 const getAllSubjects = async () => {
   const subject = await prisma.subject.findMany();
 
-  return subject;
+  return { subject };
 };
 
 const updatevisibility = async (subjectId: string, isVisible: boolean) => {
@@ -82,6 +82,8 @@ const subjectWiseChapter = async (subjectId: string) => {
 
   return { chapters };
 };
+
+
 
 export const SubjectService = {
   createSubject,

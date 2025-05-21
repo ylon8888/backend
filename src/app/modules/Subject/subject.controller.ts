@@ -79,9 +79,10 @@ const subjectWiseChapter = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
 export const SubjectController = {
   createSubject,
   updatevisibility,
   getAllSubjects,
-  subjectWiseChapter
+  subjectWiseChapter,
 };

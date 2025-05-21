@@ -16,6 +16,23 @@ const registration = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+const courseDetails = catchAsync(async (req: Request, res: Response) => {
+  const subjectId = req.params.subjectId;
+
+  const classVisibility = await StudentService.courseDetails(
+    subjectId
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Course details retrieved successfully",
+    data: classVisibility,
+  });
+});
+
 export const StudentController = {
   registration,
+  courseDetails
 };

@@ -56,6 +56,28 @@ const registration = async (userData: IUser) => {
 
 };
 
+
+const courseDetails = async (subjectId: string) => {
+  const subject = await prisma.subject.findUnique({
+    where: {
+      id: subjectId,
+    },
+    select:{
+      subjectName: true,
+      subjectDescription: true
+    }
+  });
+
+  if (!subject) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Subject not found");
+  }
+  
+  return {
+    course: subject
+  }
+};
+
 export const StudentService = {
   registration,
+  courseDetails
 };

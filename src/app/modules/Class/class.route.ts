@@ -12,4 +12,5 @@ router.get('/single-class/:id', classController.getSingleClass);
 router.post('/', classController.createClass);
 router.patch('/class-visibility/:id', classController.classVisibility);
 
+
 export const classRoutes = router;
