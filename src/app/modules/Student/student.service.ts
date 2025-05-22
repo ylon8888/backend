@@ -68,6 +68,11 @@ const courseDetails = async (subjectId: string) => {
   const ratingData = await prisma.subject.findUnique({
     where: { id: subjectId },
     select: {
+      class: {
+        select:{
+          className: true
+        }
+      },
       chapters: {
         select: {
           CourseReview: { select: { rating: true } },
