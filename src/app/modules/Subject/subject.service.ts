@@ -7,8 +7,10 @@ import ApiError from "../../../errors/ApiErrors";
 import emailSender from "../../../helpars/emailSender/emailSender";
 import { jwtHelpers } from "../../../helpars/jwtHelpers";
 import prisma from "../../../shared/prisma";
-import { UserRole } from "@prisma/client";
+import { Prisma, UserRole } from "@prisma/client";
 import { Isubject } from "./subject.interface";
+import { IPaginationOptions } from "../../../interfaces/paginations";
+import { paginationHelpers } from "../../../helpars/paginationHelper";
 
 const createSubject = async (subjectData: Isubject) => {
   const classExist = await prisma.class.findUnique({
@@ -62,27 +64,78 @@ const updatevisibility = async (subjectId: string, isVisible: boolean) => {
   return updatevisibility;
 };
 
-const subjectWiseChapter = async (subjectId: string) => {
+const subjectWiseChapter = async (
+  subjectId: string,
+  filters: {
+    searchTerm?: string;
+  },
+  options: IPaginationOptions
+) => {
+  const { searchTerm } = filters;
+  const { page, skip, limit, sortBy, sortOrder } =
+    paginationHelpers.calculatePagination(options);
+
+  // Check if the subject exists
   const subject = await prisma.subject.findUnique({
-    where: {
-      id: subjectId,
-    },
+    where: { id: subjectId },
+    select:{
+      subjectName: true,
+      subjectDescription: true,
+      banner: true
+    }
   });
 
   if (!subject) {
     throw new ApiError(httpStatus.NOT_FOUND, "Subject not found");
   }
 
+  // Construct filter conditions for Chapter
+  const whereConditions: Prisma.ChapterWhereInput = {
+    AND: [
+      { subjectId },
+      ...(searchTerm
+        ? [
+            {
+              OR: ["title", "category"].map((field) => ({
+                [field]: {
+                  contains: searchTerm,
+                  mode: "insensitive",
+                },
+              })),
+            },
+          ]
+        : []),
+    ],
+  };
+
+  // Get filtered chapters
   const chapters = await prisma.chapter.findMany({
-    where: {
-      subjectId: subject.id,
+    where: whereConditions,
+    select:{
+      chapterName: true,
+      chapterDescription: true,
+      thumbnail: true
+    },
+    skip,
+    take: limit,
+    orderBy: {
+      [sortBy || "createdAt"]: sortOrder || "desc",
     },
   });
 
-  return { chapters };
+  const total = await prisma.chapter.count({
+    where: whereConditions,
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: { subject, chapters },
+  };
 };
-
-
 
 export const SubjectService = {
   createSubject,

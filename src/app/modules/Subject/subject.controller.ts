@@ -66,9 +66,13 @@ const updatevisibility = catchAsync(async (req: Request, res: Response) => {
 
 const subjectWiseChapter = catchAsync(async (req: Request, res: Response) => {
   const subjectId = req.params.subjectId;
+  const filters = pick(req.query, ["searchTerm"]);
+  const options = pick(req.query, paginationFields);
 
   const classVisibility = await SubjectService.subjectWiseChapter(
-    subjectId
+    subjectId,
+    filters,
+    options
   );
 
   sendResponse(res, {
