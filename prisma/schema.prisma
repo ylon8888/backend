@@ -18,7 +18,7 @@ model User {
 
   firstName String
   lastName  String
-  email     String @unique
+  email     String  @unique
   password  String
   profile   String?
 
@@ -138,7 +138,77 @@ model Chapter {
   quiz         Quiz[]
   CourseReview CourseReview[]
 
+  // all steps
+  stepOne   StepOne?
+  stepTwo   StepTwo?
+  stepThree StepThree?
+  stepEight StepEight?
+
   @@map("chapters")
+}
+
+model StepOne {
+  id String @id @default(cuid())
+
+  chapterId String  @unique
+  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("stepOne")
+}
+
+model StepTwo {
+  id String @id @default(cuid())
+
+  chapterId String  @unique
+  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("stepTwo")
+}
+
+model StepThree {
+  id String @id @default(cuid())
+
+  chapterId String  @unique
+  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("stepThree")
+}
+
+model StepEight {
+  id String @id @default(cuid())
+
+  chapterId String  @unique
+  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  stepEightQuizzes StepEightQuiz[]
+
+  @@map("stepEight")
+}
+
+model StepEightQuiz {
+  id String @id @default(cuid())
+
+  setName     String
+  description String
+
+  data      Json
+  isDisable Boolean @default(false)
+
+  stepEightId String
+  stepEight   StepEight @relation(fields: [stepEightId], references: [id], onDelete: Cascade)
+
+  @@map("stepEightQuiz")
 }
 
 model Topic {
