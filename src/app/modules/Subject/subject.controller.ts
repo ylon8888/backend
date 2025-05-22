@@ -10,7 +10,7 @@ import { SubjectService } from "./subject.service";
 import { Isubject } from "./subject.interface";
 
 const createSubject = catchAsync(async (req: Request, res: Response) => {
-  const classId = req.params.id;
+  const classId = req.params.classId;
   const { file } = req;
 
   if (!file) {
@@ -49,7 +49,7 @@ const getAllSubjects = catchAsync(async (req: Request, res: Response) => {
 
 
 const updatevisibility = catchAsync(async (req: Request, res: Response) => {
-  const subjectId = req.params.id;
+  const subjectId = req.params.subjectId;
 
   const classVisibility = await SubjectService.updatevisibility(
     subjectId,
@@ -65,7 +65,7 @@ const updatevisibility = catchAsync(async (req: Request, res: Response) => {
 });
 
 const subjectWiseChapter = catchAsync(async (req: Request, res: Response) => {
-  const subjectId = req.params.id;
+  const subjectId = req.params.subjectId;
 
   const classVisibility = await SubjectService.subjectWiseChapter(
     subjectId

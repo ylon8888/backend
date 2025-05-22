@@ -57,7 +57,7 @@ const courseDetails = async (subjectId: string) => {
   // Fetch course details
   const subject = await prisma.subject.findUnique({
     where: { id: subjectId },
-    select: { id: true, subjectName: true, subjectDescription: true },
+    select: { subjectName: true, subjectDescription: true },
   });
 
   if (!subject) {
@@ -115,7 +115,7 @@ const courseDetails = async (subjectId: string) => {
       course: subject,
       averageRating,
       totalReviews,
-      chapterCount
+      chapterCount,
     },
   };
 };
@@ -184,6 +184,8 @@ const getCourseReview = async (subjectId: string) => {
 
   return { reviews };
 };
+
+
 
 export const StudentService = {
   registration,
