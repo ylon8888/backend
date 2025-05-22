@@ -101,6 +101,10 @@ const getCourseReview = async (subjectId: string) => {
       chapters: {
         select: {
           CourseReview: {
+            orderBy: {
+              createdAt: "desc"
+            },
+            take: 3,
             select: {
               rating: true,
               message: true,
@@ -117,6 +121,7 @@ const getCourseReview = async (subjectId: string) => {
         },
       },
     },
+    
   });
 
   // Flatten all reviews into array of objects
