@@ -108,6 +108,18 @@ const courseDetails = async (subjectId: string) => {
   const chapters = chapterData[0]?.chapters || [];
   const chapterCount = chapters.length;
 
+  const learnFromCourse = await prisma.subject.findUnique({
+    where: { id: subjectId },
+    select: {
+      chapters: {
+        select:{
+          chapterName: true,
+          chapterDescription: true
+        }
+      },
+    },
+  });
+
   return {
     success: true,
     message: "Course details retrieved successfully",
@@ -116,6 +128,7 @@ const courseDetails = async (subjectId: string) => {
       averageRating,
       totalReviews,
       chapterCount,
+      learnFromCourse
     },
   };
 };
