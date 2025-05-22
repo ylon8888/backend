@@ -54,23 +54,69 @@ const registration = async (userData: IUser) => {
 };
 
 const courseDetails = async (subjectId: string) => {
+  // Fetch course details
   const subject = await prisma.subject.findUnique({
-    where: {
-      id: subjectId,
-    },
-    select: {
-      id: true,
-      subjectName: true,
-      subjectDescription: true,
-    },
+    where: { id: subjectId },
+    select: { id: true, subjectName: true, subjectDescription: true },
   });
 
   if (!subject) {
     throw new ApiError(httpStatus.NOT_FOUND, "Subject not found");
   }
 
+  // Get rating data
+  const ratingData = await prisma.subject.findUnique({
+    where: { id: subjectId },
+    select: {
+      chapters: {
+        select: {
+          CourseReview: { select: { rating: true } },
+        },
+      },
+    },
+  });
+
+  // Calculate average and count reviews
+  let averageRating = 0;
+  let totalReviews = 0;
+  if (ratingData) {
+    const allRatings = ratingData.chapters.flatMap((chapter) =>
+      chapter.CourseReview.map((review) => review.rating)
+    );
+
+    totalReviews = allRatings.length;
+
+    if (totalReviews > 0) {
+      const total = allRatings.reduce((sum, rating) => sum + rating, 0);
+      averageRating = Number((total / totalReviews).toFixed(1));
+    }
+  }
+
+  const chapterData = await prisma.subject.findMany({
+    where: {
+      id: subjectId,
+    },
+    select: {
+      chapters: {
+        select: {
+          subjectId: true,
+        },
+      },
+    },
+  });
+
+  const chapters = chapterData[0]?.chapters || [];
+  const chapterCount = chapters.length;
+
   return {
-    course: subject,
+    success: true,
+    message: "Course details retrieved successfully",
+    data: {
+      course: subject,
+      averageRating,
+      totalReviews,
+      chapterCount
+    },
   };
 };
 
@@ -102,7 +148,7 @@ const getCourseReview = async (subjectId: string) => {
         select: {
           CourseReview: {
             orderBy: {
-              createdAt: "desc"
+              createdAt: "desc",
             },
             take: 3,
             select: {
@@ -121,7 +167,6 @@ const getCourseReview = async (subjectId: string) => {
         },
       },
     },
-    
   });
 
   // Flatten all reviews into array of objects
