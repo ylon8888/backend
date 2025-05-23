@@ -276,6 +276,47 @@ const uploadQuiz = catchAsync(async (req: Request, res: Response) => {
 });
 
 
+const createStepNine = catchAsync(async (req: Request, res: Response) => {
+  const chapterId = req.params.chapterId;
+
+  const { file } = req;
+
+  if (!file) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "File is required");
+  }
+
+  const parseData = req.body.data && JSON.parse(req.body.data);
+
+  const stepData: any = {
+    stepVideo: `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`,
+    ...parseData,
+  };
+
+
+  const step = await StepService.createStepNine(chapterId, stepData);
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Step nine created successfully",
+    data: step,
+  });
+});
+
+
+const getQuizQustion = catchAsync(async (req: Request, res: Response) => {
+  const quizId = req.params.quizId;  // Step 8 ID
+
+  const step = await StepService.getQuizQustion(quizId); 
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "retrive quiz question successfully",
+    data: step,
+  });
+});
+
 
 export const StepController = {
   createStepOne,
@@ -289,5 +330,7 @@ export const StepController = {
   getQuizes,
   getStudentQuizes,
   disableQuize,
-  uploadQuiz
+  uploadQuiz,
+  createStepNine,
+  getQuizQustion
 };

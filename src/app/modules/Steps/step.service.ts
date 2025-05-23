@@ -4,7 +4,7 @@ import { IPaginationOptions } from "../../../interfaces/paginations";
 import prisma from "../../../shared/prisma";
 import httpStatus from "http-status";
 import { paginationHelpers } from "../../../helpars/paginationHelper";
-import { IStepFive, IStepOne } from "./step.interface";
+import { IStepFive, IStepOne, IStepTwo } from "./step.interface";
 import xlsx from 'xlsx';
 import fs from 'fs';
 import path from 'path';
@@ -110,26 +110,26 @@ const createStepFour = async (chapterId: string, stepData: IStepOne) => {
     throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
   }
 
-  const existingStep = await prisma.stepFour.findUnique({
+  const step = await prisma.stepFour.upsert({
     where: {
-      chapterId,
+      chapterId, // This works because chapterId is unique
     },
-  });
-
-  if (existingStep) {
-    return;
-  }
-
-  const step = await prisma.stepFour.create({
-    data: {
-      chapterId: chapterId,
+    update: {
+      stepName: stepData.stepName,
+      stepDescription: stepData.stepDescription,
+      stepVideo: stepData.stepVideo,
+    },
+    create: {
+      chapterId,
       stepName: stepData.stepName,
       stepDescription: stepData.stepDescription,
       stepVideo: stepData.stepVideo,
     },
   });
+
   return step;
 };
+
 
 const createStepFive = async (chapterId: string, stepData: IStepFive) => {
   const chapter = await prisma.chapter.findUnique({
@@ -311,6 +311,7 @@ const disableQuize = async(quizId: string, isDisable: boolean) => {
 }
 
 
+
 // const uploadQuiz = async (quizId: string, file: Express.Multer.File) => {
 //   const quizExist = await prisma.stepEight.findUnique({
 //     where: { id: quizId },
@@ -393,6 +394,72 @@ const uploadQuiz = async (quizId: string, file: Express.Multer.File) => {
 };
 
 
+const createStepNine = async (chapterId: string, stepData: IStepOne) => {
+  const chapter = await prisma.chapter.findUnique({
+    where: {
+      id: chapterId,
+    },
+  });
+
+  if (!chapter) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
+  }
+
+  const step = await prisma.stepNine.upsert({
+    where: {
+      chapterId, // Assumes chapterId is unique in stepFive model
+    },
+    update: {
+      stepName: stepData.stepName,
+      stepDescription: stepData.stepDescription,
+      stepVideo: stepData.stepVideo,
+    },
+    create: {
+      chapterId: chapterId,
+      stepName: stepData.stepName,
+      stepDescription: stepData.stepDescription,
+      stepVideo: stepData.stepVideo,
+    },
+  });
+
+  return step;
+};
+
+
+const getQuizQustion = async (quizId: string) => {
+  const quizExist = await prisma.stepEight.findUnique({
+    where: {
+      id: quizId,
+    },
+  });
+
+  if (!quizExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Quiz not found");
+  }
+
+  const quiz = await prisma.stepEight.findUnique({
+    where: {
+      id: quizExist.id
+    },
+    select:{
+      stepName: true,
+      stepDescription: true,
+      stepEightQuizzes:{
+        select:{
+          questionText: true,
+          optionA: true,
+          optionB: true,
+          optionC: true,
+          optionD: true,
+          correctAnswer: false
+        }
+      }
+    }
+  })
+
+  return quiz;
+}
+
 export const StepService = {
   createStepOne,
   createStepTwo,
@@ -405,5 +472,7 @@ export const StepService = {
   getQuizes,
   getStudentQuizes,
   disableQuize,
-  uploadQuiz
+  uploadQuiz,
+  createStepNine,
+  getQuizQustion
 };

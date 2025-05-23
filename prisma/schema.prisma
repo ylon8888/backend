@@ -145,6 +145,7 @@ model Chapter {
   stepSix   StepSix?
   stepSeven StepSeven?
   stepEight StepEight[]
+  StepNine  StepNine?
 
   @@map("chapters")
 }
@@ -273,6 +274,8 @@ model StepEight {
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
   stepEightQuizzes StepEightQuiz?
+  StepNine         StepNine?      @relation(fields: [stepNineId], references: [id])
+  stepNineId       String?
 
   @@map("stepEight")
 }
@@ -291,6 +294,23 @@ model StepEightQuiz {
   correctAnswer String
 
   @@map("stepEightQuiz")
+}
+
+model StepNine {
+  id String @id @default(cuid())
+
+  chapterId String  @unique
+  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  stepName        String
+  stepDescription String
+  stepVideo       String
+
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  StepEight StepEight[]
+
+  @@map("stepNine")
 }
 
 model Podcast {
