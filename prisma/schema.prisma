@@ -142,8 +142,11 @@ model Chapter {
   stepOne   StepOne?
   stepTwo   StepTwo?
   stepThree StepThree?
-  stepEight StepEight?
-  StepFour  StepFour?
+  stepFour  StepFour?
+  stepFive  StepFive?
+  stepSix   StepSix?
+  stepSeven StepSeven?
+  stepEight StepEight[]
 
   @@map("chapters")
 }
@@ -211,15 +214,67 @@ model StepFour {
   @@map("stepFour")
 }
 
-model StepEight {
+model StepFive {
   id String @id @default(cuid())
 
   chapterId String  @unique
   chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
+  stepName       String
+  stepVideo      String
+  questionAnswer Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("stepFive")
+}
+
+model StepSix {
+  id String @id @default(cuid())
+
+  chapterId String  @unique
+  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  stepName        String
+  stepDescription String
+  stepVideo       String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("stepsix")
+}
+
+model StepSeven {
+  id String @id @default(cuid())
+
+  chapterId String  @unique
+  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  stepName        String
+  stepDescription String
+  stepVideo       String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("stepsSeven")
+}
+
+model StepEight {
+  id String @id @default(cuid())
+
+  chapterId String 
+  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  stepName        String
+  stepDescription String
+  isDisable       Boolean @default(false)
+
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
-  stepEightQuizzes StepEightQuiz[]
+  stepEightQuizzes StepEightQuiz?
 
   @@map("stepEight")
 }
@@ -227,13 +282,9 @@ model StepEight {
 model StepEightQuiz {
   id String @id @default(cuid())
 
-  setName     String
-  description String
-
   data      Json
-  isDisable Boolean @default(false)
 
-  stepEightId String
+  stepEightId String  @unique
   stepEight   StepEight @relation(fields: [stepEightId], references: [id], onDelete: Cascade)
 
   @@map("stepEightQuiz")

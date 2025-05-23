@@ -17,14 +17,16 @@ const createStepOne = catchAsync(async (req: Request, res: Response) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "File is required");
   }
 
+  const parseData = req.body.data && JSON.parse(req.body.data);
+
   const stepData: any = {
     stepVideo: `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`,
-    ...req.body,
+    ...parseData,
   };
 
-  console.log("controller",stepData)
+  console.log("controller", stepData);
 
-  const step = await StepService.createStepOne(chapterId,stepData);
+  const step = await StepService.createStepOne(chapterId, stepData);
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
@@ -34,19 +36,22 @@ const createStepOne = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 const createStepTwo = catchAsync(async (req: Request, res: Response) => {
   const chapterId = req.params.chapterId;
 
   if (!req.files || Array.isArray(req.files)) {
-    throw new ApiError(httpStatus.EXPECTATION_FAILED, "Invalid file upload data.");
+    throw new ApiError(
+      httpStatus.EXPECTATION_FAILED,
+      "Invalid file upload data."
+    );
   }
 
   const podcastContent = req.files["poadcast"] as Express.Multer.File[];
 
-  const podcastVideo = podcastContent?.map(
-    (file) => `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`
-  ) || [];
+  const podcastVideo =
+    podcastContent?.map(
+      (file) => `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`
+    ) || [];
 
   const parseData = req.body.data && JSON.parse(req.body.data);
 
@@ -82,10 +87,10 @@ const createStepThree = catchAsync(async (req: Request, res: Response) => {
 
   const stepData: any = {
     stepVideo: `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`,
-    ...parseData
+    ...parseData,
   };
 
-  const step = await StepService.createStepThree(chapterId,stepData);
+  const step = await StepService.createStepThree(chapterId, stepData);
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
@@ -95,8 +100,175 @@ const createStepThree = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const createStepFour = catchAsync(async (req: Request, res: Response) => {
+  const chapterId = req.params.chapterId;
+
+  const { file } = req;
+
+  if (!file) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "File is required");
+  }
+
+  const parseData = req.body.data && JSON.parse(req.body.data);
+
+  const stepData: any = {
+    stepVideo: `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`,
+    ...parseData,
+  };
+
+  const step = await StepService.createStepFour(chapterId, stepData);
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Step four created successfully",
+    data: step,
+  });
+});
+
+const createStepFive = catchAsync(async (req: Request, res: Response) => {
+  const chapterId = req.params.chapterId;
+
+  const { file } = req;
+
+  if (!file) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "File is required");
+  }
+
+  const parseData = req.body.data && JSON.parse(req.body.data);
+
+  const stepData: any = {
+    stepVideo: `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`,
+    ...parseData,
+  };
+
+  const step = await StepService.createStepFive(chapterId, stepData);
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Step four created successfully",
+    data: step,
+  });
+});
+
+const createStepSix = catchAsync(async (req: Request, res: Response) => {
+  const chapterId = req.params.chapterId;
+
+  const { file } = req;
+
+  if (!file) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "File is required");
+  }
+
+  const parseData = req.body.data && JSON.parse(req.body.data);
+
+  const stepData: any = {
+    stepVideo: `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`,
+    ...parseData,
+  };
+
+  const step = await StepService.createStepSix(chapterId, stepData);
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Step six created successfully",
+    data: step,
+  });
+});
+
+const createStepSeven = catchAsync(async (req: Request, res: Response) => {
+  const chapterId = req.params.chapterId;
+
+  const { file } = req;
+
+  if (!file) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "File is required");
+  }
+
+  const parseData = req.body.data && JSON.parse(req.body.data);
+
+  const stepData: any = {
+    stepVideo: `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`,
+    ...parseData,
+  };
+
+  const step = await StepService.createStepSeven(chapterId, stepData);
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Step seven created successfully",
+    data: step,
+  });
+});
+
+const createStepEight = catchAsync(async (req: Request, res: Response) => {
+  const chapterId = req.params.chapterId;
+
+  const step = await StepService.createStepEight(chapterId, req.body);
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Step eight created successfully",
+    data: step,
+  });
+});
+
+
+const getQuizes = catchAsync(async (req: Request, res: Response) => {
+  const chapterId = req.params.chapterId;
+
+  const step = await StepService.getQuizes(chapterId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Retrive quizes successfully",
+    data: step,
+  });
+});
+
+
+const disableQuize = catchAsync(async (req: Request, res: Response) => {
+  const quizId = req.params.quizId;
+
+  const step = await StepService.disableQuize(quizId, req.body.isDisable);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Quize disable successfully",
+    data: step,
+  });
+});
+
+const getStudentQuizes = catchAsync(async (req: Request, res: Response) => {
+  const chapterId = req.params.chapterId;
+
+  const step = await StepService.getStudentQuizes(chapterId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Retrive quizes successfully",
+    data: step,
+  });
+});
+
+
 export const StepController = {
-    createStepOne,
-    createStepTwo,
-    createStepThree
-}
+  createStepOne,
+  createStepTwo,
+  createStepThree,
+  createStepFour,
+  createStepFive,
+  createStepSix,
+  createStepSeven,
+  createStepEight,
+  getQuizes,
+  getStudentQuizes,
+  disableQuize
+};
