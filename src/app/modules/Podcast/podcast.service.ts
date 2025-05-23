@@ -26,24 +26,15 @@ const getChapterPodcast = async(chapterId: string, topicId: string) => {
         }
     })
 
-    const topic = await prisma.topic.findUnique({
-        where: {
-            id: topicId
-        }
-    })
 
     if(!chapter){
         throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
     }
 
-    if(!topic){
-        throw new ApiError(httpStatus.NOT_FOUND, "Topic not found");
-    }
 
     const podcast = await prisma.podcast.findMany({
         where: {
             chapterId,
-            topicId
         }
     })
 

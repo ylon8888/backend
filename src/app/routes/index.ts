@@ -8,9 +8,7 @@ import { StudentRoutes } from "../modules/Student/student.route";
 import { classRoutes } from "../modules/Class/class.route";
 import { subjectRoutes } from "../modules/Subject/subject.routes";
 import { ChapterRoutes } from "../modules/Chapter/chapter.routes";
-import { topicRoutes } from "../modules/Topic/topic.routes";
 import { PodcastRoutes } from "../modules/Podcast/podcast.routes";
-import { QuizRoutes } from "../modules/Quiz/quiz.routes";
 import { StepsRoutes } from "../modules/Steps/step.routes";
 
 const router = express.Router();
@@ -49,16 +47,8 @@ const moduleRoutes = [
     route: ChapterRoutes
   },
   {
-    path: "/topic",
-    route: topicRoutes
-  },
-  {
     path: "/podcast",
     route: PodcastRoutes
-  },
-  {
-    path: "/quiz",
-    route: QuizRoutes
   },
    {
     path: "/step",

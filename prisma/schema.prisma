@@ -133,9 +133,7 @@ model Chapter {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  topic        Topic[]
   podcast      Podcast[]
-  quiz         Quiz[]
   CourseReview CourseReview[]
 
   // all steps
@@ -265,15 +263,15 @@ model StepSeven {
 model StepEight {
   id String @id @default(cuid())
 
-  chapterId String 
+  chapterId String
   chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
   stepName        String
   stepDescription String
   isDisable       Boolean @default(false)
 
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
   stepEightQuizzes StepEightQuiz?
 
   @@map("stepEight")
@@ -282,7 +280,7 @@ model StepEight {
 model StepEightQuiz {
   id String @id @default(cuid())
 
-  stepEightId String  @unique
+  stepEightId String    @unique
   stepEight   StepEight @relation(fields: [stepEightId], references: [id], onDelete: Cascade)
 
   questionText  String
@@ -295,75 +293,19 @@ model StepEightQuiz {
   @@map("stepEightQuiz")
 }
 
-model Topic {
-  id        String  @id @default(cuid())
-  chapterId String
-  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-
-  topicName        String
-  topicDescription String?
-  topicVideo       String
-  questionAnswer   Json?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  podcast Podcast[]
-
-  @@map("topics")
-}
-
 model Podcast {
   id        String @id @default(cuid())
   chapterId String
-  topicId   String
 
   podcastName    String
   podcastContent String
 
   chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-  topic   Topic   @relation(fields: [topicId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("podcasts")
-}
-
-model Quiz {
-  id String @id @default(cuid())
-
-  chapterId       String
-  quizName        String
-  quizDescription String
-  isDisable       Boolean @default(false)
-
-  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  Question  QuizQuestion?
-
-  @@map("quizes")
-}
-
-model QuizQuestion {
-  id String @id @default(cuid())
-
-  quizId        String @unique
-  questionText  String
-  optionA       String
-  optionB       String
-  optionC       String
-  optionD       String
-  correctAnswer String
-
-  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("quizQuestions")
 }
 
 model CourseReview {
