@@ -1,21 +1,25 @@
 import express from "express";
-import { StudentController } from "./course.controller";
 import auth from "../../middlewares/auth";
+import { CourseController } from "./course.controller";
 
 
 const router = express.Router();
 
 
 // Course details
-router.get('/course-details/:subjectId', StudentController.courseDetails);
+router.get('/course-details/:subjectId', CourseController.courseDetails);
+
+// Checking enrollemnt
+router.get('/checking-enrollment/:subjectId', auth(), CourseController.checkingEnrollment);
 
 // Couese review 
-router.post('/course-review/:chapterId', auth(), StudentController.courseReview);
-router.get('/course-review/:subjectId', StudentController.getCourseReview);
+router.post('/course-review/:chapterId', auth(), CourseController.courseReview);
+router.get('/course-review/:subjectId', CourseController.getCourseReview);
 
 // Course Entroll
-router.post('/course-enroll/:subjectId', auth(), StudentController.createCourseEnroll)
-router.patch('/verify-enrollment', auth(), StudentController.verifyEnrollment)
+router.post('/course-enroll/:subjectId', auth(), CourseController.createCourseEnroll)
+router.patch('/verify-enrollment', auth(), CourseController.verifyEnrollment)
+
 
 
 

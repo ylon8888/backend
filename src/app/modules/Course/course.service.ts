@@ -283,11 +283,31 @@ const enrollVerification = async (data: {
 };
 
 
+const checkingEnrollment = async (userId: string, subjectId: string): Promise<boolean> => {
+  const enroll = await prisma.courseEnroll.findFirst({
+    where: {
+      userId,
+      subjectId,
+    },
+  });
 
-export const StudentService = {
+  // If not enrolled or not verified, return false
+  if (!enroll || !enroll.isVarified) {
+    return false;
+  }
+
+  // If enrolled and verified
+  return true;
+};
+
+
+
+
+export const CourseService = {
   courseDetails,
   courseReview,
   getCourseReview,
   createCourseEnroll,
   enrollVerification,
+  checkingEnrollment
 };

@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import httpStatus from "http-status";
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
-import { StudentService } from "./course.service";
+import { CourseService } from "./course.service";
 
 
 
@@ -10,7 +10,7 @@ import { StudentService } from "./course.service";
 const courseDetails = catchAsync(async (req: Request, res: Response) => {
   const subjectId = req.params.subjectId;
 
-  const classVisibility = await StudentService.courseDetails(
+  const classVisibility = await CourseService.courseDetails(
     subjectId
   );
 
@@ -33,7 +33,7 @@ const courseReview = catchAsync(async (req: Request, res: Response) => {
     ...req.body
   }
 
-  const classVisibility = await StudentService.courseReview(body)
+  const classVisibility = await CourseService.courseReview(body)
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -47,7 +47,7 @@ const courseReview = catchAsync(async (req: Request, res: Response) => {
 const getCourseReview = catchAsync(async (req: Request, res: Response) => {
   const subjectId = req.params.subjectId;
 
-  const classVisibility = await StudentService.getCourseReview(
+  const classVisibility = await CourseService.getCourseReview(
     subjectId
   );
 
@@ -70,7 +70,7 @@ const createCourseEnroll =  catchAsync(async (req: Request, res: Response) => {
     ...req.body
   }
 
-  const courseEntroll = await StudentService.createCourseEnroll(bodyData)
+  const courseEntroll = await CourseService.createCourseEnroll(bodyData)
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -85,7 +85,7 @@ const verifyEnrollment = catchAsync(async (req: Request, res: Response) => {
 
   const { subjectId, otp } = req.body;
 
-  const result = await StudentService.enrollVerification({ userId, subjectId, otp });
+  const result = await CourseService.enrollVerification({ userId, subjectId, otp });
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -96,10 +96,26 @@ const verifyEnrollment = catchAsync(async (req: Request, res: Response) => {
 });
 
 
-export const StudentController = {
+const checkingEnrollment = catchAsync(async (req: Request, res: Response) => {
+  const subjectId = req.params.subjectId;
+  const userId = req.user.id;
+
+
+  const courseEntroll = await CourseService.checkingEnrollment(userId, subjectId)
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Checking entrollment",
+    data: courseEntroll,
+  });
+});
+
+export const CourseController = {
   courseDetails,
   courseReview,
   getCourseReview,
   createCourseEnroll,
-  verifyEnrollment
+  verifyEnrollment,
+  checkingEnrollment
 };
