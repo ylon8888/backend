@@ -70,10 +70,47 @@ const getCourseReview = catchAsync(async (req: Request, res: Response) => {
 });
 
 
+const createCourseEnroll =  catchAsync(async (req: Request, res: Response) => {
+  const subjectId = req.params.subjectId;
+  const userId = req.user.id;
+
+  const bodyData = {
+    subjectId,
+    userId,
+    ...req.body
+  }
+
+  const courseEntroll = await StudentService.createCourseEnroll(bodyData)
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "OTP sent! Please verify your email to complete enrollment.",
+    data: courseEntroll,
+  });
+});
+
+const verifyEnrollment = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user.id;
+
+  const { subjectId, otp } = req.body;
+
+  const result = await StudentService.enrollVerification({ userId, subjectId, otp });
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Enrollment verified successfully",
+    data: result,
+  });
+});
+
 
 export const StudentController = {
   registration,
   courseDetails,
   courseReview,
-  getCourseReview
+  getCourseReview,
+  createCourseEnroll,
+  verifyEnrollment
 };

@@ -69,9 +69,9 @@ const courseDetails = async (subjectId: string) => {
     where: { id: subjectId },
     select: {
       class: {
-        select:{
-          className: true
-        }
+        select: {
+          className: true,
+        },
       },
       chapters: {
         select: {
@@ -117,10 +117,10 @@ const courseDetails = async (subjectId: string) => {
     where: { id: subjectId },
     select: {
       chapters: {
-        select:{
+        select: {
           chapterName: true,
-          chapterDescription: true
-        }
+          chapterDescription: true,
+        },
       },
     },
   });
@@ -133,7 +133,7 @@ const courseDetails = async (subjectId: string) => {
       averageRating,
       totalReviews,
       chapterCount,
-      learnFromCourse
+      learnFromCourse,
     },
   };
 };
@@ -203,6 +203,127 @@ const getCourseReview = async (subjectId: string) => {
   return { reviews };
 };
 
+// Course Entroll
+const createCourseEnroll = async (entrollData: any) => {
+  const user = await prisma.user.findUnique({
+    where: { id: entrollData.userId },
+  });
+
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  const chapter = await prisma.subject.findUnique({
+    where: { id: entrollData.subjectId },
+  });
+
+  if (!chapter) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Chapter not found");
+  }
+
+  const existingEnroll = await prisma.courseEnroll.findFirst({
+    where: {
+      userId: entrollData.userId,
+      subjectId: entrollData.subjectId,
+    },
+  });
+
+  const randomOtp = Math.floor(100000 + Math.random() * 900000).toString();
+  const html = otpEmail(randomOtp);
+
+  if (existingEnroll) {
+    if (existingEnroll.isVarified) {
+      throw new ApiError(httpStatus.CONFLICT, "User already enrolled in this chapter");
+    }
+
+   
+    await prisma.courseEnroll.update({
+      where: { id: existingEnroll.id },
+      data: { otp: randomOtp }, 
+    });
+
+    await emailSender("OTP", existingEnroll.email, html);
+
+    return {
+      id: user.id,
+      email: existingEnroll.email,
+       courseId: existingEnroll.subjectId,
+      message: "OTP resent! Please verify your email to complete enrollment.",
+    };
+  }
+
+  // Fresh enrollment
+  const newEnroll = await prisma.courseEnroll.create({
+    data: {
+      userId: entrollData.userId,
+      subjectId: entrollData.subjectId,
+      name: entrollData.name,
+      phoneNumber: entrollData.phoneNumber,
+      email: entrollData.email,
+      otp: randomOtp,
+    },
+  });
+
+  await emailSender("OTP", newEnroll.email, html);
+
+  return {
+    id: user.id,
+    courseId: newEnroll.subjectId,
+    email: newEnroll.email,
+    message: "OTP sent! Please verify your email to complete enrollment.",
+  };
+};
+
+
+const enrollVerification = async (data: {
+  userId: string;
+  subjectId: string;
+  otp: string;
+}) => {
+
+  const course = await prisma.subject.findUnique({
+    where: {
+      id: data.subjectId,
+    }
+  })
+
+  if(!course){
+    throw new ApiError(httpStatus.NOT_FOUND, "Course not found");
+  }
+
+  const enrollment = await prisma.courseEnroll.findFirst({
+    where: {
+      userId: data.userId,
+      subjectId: data.subjectId,
+    },
+  });
+
+  if (!enrollment) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Enrollment not found");
+  }
+
+  if (enrollment.isVarified) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "You have already verified");
+  }
+
+  if (enrollment.otp !== data.otp) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Invalid OTP");
+  }
+
+  await prisma.courseEnroll.update({
+    where: { id: enrollment.id },
+    data: {
+      isVarified: true,
+    },
+  });
+
+  return {
+    success: true,
+    message: "Enrollment verified successfully",
+    email: enrollment.email,
+  };
+};
+
 
 
 export const StudentService = {
@@ -210,4 +331,6 @@ export const StudentService = {
   courseDetails,
   courseReview,
   getCourseReview,
+  createCourseEnroll,
+  enrollVerification,
 };

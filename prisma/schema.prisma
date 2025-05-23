@@ -36,6 +36,7 @@ model User {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
   CourseReview CourseReview[]
+  CourseEnroll CourseEnroll[]
 
   @@map("users")
 }
@@ -114,7 +115,8 @@ model Subject {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  chapters Chapter[]
+  chapters     Chapter[]
+  CourseEnroll CourseEnroll[]
 
   @@map("subjects")
 }
@@ -271,10 +273,10 @@ model StepEight {
   questionDescription String
   isDisable           Boolean @default(false)
 
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
   stepEightQuizzes StepEightQuiz[]
-  StepNine         StepNine?      @relation(fields: [stepNineId], references: [id])
+  StepNine         StepNine?       @relation(fields: [stepNineId], references: [id])
   stepNineId       String?
 
   @@map("stepEight")
@@ -311,6 +313,30 @@ model StepNine {
   StepEight StepEight[]
 
   @@map("stepNine")
+}
+
+// course Enrollment 
+
+model CourseEnroll {
+  id String @id @default(cuid())
+
+  subjectId String
+  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String
+  phoneNumber String
+  email       String
+  otp         String
+  isVarified  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([subjectId, userId])
+  @@map("courseEnroll")
 }
 
 model Podcast {

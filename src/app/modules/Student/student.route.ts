@@ -14,4 +14,10 @@ router.get('/course-details/:subjectId', StudentController.courseDetails);
 router.post('/course-review/:chapterId', auth(), StudentController.courseReview);
 router.get('/course-review/:subjectId', StudentController.getCourseReview);
 
+// Course Entroll
+router.post('/course-enroll/:subjectId', auth(), StudentController.createCourseEnroll)
+router.patch('/verify-enrollment', auth(), StudentController.verifyEnrollment)
+
+
+
 export const StudentRoutes = router;
