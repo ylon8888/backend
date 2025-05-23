@@ -75,7 +75,45 @@ const createStepTwo = async (chapterId: string, stepData: any) => {
   return step;
 };
 
+const createStepThree = async (chapterId: string, stepData: IStepOne) => {
+  const chapter = await prisma.chapter.findUnique({
+    where: {
+      id: chapterId,
+    },
+  });
+
+  if (!chapter) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
+  }
+
+  const existingStep = await prisma.stepThree.findUnique({
+    where: {
+      chapterId,
+    },
+  });
+
+  if (existingStep) {
+    throw new ApiError(
+      httpStatus.CONFLICT,
+      "Step Three already exists for this chapter."
+    );
+  }
+
+  console.log("service",stepData)
+
+  const step = await prisma.stepThree.create({
+    data: {
+      chapterId: chapterId,
+      stepName: stepData.stepName,
+      stepDescription: stepData.stepDescription,
+      stepVideo: stepData.stepVideo,
+    },
+  });
+  return step;
+};
+
 export const StepService = {
   createStepOne,
   createStepTwo,
+  createStepThree
 };

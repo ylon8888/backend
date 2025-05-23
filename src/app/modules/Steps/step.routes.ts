@@ -14,5 +14,6 @@ const uploadPodcast = upload.fields([
 
 router.post('/one/:chapterId', fileUpload, StepController.createStepOne);
 router.post('/two/:chapterId', uploadPodcast, StepController.createStepTwo);
+router.post('/three/:chapterId', fileUpload, StepController.createStepThree);
 
 export const StepsRoutes = router;

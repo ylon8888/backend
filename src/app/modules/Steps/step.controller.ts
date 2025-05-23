@@ -29,7 +29,7 @@ const createStepOne = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
     success: true,
-    message: "Step created successfully",
+    message: "Step one created successfully",
     data: step,
   });
 });
@@ -69,9 +69,34 @@ const createStepTwo = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const createStepThree = catchAsync(async (req: Request, res: Response) => {
+  const chapterId = req.params.chapterId;
 
+  const { file } = req;
+
+  if (!file) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "File is required");
+  }
+
+  const parseData = req.body.data && JSON.parse(req.body.data);
+
+  const stepData: any = {
+    stepVideo: `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`,
+    ...parseData
+  };
+
+  const step = await StepService.createStepThree(chapterId,stepData);
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Step three created successfully",
+    data: step,
+  });
+});
 
 export const StepController = {
     createStepOne,
-    createStepTwo
+    createStepTwo,
+    createStepThree
 }
