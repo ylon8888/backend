@@ -38,14 +38,14 @@ const createchapter = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getAllChapter = catchAsync(async (req: Request, res: Response) => {
-    const subjectId = req.params.subjectId;
+const getChapterWiseSteps = catchAsync(async (req: Request, res: Response) => {
+    const chapterId = req.params.chapterId;
 
 
   const filters = pick(req.query, ["searchTerm"]);
   const options = pick(req.query, paginationFields);
 
-  const blogs = await ChapterService.getAllChapter(filters, options, subjectId);
+  const blogs = await ChapterService.getChapterWiseSteps(filters, options, chapterId);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -56,5 +56,5 @@ const getAllChapter = catchAsync(async (req: Request, res: Response) => {
 
 export const ChapterController = {
     createchapter,
-    getAllChapter
+    getChapterWiseSteps
 }

@@ -10,5 +10,6 @@ const upload = multer({ storage: createStorage("chapter") });
 const fileUpload = upload.single("file");
 
 router.post('/:subjectId', fileUpload, ChapterController.createchapter);
+router.get('/chapter-wise-steps/:chapterId', ChapterController.getChapterWiseSteps);
 
 export const ChapterRoutes = router;

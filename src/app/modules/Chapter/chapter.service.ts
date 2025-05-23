@@ -8,6 +8,17 @@ import { IChapter } from "./chapter.interface";
 
 
 const createchapter = async (chapterData: IChapter) => {
+
+  const subject = await prisma.subject.findUnique({
+    where: {
+      id: chapterData.subjectId
+    }
+  })
+
+  if(!subject){
+    throw new ApiError(httpStatus.NOT_FOUND, "Subject not found");
+  }
+   
     const chapter = await prisma.chapter.create({
         data: {
             subjectId: chapterData.subjectId,
@@ -23,18 +34,24 @@ const createchapter = async (chapterData: IChapter) => {
 }
 
 
-const getAllChapter = async (
+const getChapterWiseSteps = async (
   filters: {
     searchTerm?: string;
   },
   options: IPaginationOptions,
-  subjectId: string
+  chapterId: string
 ) => {
   const { searchTerm } = filters;
   const { page, skip, limit, sortBy, sortOrder } =
     paginationHelpers.calculatePagination(options);
 
   const andConditions = [];
+
+    if (chapterId) {
+    andConditions.push({
+      id: chapterId,
+    });
+  }
 
   if (searchTerm) {
     andConditions.push({
@@ -55,13 +72,29 @@ const getAllChapter = async (
     where: {
       ...whereConditions,
     },
+    include: {
+      stepOne: true,
+      stepTwo: true,
+      stepThree: true,
+      stepFour: true,
+      stepFive: true,
+      stepSix: true,
+      stepSeven: true,
+      stepEight: {
+        include: {
+          stepEightQuizzes: true,
+          StepNine: true,
+        },
+      },
+      StepNine: true,
+    },
     skip,
     take: limit,
     orderBy:
       sortBy && sortOrder
         ? { [sortBy]: sortOrder }
         : {
-            createdAt: "desc",
+            createdAt: "asc",
           },
   });
 
@@ -84,5 +117,5 @@ const getAllChapter = async (
 
 export const ChapterService = {
     createchapter,
-    getAllChapter
+    getChapterWiseSteps
 }

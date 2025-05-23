@@ -79,6 +79,7 @@ const subjectWiseChapter = async (
   const subject = await prisma.subject.findUnique({
     where: { id: subjectId },
     select:{
+      id: true,
       subjectName: true,
       subjectDescription: true,
       banner: true
@@ -112,6 +113,7 @@ const subjectWiseChapter = async (
   const chapters = await prisma.chapter.findMany({
     where: whereConditions,
     select:{
+      id: true,
       chapterName: true,
       chapterDescription: true,
       thumbnail: true
@@ -119,7 +121,7 @@ const subjectWiseChapter = async (
     skip,
     take: limit,
     orderBy: {
-      [sortBy || "createdAt"]: sortOrder || "desc",
+      [sortBy || "createdAt"]: sortOrder || "asc",
     },
   });
 
