@@ -258,6 +258,24 @@ const getStudentQuizes = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const uploadQuiz = catchAsync(async (req: Request, res: Response) => {
+  const quizId = req.params.quizId;
+
+  if (!req.file) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "No file uploaded");
+  }
+
+  const step = await StepService.uploadQuiz(quizId, req.file);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Quiz uploaded successfully",
+    data: step,
+  });
+});
+
+
 
 export const StepController = {
   createStepOne,
@@ -270,5 +288,6 @@ export const StepController = {
   createStepEight,
   getQuizes,
   getStudentQuizes,
-  disableQuize
+  disableQuize,
+  uploadQuiz
 };

@@ -282,10 +282,15 @@ model StepEight {
 model StepEightQuiz {
   id String @id @default(cuid())
 
-  data      Json
-
   stepEightId String  @unique
   stepEight   StepEight @relation(fields: [stepEightId], references: [id], onDelete: Cascade)
+
+  questionText  String
+  optionA       String
+  optionB       String
+  optionC       String
+  optionD       String
+  correctAnswer String
 
   @@map("stepEightQuiz")
 }

@@ -12,6 +12,8 @@ const uploadPodcast = upload.fields([
   { name: "poadcast", maxCount: 6 },
 ]);
 
+const quizUpload = upload.single("quiz");
+
 router.post('/one/:chapterId', fileUpload, StepController.createStepOne);
 router.post('/two/:chapterId', uploadPodcast, StepController.createStepTwo);
 router.post('/three/:chapterId', fileUpload, StepController.createStepThree);
@@ -25,5 +27,8 @@ router.post('/eight/:chapterId', StepController.createStepEight);
 router.get('/get-quizes/:chapterId', StepController.getQuizes);
 router.get('/get-student-quizes/:chapterId', StepController.getStudentQuizes);
 router.patch('/disable-quiz/:quizId', StepController.disableQuize);
+
+// Create Quiz Question
+router.post('/quiz/:quizId',quizUpload, StepController.uploadQuiz);
 
 export const StepsRoutes = router;

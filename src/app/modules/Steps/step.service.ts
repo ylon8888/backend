@@ -5,42 +5,10 @@ import prisma from "../../../shared/prisma";
 import httpStatus from "http-status";
 import { paginationHelpers } from "../../../helpars/paginationHelper";
 import { IStepFive, IStepOne } from "./step.interface";
+import xlsx from 'xlsx';
+import fs from 'fs';
+import path from 'path';
 
-// const createStepOne = async (chapterId: string, stepData: IStepOne) => {
-//   const chapter = await prisma.chapter.findUnique({
-//     where: {
-//       id: chapterId,
-//     },
-//   });
-
-//   if (!chapter) {
-//     throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
-//   }
-
-//   const existingStep = await prisma.stepOne.findUnique({
-//     where: {
-//       chapterId,
-//     },
-//   });
-
-//   if (existingStep) {
-//     // throw new ApiError(
-//     //   httpStatus.CONFLICT,
-//     //   "Step four already exists for this chapter."
-//     // );
-//     return;
-//   }
-
-//   const step = await prisma.stepOne.create({
-//     data: {
-//       chapterId: chapterId,
-//       stepName: stepData.stepName,
-//       stepDescription: stepData.stepDescription,
-//       stepVideo: stepData.stepVideo,
-//     },
-//   });
-//   return step;
-// };
 
 const createStepOne = async (chapterId: string, stepData: IStepOne) => {
   const chapter = await prisma.chapter.findUnique({
@@ -343,6 +311,87 @@ const disableQuize = async(quizId: string, isDisable: boolean) => {
 }
 
 
+// const uploadQuiz = async (quizId: string, file: Express.Multer.File) => {
+//   const quizExist = await prisma.stepEight.findUnique({
+//     where: { id: quizId },
+//   });
+
+//   if (!quizExist) {
+//     throw new ApiError(httpStatus.NOT_FOUND, 'Quiz not found');
+//   }
+
+//   // Read the Excel file
+//   const workbook = xlsx.readFile(file.path);
+//   const sheetName = workbook.SheetNames[0];
+//   const sheetData = xlsx.utils.sheet_to_json<any>(workbook.Sheets[sheetName]);
+
+//   // Parse and insert each row
+//   const quizEntries = sheetData.map((row: any) => ({
+//     stepEightId: quizId,
+//     questionText: row['Question Text']?.toString().trim(),
+//     optionA: row['Option A']?.toString().trim(),
+//     optionB: row['Option B']?.toString().trim(),
+//     optionC: row['Option C']?.toString().trim(),
+//     optionD: row['Option D']?.toString().trim(),
+//     correctAnswer: row['Correct Answer']?.toString().trim(),
+//   }));
+
+//   const insertedQuizzes = await prisma.stepEightQuiz.createMany({
+//     data: quizEntries,
+//     skipDuplicates: true,
+//   });
+
+
+//   fs.unlinkSync(path.resolve(file.path));
+
+//   return insertedQuizzes;
+// };
+
+const uploadQuiz = async (quizId: string, file: Express.Multer.File) => {
+  const workbook = xlsx.readFile(file.path);
+  const sheetName = workbook.SheetNames[0];
+  const sheetData = xlsx.utils.sheet_to_json<any>(workbook.Sheets[sheetName]);
+
+  // Validate StepEight exists
+  const stepExists = await prisma.stepEight.findUnique({
+    where: { id: quizId }
+  });
+
+  if (!stepExists) {
+    fs.unlinkSync(file.path);
+    throw new ApiError(httpStatus.NOT_FOUND, 'StepEight not found');
+  }
+
+  // Process each row with upsert
+  const transaction = await prisma.$transaction(
+    sheetData.map((row) =>
+      prisma.stepEightQuiz.upsert({
+        where: { stepEightId: quizId }, // Use stepEightId as unique identifier
+        update: {
+          questionText: row['Question Text']?.toString().trim(),
+          optionA: row['Option A']?.toString().trim(),
+          optionB: row['Option B']?.toString().trim(),
+          optionC: row['Option C']?.toString().trim(),
+          optionD: row['Option D']?.toString().trim(),
+          correctAnswer: row['Correct Answer']?.toString().trim(),
+        },
+        create: {
+          stepEightId: quizId,
+          questionText: row['Question Text']?.toString().trim(),
+          optionA: row['Option A']?.toString().trim(),
+          optionB: row['Option B']?.toString().trim(),
+          optionC: row['Option C']?.toString().trim(),
+          optionD: row['Option D']?.toString().trim(),
+          correctAnswer: row['Correct Answer']?.toString().trim(),
+        }
+      })
+    )
+  );
+
+  fs.unlinkSync(file.path);
+  return transaction;
+};
+
 
 export const StepService = {
   createStepOne,
@@ -356,4 +405,5 @@ export const StepService = {
   getQuizes,
   getStudentQuizes,
   disableQuize,
+  uploadQuiz
 };
