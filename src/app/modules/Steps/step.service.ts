@@ -7,15 +7,28 @@ import { paginationHelpers } from "../../../helpars/paginationHelper";
 import { IStepOne } from "./step.interface";
 
 const createStepOne = async (chapterId: string, stepData: IStepOne) => {
-    const chapter = await prisma.chapter.findUnique({
-        where: {
-            id: chapterId
-        }
-    })
+  const chapter = await prisma.chapter.findUnique({
+    where: {
+      id: chapterId,
+    },
+  });
 
-    if(!chapter){
-        throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found")
-    }
+  if (!chapter) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
+  }
+
+  const existingStep = await prisma.stepOne.findUnique({
+    where: {
+      chapterId,
+    },
+  });
+
+  if (existingStep) {
+    throw new ApiError(
+      httpStatus.CONFLICT,
+      "Step One already exists for this chapter."
+    );
+  }
 
   const step = await prisma.stepOne.create({
     data: {
@@ -28,6 +41,41 @@ const createStepOne = async (chapterId: string, stepData: IStepOne) => {
   return step;
 };
 
+const createStepTwo = async (chapterId: string, stepData: any) => {
+  const chapter = await prisma.chapter.findUnique({
+    where: {
+      id: chapterId,
+    },
+  });
+
+  if (!chapter) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
+  }
+
+  const existingStep = await prisma.stepTwo.findUnique({
+    where: {
+      chapterId,
+    },
+  });
+
+  if (existingStep) {
+    throw new ApiError(
+      httpStatus.CONFLICT,
+      "StepTwo already exists for this chapter."
+    );
+  }
+
+  const step = await prisma.stepTwo.create({
+    data: {
+      chapterId,
+      ...stepData,
+    },
+  });
+
+  return step;
+};
+
 export const StepService = {
   createStepOne,
+  createStepTwo,
 };

@@ -150,9 +150,9 @@ model Chapter {
 model StepOne {
   id String @id @default(cuid())
 
-  chapterId       String  @unique
-  chapter         Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-  
+  chapterId String  @unique
+  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
   stepName        String
   stepDescription String?
   stepVideo       String
@@ -169,6 +169,9 @@ model StepTwo {
   chapterId String  @unique
   chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
+  podcastName  String
+  podcastVideo String[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -180,6 +183,10 @@ model StepThree {
 
   chapterId String  @unique
   chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  stepName        String
+  stepDescription String
+  stepVideo       String
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

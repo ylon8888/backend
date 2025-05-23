@@ -17,12 +17,12 @@ const createStepOne = catchAsync(async (req: Request, res: Response) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "File is required");
   }
 
-  const parseData = req.body.data && JSON.parse(req.body.data);
-
   const stepData: any = {
     stepVideo: `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`,
-    ...parseData,
+    ...req.body,
   };
+
+  console.log("controller",stepData)
 
   const step = await StepService.createStepOne(chapterId,stepData);
 
@@ -35,6 +35,43 @@ const createStepOne = catchAsync(async (req: Request, res: Response) => {
 });
 
 
+const createStepTwo = catchAsync(async (req: Request, res: Response) => {
+  const chapterId = req.params.chapterId;
+
+  if (!req.files || Array.isArray(req.files)) {
+    throw new ApiError(httpStatus.EXPECTATION_FAILED, "Invalid file upload data.");
+  }
+
+  const podcastContent = req.files["poadcast"] as Express.Multer.File[];
+
+  const podcastVideo = podcastContent?.map(
+    (file) => `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`
+  ) || [];
+
+  const parseData = req.body.data && JSON.parse(req.body.data);
+
+  if (!parseData?.podcastName) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Podcast name is required.");
+  }
+
+  const stepData = {
+    podcastVideo,
+    podcastName: parseData.podcastName, // ensure it's included
+  };
+
+  const step = await StepService.createStepTwo(chapterId, stepData);
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Podcast created successfully",
+    data: step,
+  });
+});
+
+
+
 export const StepController = {
-    createStepOne
+    createStepOne,
+    createStepTwo
 }
