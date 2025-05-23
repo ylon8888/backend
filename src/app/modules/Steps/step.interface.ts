@@ -16,7 +16,7 @@ export interface IStepFive {
 }
 
 
-export interface StepEight{
-    stepName: string;
-    stepDescription: string;
+export interface IStepEight{
+    questionType: string;
+    questionDescription: string;
 }

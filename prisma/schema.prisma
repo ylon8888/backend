@@ -267,13 +267,13 @@ model StepEight {
   chapterId String
   chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
-  stepName        String
-  stepDescription String
-  isDisable       Boolean @default(false)
+  questionType        String
+  questionDescription String
+  isDisable           Boolean @default(false)
 
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
-  stepEightQuizzes StepEightQuiz?
+  stepEightQuizzes StepEightQuiz[]
   StepNine         StepNine?      @relation(fields: [stepNineId], references: [id])
   stepNineId       String?
 
@@ -281,9 +281,8 @@ model StepEight {
 }
 
 model StepEightQuiz {
-  id String @id @default(cuid())
-
-  stepEightId String    @unique
+  id          String    @id @default(cuid())
+  stepEightId String
   stepEight   StepEight @relation(fields: [stepEightId], references: [id], onDelete: Cascade)
 
   questionText  String
@@ -293,6 +292,7 @@ model StepEightQuiz {
   optionD       String
   correctAnswer String
 
+  @@unique([stepEightId, questionText])
   @@map("stepEightQuiz")
 }
 

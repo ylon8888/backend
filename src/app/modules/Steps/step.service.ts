@@ -4,7 +4,7 @@ import { IPaginationOptions } from "../../../interfaces/paginations";
 import prisma from "../../../shared/prisma";
 import httpStatus from "http-status";
 import { paginationHelpers } from "../../../helpars/paginationHelper";
-import { IStepFive, IStepOne, IStepTwo } from "./step.interface";
+import { IStepEight, IStepFive, IStepOne, IStepTwo } from "./step.interface";
 import xlsx from 'xlsx';
 import fs from 'fs';
 import path from 'path';
@@ -224,7 +224,7 @@ const createStepSeven = async (chapterId: string, stepData: IStepOne) => {
   return step;
 };
 
-const createStepEight = async (chapterId: string, stepData: StepEight) => {
+const createStepEight = async (chapterId: string, stepData: IStepEight) => {
   const chapter = await prisma.chapter.findUnique({
     where: {
       id: chapterId,
@@ -238,8 +238,8 @@ const createStepEight = async (chapterId: string, stepData: StepEight) => {
   const step = await prisma.stepEight.create({
     data: {
       chapterId: chapterId,
-      stepName: stepData.stepName,
-      stepDescription: stepData.stepDescription,
+      questionType: stepData.questionType,
+      questionDescription: stepData.questionDescription,
     },
   });
   return step;
@@ -360,16 +360,20 @@ const uploadQuiz = async (quizId: string, file: Express.Multer.File) => {
 
   if (!stepExists) {
     fs.unlinkSync(file.path);
-    throw new ApiError(httpStatus.NOT_FOUND, 'StepEight not found');
+    throw new ApiError(httpStatus.NOT_FOUND, 'Quiz not found');
   }
 
-  // Process each row with upsert
+  // Process each row with upsert using composite unique constraint
   const transaction = await prisma.$transaction(
     sheetData.map((row) =>
       prisma.stepEightQuiz.upsert({
-        where: { stepEightId: quizId }, // Use stepEightId as unique identifier
+        where: {
+          stepEightId_questionText: {
+            stepEightId: quizId,
+            questionText: row['Question Text']?.toString().trim(),
+          }
+        },
         update: {
-          questionText: row['Question Text']?.toString().trim(),
           optionA: row['Option A']?.toString().trim(),
           optionB: row['Option B']?.toString().trim(),
           optionC: row['Option C']?.toString().trim(),
@@ -392,6 +396,7 @@ const uploadQuiz = async (quizId: string, file: Express.Multer.File) => {
   fs.unlinkSync(file.path);
   return transaction;
 };
+
 
 
 const createStepNine = async (chapterId: string, stepData: IStepOne) => {
@@ -442,8 +447,8 @@ const getQuizQustion = async (quizId: string) => {
       id: quizExist.id
     },
     select:{
-      stepName: true,
-      stepDescription: true,
+      questionType: true,
+      questionDescription: true,
       stepEightQuizzes:{
         select:{
           questionText: true,
