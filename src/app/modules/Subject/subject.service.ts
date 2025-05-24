@@ -132,9 +132,9 @@ const subjectWiseChapter = async (
     },
     skip,
     take: limit,
-    orderBy: {
-      [sortBy || "createdAt"]: sortOrder || "asc",
-    },
+    // orderBy: {
+    //   [sortBy || "createdAt"]: sortOrder || "asc",
+    // },
   });
 
   const total = await prisma.chapter.count({
