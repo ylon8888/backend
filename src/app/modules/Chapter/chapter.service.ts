@@ -6,32 +6,41 @@ import httpStatus from "http-status";
 import { paginationHelpers } from "../../../helpars/paginationHelper";
 import { IChapter } from "./chapter.interface";
 
-
 const createchapter = async (chapterData: IChapter) => {
-
   const subject = await prisma.subject.findUnique({
     where: {
-      id: chapterData.subjectId
-    }
-  })
+      id: chapterData.subjectId,
+    },
+  });
 
-  if(!subject){
+  if (!subject) {
     throw new ApiError(httpStatus.NOT_FOUND, "Subject not found");
   }
-   
-    const chapter = await prisma.chapter.create({
-        data: {
-            subjectId: chapterData.subjectId,
-            chapterName: chapterData.chapterName,
-            chapterDescription: chapterData.chapterDescription,
-            thumbnail: chapterData.thumbnail,
-        },
-    })
 
-    return {
-        chapter
-    }
-}
+  // Count existing chapters for the subject
+  const existingChapterCount = await prisma.chapter.count({
+    where: {
+      subjectId: chapterData.subjectId,
+    },
+  });
+
+  const nextSLNumber = existingChapterCount + 1;
+
+  const chapter = await prisma.chapter.create({
+    data: {
+      sLNumber: nextSLNumber.toString(), 
+      subjectId: chapterData.subjectId,
+      chapterName: chapterData.chapterName,
+      chapterDescription: chapterData.chapterDescription,
+      thumbnail: chapterData.thumbnail,
+    },
+  });
+
+  return {
+    chapter,
+  };
+};
+
 
 
 const getChapterWiseSteps = async (
@@ -47,7 +56,7 @@ const getChapterWiseSteps = async (
 
   const andConditions = [];
 
-    if (chapterId) {
+  if (chapterId) {
     andConditions.push({
       id: chapterId,
     });
@@ -65,7 +74,7 @@ const getChapterWiseSteps = async (
   }
 
   const whereConditions: Prisma.ChapterWhereInput = {
-    AND: [...andConditions,  { isDeleted: false }],
+    AND: [...andConditions, { isDeleted: false }],
   };
 
   const chapters = await prisma.chapter.findMany({
@@ -83,10 +92,9 @@ const getChapterWiseSteps = async (
       stepEight: {
         include: {
           stepEightQuizzes: true,
-          StepNine: true,
         },
       },
-      StepNine: true,
+      stepNine: true,
     },
     skip,
     take: limit,
@@ -114,8 +122,7 @@ const getChapterWiseSteps = async (
   };
 };
 
-
 export const ChapterService = {
-    createchapter,
-    getChapterWiseSteps
-}
+  createchapter,
+  getChapterWiseSteps,
+};

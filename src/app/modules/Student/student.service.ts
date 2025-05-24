@@ -75,7 +75,7 @@ const courseDetails = async (subjectId: string) => {
       },
       chapters: {
         select: {
-          CourseReview: { select: { rating: true } },
+          courseReviews: { select: { rating: true } },
         },
       },
     },
@@ -86,7 +86,7 @@ const courseDetails = async (subjectId: string) => {
   let totalReviews = 0;
   if (ratingData) {
     const allRatings = ratingData.chapters.flatMap((chapter) =>
-      chapter.CourseReview.map((review) => review.rating)
+      chapter.courseReviews.map((review) => review.rating)
     );
 
     totalReviews = allRatings.length;
@@ -164,7 +164,7 @@ const getCourseReview = async (subjectId: string) => {
     select: {
       chapters: {
         select: {
-          CourseReview: {
+          courseReviews: {
             orderBy: {
               createdAt: "desc",
             },
@@ -190,7 +190,7 @@ const getCourseReview = async (subjectId: string) => {
   // Flatten all reviews into array of objects
   const reviews = courseData.flatMap((course) =>
     course.chapters.flatMap((chapter) =>
-      chapter.CourseReview.map((review) => ({
+      chapter.courseReviews.map((review) => ({
         name: `${review.user.firstName} ${review.user.lastName}`,
         email: review.user.email,
         profile: review.user.profile,
@@ -232,10 +232,6 @@ const createCourseEnroll = async (entrollData: any) => {
   const html = otpEmail(randomOtp);
 
   if (existingEnroll) {
-    if (existingEnroll.isVarified) {
-      throw new ApiError(httpStatus.CONFLICT, "User already enrolled in this chapter");
-    }
-
    
     await prisma.courseEnroll.update({
       where: { id: existingEnroll.id },
@@ -302,20 +298,12 @@ const enrollVerification = async (data: {
     throw new ApiError(httpStatus.NOT_FOUND, "Enrollment not found");
   }
 
-  if (enrollment.isVarified) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "You have already verified");
-  }
+
 
   if (enrollment.otp !== data.otp) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Invalid OTP");
   }
 
-  await prisma.courseEnroll.update({
-    where: { id: enrollment.id },
-    data: {
-      isVarified: true,
-    },
-  });
 
   return {
     success: true,
