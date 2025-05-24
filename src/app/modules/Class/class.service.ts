@@ -48,6 +48,19 @@ const getAllClass = async (
     where: {
       ...whereConditions,
     },
+    include: {
+      subjects: {
+        select: {
+          _count: true,
+          chapters: {
+            select: {
+              _count: true,
+            
+            }
+          }
+        },
+      },
+    },
     skip,
     take: limit,
     orderBy:

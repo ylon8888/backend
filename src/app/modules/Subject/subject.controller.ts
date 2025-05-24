@@ -84,9 +84,23 @@ const subjectWiseChapter = catchAsync(async (req: Request, res: Response) => {
 });
 
 
+const classWiseSubject = catchAsync(async (req: Request, res: Response) => {
+  const classId = req.params.classId;
+
+  const classSubjects = await SubjectService.classWiseSubject(classId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Subjects retrieved successfully",
+    data: classSubjects,
+  });
+});
+
 export const SubjectController = {
   createSubject,
   updatevisibility,
   getAllSubjects,
   subjectWiseChapter,
+  classWiseSubject
 };

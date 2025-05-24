@@ -120,24 +120,32 @@ const getSingleBlog = async (id: string) => {
     throw new ApiError(httpStatus.NOT_FOUND, "Blog not found");
   }
 
+  // Extract a keyword from the blog title (for basic similarity search)
+  const keywords = blog.title.split(" ").filter(word => word.length > 3); // filter short/common words
+  const firstKeyword = keywords[0] || blog.title; // fallback if no valid keyword
+
   const relatedBlog = await prisma.blog.findMany({
     where: {
-      category: blog.category,
+      title: {
+        contains: firstKeyword,
+        mode: "insensitive",
+      },
       NOT: {
-        id
-      }
+        id,
+      },
     },
     take: 3,
     orderBy: {
-      createdAt: "desc"
-    }
-  })
+      createdAt: "desc",
+    },
+  });
 
   return {
     blog,
-    relatedBlog
+    relatedBlog,
   };
 };
+
 
 
 export const BlogService = {

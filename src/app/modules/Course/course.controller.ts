@@ -3,6 +3,8 @@ import httpStatus from "http-status";
 import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 import { CourseService } from "./course.service";
+import pick from "../../../shared/pick";
+import { paginationFields } from "../../../constants/pagination";
 
 
 
@@ -44,12 +46,28 @@ const courseReview = catchAsync(async (req: Request, res: Response) => {
 });
 
 
+
+
 const getCourseReview = catchAsync(async (req: Request, res: Response) => {
   const subjectId = req.params.subjectId;
 
   const classVisibility = await CourseService.getCourseReview(
     subjectId
   );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Retrieved course review successfully",
+    data: classVisibility,
+  });
+});
+
+const getAllCourseReview = catchAsync(async (req: Request, res: Response) => {
+    const filters = pick(req.query, ["searchTerm"]);
+  const options = pick(req.query, paginationFields);
+
+  const classVisibility = await CourseService.getAllCourseReview(filters, options);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -117,5 +135,6 @@ export const CourseController = {
   getCourseReview,
   createCourseEnroll,
   verifyEnrollment,
-  checkingEnrollment
+  checkingEnrollment,
+  getAllCourseReview
 };

@@ -8,7 +8,9 @@ import emailSender from "../../../helpars/emailSender/emailSender";
 import { jwtHelpers } from "../../../helpars/jwtHelpers";
 import prisma from "../../../shared/prisma";
 import { IUser } from "./course.interface";
-import { UserRole } from "@prisma/client";
+import { Prisma, UserRole } from "@prisma/client";
+import { IPaginationOptions } from "../../../interfaces/paginations";
+import { paginationHelpers } from "../../../helpars/paginationHelper";
 
 
 const courseDetails = async (subjectId: string) => {
@@ -302,6 +304,62 @@ const checkingEnrollment = async (userId: string, subjectId: string): Promise<bo
 
 
 
+const getAllCourseReview = async (
+  filters: {
+    searchTerm?: string;
+  },
+  options: IPaginationOptions
+) => {
+  const { searchTerm } = filters;
+  const { page, skip, limit, sortBy, sortOrder } =
+    paginationHelpers.calculatePagination(options);
+
+  const andConditions = [];
+
+  if (searchTerm) {
+    andConditions.push({
+      OR: ["title", "category"].map((field) => ({
+        [field]: {
+          contains: searchTerm,
+          mode: "insensitive",
+        },
+      })),
+    });
+  }
+
+  const whereConditions: Prisma.CourseReviewWhereInput = {
+    AND: [...andConditions,],
+  };
+
+  const blogs = await prisma.courseReview.findMany({
+    where: {
+      ...whereConditions,
+    },
+    skip,
+    take: limit,
+    orderBy:
+      sortBy && sortOrder
+        ? { [sortBy]: sortOrder }
+        : {
+            createdAt: "desc",
+          },
+  });
+
+  const total = await prisma.courseReview.count({
+    where: {
+      ...whereConditions,
+    },
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: blogs,
+  };
+};
 
 export const CourseService = {
   courseDetails,
@@ -309,5 +367,6 @@ export const CourseService = {
   getCourseReview,
   createCourseEnroll,
   enrollVerification,
-  checkingEnrollment
+  checkingEnrollment,
+  getAllCourseReview
 };

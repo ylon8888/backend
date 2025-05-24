@@ -33,10 +33,14 @@ model User {
 
   testimonials Testimonial?
 
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  CourseReview CourseReview[]
-  CourseEnroll CourseEnroll[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  courseReviews CourseReview[]
+  courseEnrolls CourseEnroll[]
+
+  // user step progress
+  userStepProgress    UserStepProgress?
+  userChapterProgress UserChapterProgress?
 
   @@map("users")
 }
@@ -115,14 +119,16 @@ model Subject {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  chapters     Chapter[]
-  CourseEnroll CourseEnroll[]
+  chapters      Chapter[]
+  courseEnrolls CourseEnroll[]
 
   @@map("subjects")
 }
 
 model Chapter {
   id String @id @default(cuid())
+
+  sLNumber String @unique // 1
 
   subjectId String
   subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
@@ -135,8 +141,8 @@ model Chapter {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  podcast      Podcast[]
-  CourseReview CourseReview[]
+  podcasts      Podcast[]
+  courseReviews CourseReview[]
 
   // all steps
   stepOne   StepOne?
@@ -146,8 +152,12 @@ model Chapter {
   stepFive  StepFive?
   stepSix   StepSix?
   stepSeven StepSeven?
-  stepEight StepEight[]
-  StepNine  StepNine?
+  stepEight StepEight?
+  stepNine  StepNine?
+
+  // student
+  userStepProgress    UserStepProgress?
+  userChapterProgress UserChapterProgress?
 
   @@map("chapters")
 }
@@ -161,6 +171,8 @@ model StepOne {
   stepName        String
   stepDescription String?
   stepVideo       String
+
+  type StepType @default(STEP_ONE)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -176,6 +188,8 @@ model StepTwo {
 
   podcastName  String
   podcastVideo String[]
+
+  type StepType @default(STEP_TWO)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -193,6 +207,8 @@ model StepThree {
   stepDescription String
   stepVideo       String
 
+  type StepType @default(STEP_THREE)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -208,6 +224,8 @@ model StepFour {
   stepName        String
   stepDescription String
   stepVideo       String
+
+  type StepType @default(STEP_FOUR)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -225,6 +243,8 @@ model StepFive {
   stepVideo      String
   questionAnswer Json
 
+  type StepType @default(STEP_FIVE)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -241,10 +261,12 @@ model StepSix {
   stepDescription String
   stepVideo       String
 
+  type StepType @default(STEP_SIX)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("stepsix")
+  @@map("stepSix")
 }
 
 model StepSeven {
@@ -257,27 +279,29 @@ model StepSeven {
   stepDescription String
   stepVideo       String
 
+  type StepType @default(STEP_SEVEN)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@map("stepsSeven")
+  @@map("stepSeven")
 }
 
 model StepEight {
   id String @id @default(cuid())
 
-  chapterId String
+  chapterId String  @unique
   chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
   questionType        String
   questionDescription String
   isDisable           Boolean @default(false)
 
+  type StepType @default(STEP_EIGHT)
+
   createdAt        DateTime        @default(now())
   updatedAt        DateTime        @updatedAt
   stepEightQuizzes StepEightQuiz[]
-  StepNine         StepNine?       @relation(fields: [stepNineId], references: [id])
-  stepNineId       String?
 
   @@map("stepEight")
 }
@@ -308,9 +332,10 @@ model StepNine {
   stepDescription String
   stepVideo       String
 
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
-  StepEight StepEight[]
+  type StepType @default(STEP_NINE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("stepNine")
 }
@@ -326,11 +351,11 @@ model CourseEnroll {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  name        String
-  phoneNumber String
-  email       String
-  otp         String
-  isVarified  Boolean @default(false)
+  name         String
+  phoneNumber  String
+  email        String
+  otp          String?
+  otpExpiresAt DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -358,15 +383,63 @@ model CourseReview {
   id String @id @default(cuid())
 
   chapterId String
-  useId     String
+  userId    String
   rating    Int    @default(1)
   message   String
 
   chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-  user    User    @relation(fields: [useId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("courseReviews")
+}
+
+enum StepType {
+  STEP_ONE
+  STEP_TWO
+  STEP_THREE
+  STEP_FOUR
+  STEP_FIVE
+  STEP_SIX
+  STEP_SEVEN
+  STEP_EIGHT
+  STEP_NINE
+}
+
+model UserChapterProgress {
+  id String @id @default(cuid())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  chapterId String  @unique
+  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  isCompleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("userChapterProgress")
+}
+
+model UserStepProgress {
+  id String @id @default(cuid())
+
+  userId    String @unique
+  chapterId String @unique
+
+  stepId      String   @unique // ex: stepOneId
+  stepType    StepType @unique // ex: STEP_ONE
+  isCompleted Boolean  @default(false)
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("userStepProgress")
 }
