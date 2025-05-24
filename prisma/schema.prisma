@@ -39,8 +39,9 @@ model User {
   courseEnrolls CourseEnroll[]
 
   // user step progress
-  userStepProgress    UserStepProgress?
-  userChapterProgress UserChapterProgress?
+  userStepProgress      UserStepProgress?
+  userChapterProgress   UserChapterProgress?
+  stepEightQuizAttempts StepEightQuizAttempt[]
 
   @@map("users")
 }
@@ -318,8 +319,27 @@ model StepEightQuiz {
   optionD       String
   correctAnswer String
 
+  stepEightQuizAttempts StepEightQuizAttempt[]
+
   @@unique([stepEightId, questionText])
   @@map("stepEightQuiz")
+}
+
+model StepEightQuizAttempt {
+  id     String @id @default(cuid())
+  userId String 
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  quizId String
+  stepEightQuiz   StepEightQuiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  selectedOption String 
+  isCorrect      Boolean
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, quizId])
+  @@map("stepEightQuizAttempt")
 }
 
 model StepNine {

@@ -2,6 +2,7 @@ import express from "express";
 import multer from "multer";
 import { createStorage } from "../../../helpars/fileUploader";
 import { StepController } from "./step.controller";
+import auth from "../../middlewares/auth";
 
 const router = express.Router();
 
@@ -32,5 +33,8 @@ router.patch('/disable-quiz/:quizId', StepController.disableQuize);
 
 // Create Quiz Question
 router.post('/quiz/:quizId',quizUpload, StepController.uploadQuiz);
+
+// Submit Quiz Answers
+router.post('/submit-quiz', auth(), StepController.submitQuizAnswers);
 
 export const StepsRoutes = router;

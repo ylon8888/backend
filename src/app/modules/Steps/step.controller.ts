@@ -318,6 +318,33 @@ const getQuizQustion = catchAsync(async (req: Request, res: Response) => {
 });
 
 
+export const submitQuizAnswers = catchAsync(
+  async (req: Request, res: Response) => {
+    const userId = req.user?.id;
+    const { answers } = req.body;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Unauthorized' });
+    }
+
+    if (!Array.isArray(answers) || answers.length === 0) {
+      return res.status(400).json({ success: false, message: 'Answers are required' });
+    }
+
+    const result = await StepService.submitQuizAnswers(userId, answers);
+
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: 'Quiz submitted successfully',
+      data: result,
+    });
+  }
+);
+
+
+
+
 export const StepController = {
   createStepOne,
   createStepTwo,
@@ -332,5 +359,6 @@ export const StepController = {
   disableQuize,
   uploadQuiz,
   createStepNine,
-  getQuizQustion
+  getQuizQustion,
+  submitQuizAnswers
 };

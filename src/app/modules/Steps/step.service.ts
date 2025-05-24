@@ -5,10 +5,9 @@ import prisma from "../../../shared/prisma";
 import httpStatus from "http-status";
 import { paginationHelpers } from "../../../helpars/paginationHelper";
 import { IStepEight, IStepFive, IStepOne, IStepTwo } from "./step.interface";
-import xlsx from 'xlsx';
-import fs from 'fs';
-import path from 'path';
-
+import xlsx from "xlsx";
+import fs from "fs";
+import path from "path";
 
 const createStepOne = async (chapterId: string, stepData: IStepOne) => {
   const chapter = await prisma.chapter.findUnique({
@@ -129,7 +128,6 @@ const createStepFour = async (chapterId: string, stepData: IStepOne) => {
 
   return step;
 };
-
 
 const createStepFive = async (chapterId: string, stepData: IStepFive) => {
   const chapter = await prisma.chapter.findUnique({
@@ -279,15 +277,14 @@ const getStudentQuizes = async (chapterId: string) => {
   const quizes = await prisma.stepEight.findMany({
     where: {
       chapterId,
-      isDisable: false
+      isDisable: false,
     },
   });
 
   return { quizes };
 };
 
-
-const disableQuize = async(quizId: string, isDisable: boolean) => {
+const disableQuize = async (quizId: string, isDisable: boolean) => {
   const quizExist = await prisma.stepEight.findUnique({
     where: {
       id: quizId,
@@ -300,17 +297,15 @@ const disableQuize = async(quizId: string, isDisable: boolean) => {
 
   const quiz = await prisma.stepEight.update({
     where: {
-      id: quizExist.id
+      id: quizExist.id,
     },
     data: {
-      isDisable
-    }
-  })
+      isDisable,
+    },
+  });
 
   return quiz;
-}
-
-
+};
 
 // const uploadQuiz = async (quizId: string, file: Express.Multer.File) => {
 //   const quizExist = await prisma.stepEight.findUnique({
@@ -342,7 +337,6 @@ const disableQuize = async(quizId: string, isDisable: boolean) => {
 //     skipDuplicates: true,
 //   });
 
-
 //   fs.unlinkSync(path.resolve(file.path));
 
 //   return insertedQuizzes;
@@ -355,12 +349,12 @@ const uploadQuiz = async (quizId: string, file: Express.Multer.File) => {
 
   // Validate StepEight exists
   const stepExists = await prisma.stepEight.findUnique({
-    where: { id: quizId }
+    where: { id: quizId },
   });
 
   if (!stepExists) {
     fs.unlinkSync(file.path);
-    throw new ApiError(httpStatus.NOT_FOUND, 'Quiz not found');
+    throw new ApiError(httpStatus.NOT_FOUND, "Quiz not found");
   }
 
   // Process each row with upsert using composite unique constraint
@@ -370,25 +364,25 @@ const uploadQuiz = async (quizId: string, file: Express.Multer.File) => {
         where: {
           stepEightId_questionText: {
             stepEightId: quizId,
-            questionText: row['Question Text']?.toString().trim(),
-          }
+            questionText: row["Question Text"]?.toString().trim(),
+          },
         },
         update: {
-          optionA: row['Option A']?.toString().trim(),
-          optionB: row['Option B']?.toString().trim(),
-          optionC: row['Option C']?.toString().trim(),
-          optionD: row['Option D']?.toString().trim(),
-          correctAnswer: row['Correct Answer']?.toString().trim(),
+          optionA: row["Option A"]?.toString().trim(),
+          optionB: row["Option B"]?.toString().trim(),
+          optionC: row["Option C"]?.toString().trim(),
+          optionD: row["Option D"]?.toString().trim(),
+          correctAnswer: row["Correct Answer"]?.toString().trim(),
         },
         create: {
           stepEightId: quizId,
-          questionText: row['Question Text']?.toString().trim(),
-          optionA: row['Option A']?.toString().trim(),
-          optionB: row['Option B']?.toString().trim(),
-          optionC: row['Option C']?.toString().trim(),
-          optionD: row['Option D']?.toString().trim(),
-          correctAnswer: row['Correct Answer']?.toString().trim(),
-        }
+          questionText: row["Question Text"]?.toString().trim(),
+          optionA: row["Option A"]?.toString().trim(),
+          optionB: row["Option B"]?.toString().trim(),
+          optionC: row["Option C"]?.toString().trim(),
+          optionD: row["Option D"]?.toString().trim(),
+          correctAnswer: row["Correct Answer"]?.toString().trim(),
+        },
       })
     )
   );
@@ -396,8 +390,6 @@ const uploadQuiz = async (quizId: string, file: Express.Multer.File) => {
   fs.unlinkSync(file.path);
   return transaction;
 };
-
-
 
 const createStepNine = async (chapterId: string, stepData: IStepOne) => {
   const chapter = await prisma.chapter.findUnique({
@@ -430,7 +422,6 @@ const createStepNine = async (chapterId: string, stepData: IStepOne) => {
   return step;
 };
 
-
 const getQuizQustion = async (quizId: string) => {
   const quizExist = await prisma.stepEight.findUnique({
     where: {
@@ -444,26 +435,94 @@ const getQuizQustion = async (quizId: string) => {
 
   const quiz = await prisma.stepEight.findUnique({
     where: {
-      id: quizExist.id
+      id: quizExist.id,
     },
-    select:{
+    select: {
       questionType: true,
       questionDescription: true,
-      stepEightQuizzes:{
-        select:{
+      stepEightQuizzes: {
+        select: {
+          id: true,
           questionText: true,
           optionA: true,
           optionB: true,
           optionC: true,
           optionD: true,
-          correctAnswer: false
-        }
-      }
-    }
-  })
+          correctAnswer: false,
+        },
+      },
+    },
+  });
 
   return quiz;
+};
+
+export interface Answer {
+  quizId: string;
+  selectedOption: "optionA" | "optionB" | "optionC" | "optionD";
 }
+
+export const submitQuizAnswers = async (userId: string, answers: Answer[]) => {
+  const results = [];
+
+  for (const answer of answers) {
+    const quiz = await prisma.stepEightQuiz.findUnique({
+      where: { id: answer.quizId },
+    });
+
+    if (!quiz) continue;
+
+    // Corrected comparison logic
+    const isCorrect =
+      answer.selectedOption.toLowerCase() === quiz.correctAnswer.toLowerCase();
+
+    const selectedValue = quiz[answer.selectedOption];
+
+    await prisma.stepEightQuizAttempt.upsert({
+      where: {
+        userId_quizId: {
+          userId,
+          quizId: quiz.id,
+        },
+      },
+      update: {
+        selectedOption: answer.selectedOption,
+        isCorrect,
+      },
+      create: {
+        userId,
+        quizId: quiz.id,
+        selectedOption: answer.selectedOption,
+        isCorrect,
+      },
+    });
+
+    results.push({
+      quizId: quiz.id,
+      questionText: quiz.questionText,
+      selectedOption: answer.selectedOption,
+      selectedValue,
+      correctAnswer: quiz.correctAnswer,
+      isCorrect,
+    });
+  }
+
+  const total = results.length;
+  const correct = results.filter((r) => r.isCorrect).length;
+  const incorrect = total - correct;
+  const percentage = total > 0 ? Math.round((correct / total) * 100) : 0;
+
+  return {
+    userId,
+    summary: {
+      totalQuestions: total,
+      correctAnswers: correct,
+      wrongAnswers: incorrect,
+      scorePercentage: percentage,
+    },
+    details: results,
+  };
+};
 
 export const StepService = {
   createStepOne,
@@ -479,5 +538,6 @@ export const StepService = {
   disableQuize,
   uploadQuiz,
   createStepNine,
-  getQuizQustion
+  getQuizQustion,
+  submitQuizAnswers,
 };
