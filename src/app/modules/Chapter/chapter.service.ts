@@ -24,17 +24,11 @@ const createchapter = async (chapterData: IChapter) => {
     },
   });
 
-  let nextSLNumber = 0;
-
-  if (existingChapterCount) {
-    nextSLNumber = existingChapterCount + 1;
-  } else {
-    nextSLNumber = 1;
-  }
+  const nextSLNumber = (existingChapterCount + 1).toString();
 
   const chapter = await prisma.chapter.create({
     data: {
-      sLNumber: nextSLNumber.toString(),
+      sLNumber: nextSLNumber,
       subjectId: chapterData.subjectId,
       chapterName: chapterData.chapterName,
       chapterDescription: chapterData.chapterDescription,

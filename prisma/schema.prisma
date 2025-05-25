@@ -129,7 +129,7 @@ model Subject {
 model Chapter {
   id String @id @default(cuid())
 
-  sLNumber String @unique // 1
+  sLNumber String  // 1
 
   subjectId String
   subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
@@ -141,6 +141,8 @@ model Chapter {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+   @@unique([subjectId, sLNumber]) // Ensure unique chapter per subject based on sLNumber
 
   podcasts      Podcast[]
   courseReviews CourseReview[]
