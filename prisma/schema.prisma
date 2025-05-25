@@ -155,7 +155,7 @@ model Chapter {
   stepFive  StepFive?
   stepSix   StepSix?
   stepSeven StepSeven?
-  stepEight StepEight?
+  stepEight StepEight[]
   stepNine  StepNine?
 
   // student
@@ -293,7 +293,7 @@ model StepSeven {
 model StepEight {
   id String @id @default(cuid())
 
-  chapterId String  @unique
+  chapterId String 
   chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
   questionType        String
