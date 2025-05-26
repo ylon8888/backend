@@ -126,6 +126,7 @@ const subjectWiseChapter = async (
     where: whereConditions,
     select:{
       id: true,
+      sLNumber: true,
       chapterName: true,
       chapterDescription: true,
       thumbnail: true

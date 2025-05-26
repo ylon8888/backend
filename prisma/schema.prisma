@@ -47,7 +47,7 @@ model User {
 
   // user step progress
   userStepProgress      UserStepProgress?
-  userChapterProgress   UserChapterProgress?
+  userChapterProgress   UserChapterProgress[]
   stepEightQuizAttempts StepEightQuizAttempt[]
 
   @@map("users")
@@ -165,7 +165,7 @@ model Chapter {
 
   // student
   userStepProgress    UserStepProgress?
-  userChapterProgress UserChapterProgress?
+  userChapterProgress UserChapterProgress[]
 
   @@unique([subjectId, sLNumber]) // Ensure unique chapter per subject based on sLNumber
   @@map("chapters")
@@ -439,19 +439,21 @@ enum StepType {
 model UserChapterProgress {
   id String @id @default(cuid())
 
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+  chapterId String
 
-  chapterId String  @unique
-  chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
   isCompleted Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([userId, chapterId]) // Ensures each user-chapter pair is unique
   @@map("userChapterProgress")
 }
+
 
 model UserStepProgress {
   id String @id @default(cuid())

@@ -252,6 +252,45 @@ const enrollVerification = async (data: {
     throw new ApiError(httpStatus.NOT_FOUND, "Enrollment not found");
   }
 
+  const chapter = await prisma.subject.findUnique({
+    where: {
+      id: data.subjectId,
+    },
+    select: {
+      chapters: {
+        select: {
+          sLNumber: true
+        }
+      }
+    }
+  });
+
+  const step = await prisma.subject.findUnique({
+    where: {
+      id: data.subjectId,
+    },
+    select: {
+      chapters: {
+        select: {
+          stepOne: {
+            select: {
+             stepDescription: true
+            }
+          }
+        }
+      }
+    }
+  });
+
+  if (!chapter) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
+  }
+
+
+  console.log(chapter)
+
+  console.log(step)
+
   if (enrollment.otp !== data.otp) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Invalid OTP");
   }
@@ -261,6 +300,7 @@ const enrollVerification = async (data: {
       where: { id: enrollment.id },
       data: { enrollStatus: EnrollStatus.SUCCESS, otp: null },
     });
+    
   }
 
   return {
