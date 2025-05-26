@@ -13,10 +13,8 @@ enum UserRole {
   ADMIN
 }
 
-
-
 enum EnrollStatus {
-   SUCCESS
+  SUCCESS
   PENDING
 }
 
@@ -25,9 +23,8 @@ model User {
 
   firstName String
   lastName  String
-  email     String  @unique
+  email     String @unique
   password  String
-  profile   String?
 
   role UserRole @default(STUDENT)
 
@@ -49,6 +46,7 @@ model User {
   userStepProgress      UserStepProgress[]
   userChapterProgress   UserChapterProgress[]
   stepEightQuizAttempts StepEightQuizAttempt[]
+  studentProfiles        StudentProfile?
 
   @@map("users")
 }
@@ -439,7 +437,7 @@ enum StepType {
 model UserChapterProgress {
   id String @id @default(cuid())
 
-  userId   String
+  userId    String
   chapterId String
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -454,23 +452,41 @@ model UserChapterProgress {
   @@map("userChapterProgress")
 }
 
-
 model UserStepProgress {
-  id         String    @id @default(cuid())
-  
-  userId     String
-  chapterId  String
-  stepId     String   // ex: stepOneId
-  stepType   StepType // ex: STEP_ONE
-  isCompleted Boolean @default(false)
+  id String @id @default(cuid())
 
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  chapter    Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  userId      String
+  chapterId   String
+  stepId      String // ex: stepOneId
+  stepType    StepType // ex: STEP_ONE
+  isCompleted Boolean  @default(false)
 
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@unique([userId, chapterId, stepId, stepType])
   @@map("userStepProgress")
+}
+
+model StudentProfile {
+  id String @id @default(cuid())
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  profileImage        String?
+  gurdianContact      Json
+  academicInformation Json
+  experience          Json
+  hobbies             Json
+  skill               Json
+  socialProfile       Json
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("studentProfiles")
 }

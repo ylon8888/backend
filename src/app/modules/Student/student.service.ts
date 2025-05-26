@@ -54,8 +54,72 @@ const registration = async (userData: IUser) => {
 };
 
 
+const createUpdateProfile = async (profileData: any) => {
+  const profile = await prisma.studentProfile.upsert({
+  where: { userId: profileData.userId },
+  update: {
+    profileImage: profileData.profileImage,
+    gurdianContact: profileData.gurdianContact,
+    academicInformation: profileData.academicInformation,
+    experience: profileData.experience,
+    hobbies: profileData.hobbies,
+    skill: profileData.skill,
+    socialProfile: profileData.socialProfile,
+  },
+  create: {
+    userId: profileData.userId,
+    profileImage: profileData.profileImage,
+    gurdianContact: profileData.gurdianContact,
+    academicInformation: profileData.academicInformation,
+    experience: profileData.experience,
+    hobbies: profileData.hobbies,
+    skill: profileData.skill,
+    socialProfile: profileData.socialProfile,
+  },
+});
 
+
+  return{
+    profile
+  }
+};
+
+
+const getStudentProfile = async(userId: string) => {
+  const profile = await prisma.studentProfile.findUnique({
+    where: {
+      userId
+    }
+  })
+
+  if(!profile){
+    throw new ApiError(httpStatus.NOT_FOUND, "Profile not found");
+  }
+
+  return {
+    profile
+  }
+}
+
+const getStudentById = async(userId: string) => {
+  const profile = await prisma.studentProfile.findUnique({
+    where: {
+      userId
+    }
+  })
+
+  if(!profile){
+    throw new ApiError(httpStatus.NOT_FOUND, "Profile not found");
+  }
+
+  return {
+    profile
+  }
+}
 
 export const StudentService = {
   registration,
+  createUpdateProfile,
+  getStudentProfile,
+  getStudentById
 };

@@ -136,7 +136,6 @@ const getCourseReview = async (subjectId: string) => {
                   firstName: true,
                   lastName: true,
                   email: true,
-                  profile: true,
                 },
               },
             },
@@ -152,7 +151,6 @@ const getCourseReview = async (subjectId: string) => {
       chapter.courseReviews.map((review) => ({
         name: `${review.user.firstName} ${review.user.lastName}`,
         email: review.user.email,
-        profile: review.user.profile,
         rating: review.rating,
         message: review.message,
       }))
