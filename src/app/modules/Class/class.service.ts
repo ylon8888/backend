@@ -144,12 +144,14 @@ const studentAllClass = async (
   };
 };
 
-const getSingleClass = async (id: string) => {
+const classWiseChapter = async (id: string) => {
   const singleClass = await prisma.class.findUnique({
     where: {
       id,
     },
     select: {
+      id: true,
+      className: true, // optional: include any class-level fields
       subjects: {
         select: {
           id: true,
@@ -157,6 +159,11 @@ const getSingleClass = async (id: string) => {
           subjectDescription: true,
           banner: true,
           isVisible: true,
+          _count: {
+            select: {
+              chapters: true,
+            },
+          },
         },
       },
     },
@@ -164,6 +171,7 @@ const getSingleClass = async (id: string) => {
 
   return { singleClass };
 };
+;
 
 const classVisibility = async (id: string) => {
   const isExist = await prisma.class.findUnique({
@@ -191,7 +199,7 @@ const classVisibility = async (id: string) => {
 export const ClassService = {
   createClass,
   getAllClass,
-  getSingleClass,
+  classWiseChapter,
   classVisibility,
   studentAllClass
 };

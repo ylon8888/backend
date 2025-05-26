@@ -51,10 +51,10 @@ const studentAllClass = catchAsync(async (req: Request, res: Response) => {
 });
 
 
-const getSingleClass = catchAsync(async (req: Request,res: Response) => {
+const classWiseChapter = catchAsync(async (req: Request,res: Response) => {
   const classId = req.params.id; 
 
-  const singleClasss = await ClassService.getSingleClass(classId);
+  const singleClasss = await ClassService.classWiseChapter(classId);
 
  sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -82,7 +82,7 @@ const classVisibility = catchAsync(async (req: Request,res: Response) => {
 export const classController = {
     createClass,
     getAllClasses,
-    getSingleClass,
+    classWiseChapter,
     classVisibility,
     studentAllClass
 }
