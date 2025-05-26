@@ -87,6 +87,63 @@ const getAllClass = async (
   };
 };
 
+const studentAllClass = async (
+  filters: {
+    searchTerm?: string;
+  },
+  options: IPaginationOptions
+) => {
+  const { searchTerm } = filters;
+  const { page, skip, limit, sortBy, sortOrder } =
+    paginationHelpers.calculatePagination(options);
+
+  const andConditions = [];
+
+  if (searchTerm) {
+    andConditions.push({
+      OR: ["className", "classDescription"].map((field) => ({
+        [field]: {
+          contains: searchTerm,
+          mode: "insensitive",
+        },
+      })),
+    });
+  }
+
+  const whereConditions: Prisma.ClassWhereInput = {
+    AND: [...andConditions, { isDeleted: false }],
+  };
+
+  const classes = await prisma.class.findMany({
+    where: {
+      ...whereConditions,
+    },
+    skip,
+    take: limit,
+    orderBy:
+      sortBy && sortOrder
+        ? { [sortBy]: sortOrder }
+        : {
+            createdAt: "desc",
+          },
+  });
+
+  const total = await prisma.class.count({
+    where: {
+      ...whereConditions,
+    },
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: classes,
+  };
+};
+
 const getSingleClass = async (id: string) => {
   const singleClass = await prisma.class.findUnique({
     where: {
@@ -136,4 +193,5 @@ export const ClassService = {
   getAllClass,
   getSingleClass,
   classVisibility,
+  studentAllClass
 };

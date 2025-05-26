@@ -7,8 +7,6 @@ import pick from "../../../shared/pick";
 import { paginationFields } from "../../../constants/pagination";
 
 
-
-
 const courseDetails = catchAsync(async (req: Request, res: Response) => {
   const subjectId = req.params.subjectId;
 

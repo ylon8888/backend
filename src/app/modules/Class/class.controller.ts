@@ -37,6 +37,19 @@ const getAllClasses = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const studentAllClass = catchAsync(async (req: Request, res: Response) => {
+  const filters = pick(req.query, ["searchTerm"]);
+  const options = pick(req.query, paginationFields);
+
+  const blogs = await ClassService.studentAllClass(filters, options);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Classes retrieved successfully",
+    data: blogs,
+  });
+});
+
 
 const getSingleClass = catchAsync(async (req: Request,res: Response) => {
   const classId = req.params.id; 
@@ -70,5 +83,6 @@ export const classController = {
     createClass,
     getAllClasses,
     getSingleClass,
-    classVisibility
+    classVisibility,
+    studentAllClass
 }

@@ -8,10 +8,9 @@ import emailSender from "../../../helpars/emailSender/emailSender";
 import { jwtHelpers } from "../../../helpars/jwtHelpers";
 import prisma from "../../../shared/prisma";
 import { ICourse, IUser } from "./course.interface";
-import { EnrollStatus, Prisma, UserRole } from "@prisma/client";
+import { EnrollStatus, Prisma, StepType, UserRole } from "@prisma/client";
 import { IPaginationOptions } from "../../../interfaces/paginations";
 import { paginationHelpers } from "../../../helpars/paginationHelper";
-import { date } from "zod";
 
 const courseDetails = async (subjectId: string) => {
   // Fetch course details
@@ -173,12 +172,12 @@ const createCourseEnroll = async (entrollData: ICourse) => {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
 
-  const chapter = await prisma.subject.findUnique({
+  const subject = await prisma.subject.findUnique({
     where: { id: entrollData.subjectId },
   });
 
-  if (!chapter) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Chapter not found");
+  if (!subject) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "subject not found");
   }
 
   const existingEnroll = await prisma.courseEnroll.findFirst({
@@ -189,9 +188,31 @@ const createCourseEnroll = async (entrollData: ICourse) => {
   });
 
   if (existingEnroll) {
-    return {
-      message: "you are already enrolled in this course",
-    };
+    if (existingEnroll.enrollStatus === EnrollStatus.SUCCESS) {
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        "Already enrolled in this course"
+      );
+    }
+
+    if (existingEnroll.enrollStatus === EnrollStatus.PENDING) {
+      const randomOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      const html = otpEmail(randomOtp);
+
+      await prisma.courseEnroll.update({
+        where: { id: existingEnroll.id },
+        data: { otp: randomOtp },
+      });
+
+      await emailSender("OTP", user.email, html);
+
+      return {
+        id: user.id,
+        courseId: existingEnroll.subjectId,
+        email: user.email,
+        message: "OTP sent! Please verify your email to complete enrollment.",
+      };
+    }
   }
 
   const randomOtp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -252,7 +273,7 @@ const enrollVerification = async (data: {
     throw new ApiError(httpStatus.NOT_FOUND, "Enrollment not found");
   }
 
-  const chapter = await prisma.subject.findUnique({
+  const subjectDetails = await prisma.subject.findUnique({
     where: {
       id: data.subjectId,
     },
@@ -260,37 +281,26 @@ const enrollVerification = async (data: {
       chapters: {
         select: {
           sLNumber: true,
-          id: true
-        }
-      }
-    }
-  });
-
-  const step = await prisma.subject.findUnique({
-    where: {
-      id: data.subjectId,
-    },
-    select: {
-      chapters: {
-        select: {
+          id: true,
           stepOne: {
             select: {
               type: true,
-            }
-          }
-        }
-      }
-    }
+            },
+          },
+        },
+      },
+    },
   });
 
-  if (!chapter) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
+  if (
+    !subjectDetails ||
+    !subjectDetails.chapters ||
+    subjectDetails.chapters.length === 0
+  ) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Chapter or StepOne not found");
   }
 
-
-  console.log(chapter)
-
-  console.log(step)
+  const firstChapter = subjectDetails.chapters[0];
 
   if (enrollment.otp !== data.otp) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Invalid OTP");
@@ -301,7 +311,46 @@ const enrollVerification = async (data: {
       where: { id: enrollment.id },
       data: { enrollStatus: EnrollStatus.SUCCESS, otp: null },
     });
-    
+
+    const existingProgress = await prisma.userChapterProgress.findFirst({
+      where: {
+        userId: user.id,
+        chapterId: firstChapter.id,
+
+      }
+    });
+
+
+    const existingStep = await prisma.userStepProgress.findFirst({
+      where: {
+        userId: user.id,
+        chapterId: firstChapter.id,
+      }
+    })
+
+    if(existingProgress && existingStep){
+      return
+    }
+
+    // Student Chapter Progress
+    await prisma.userChapterProgress.create({
+      data: {
+        userId: user.id,
+        chapterId: firstChapter.id,
+        isCompleted: true,
+      },
+    });
+
+    // chapter Progress
+    await prisma.userStepProgress.create({
+      data: {
+        userId: user.id,
+        chapterId: firstChapter.id,
+        stepId: firstChapter?.id,
+        stepType: StepType.STEP_ONE,
+        isCompleted: true,
+      },
+    });
   }
 
   return {
@@ -311,10 +360,7 @@ const enrollVerification = async (data: {
   };
 };
 
-const checkingEnrollment = async (
-  userId: string,
-  subjectId: string
-) => {
+const checkingEnrollment = async (userId: string, subjectId: string) => {
   const enroll = await prisma.courseEnroll.findFirst({
     where: {
       userId,
@@ -322,10 +368,9 @@ const checkingEnrollment = async (
     },
   });
 
-
   return {
-    isEnrilled: enroll?.enrollStatus
-  }
+    isEnrilled: enroll?.enrollStatus,
+  };
 };
 
 const getAllCourseReview = async (

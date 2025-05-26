@@ -11,6 +11,7 @@ import { ChapterRoutes } from "../modules/Chapter/chapter.routes";
 import { PodcastRoutes } from "../modules/Podcast/podcast.routes";
 import { StepsRoutes } from "../modules/Steps/step.routes";
 import { CourseRoutes } from "../modules/Course/course.route";
+import { ProgressRoutes } from "../modules/CourseProgress/courseProgress.routes";
 
 
 const router = express.Router();
@@ -59,6 +60,10 @@ const moduleRoutes = [
    {
     path: "/step",
     route: StepsRoutes
+  },
+  {
+    path: "/progress",
+    route: ProgressRoutes
   },
 ];
 

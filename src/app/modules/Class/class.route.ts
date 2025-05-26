@@ -8,6 +8,7 @@ const router = express.Router();
 
 
 router.get('/', classController.getAllClasses);
+router.get('/student-class', classController.studentAllClass);
 router.get('/single-class/:id', classController.getSingleClass);
 router.post('/', classController.createClass);
 router.patch('/class-visibility/:id', classController.classVisibility);
