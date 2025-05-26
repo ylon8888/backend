@@ -7,11 +7,11 @@ import ApiError from "../../../errors/ApiErrors";
 import emailSender from "../../../helpars/emailSender/emailSender";
 import { jwtHelpers } from "../../../helpars/jwtHelpers";
 import prisma from "../../../shared/prisma";
-import { IUser } from "./course.interface";
-import { Prisma, UserRole } from "@prisma/client";
+import { ICourse, IUser } from "./course.interface";
+import { EnrollStatus, Prisma, UserRole } from "@prisma/client";
 import { IPaginationOptions } from "../../../interfaces/paginations";
 import { paginationHelpers } from "../../../helpars/paginationHelper";
-
+import { date } from "zod";
 
 const courseDetails = async (subjectId: string) => {
   // Fetch course details
@@ -164,7 +164,7 @@ const getCourseReview = async (subjectId: string) => {
 };
 
 // Course Entroll
-const createCourseEnroll = async (entrollData: any) => {
+const createCourseEnroll = async (entrollData: ICourse) => {
   const user = await prisma.user.findUnique({
     where: { id: entrollData.userId },
   });
@@ -188,9 +188,14 @@ const createCourseEnroll = async (entrollData: any) => {
     },
   });
 
+  if (existingEnroll) {
+    return {
+      message: "you are already enrolled in this course",
+    };
+  }
+
   const randomOtp = Math.floor(100000 + Math.random() * 900000).toString();
   const html = otpEmail(randomOtp);
-
 
   // Fresh enrollment
   const newEnroll = await prisma.courseEnroll.create({
@@ -199,35 +204,40 @@ const createCourseEnroll = async (entrollData: any) => {
       subjectId: entrollData.subjectId,
       name: entrollData.name,
       phoneNumber: entrollData.phoneNumber,
-      email: entrollData.email,
       otp: randomOtp,
     },
   });
 
-  await emailSender("OTP", newEnroll.email, html);
+  await emailSender("OTP", user.email, html);
 
   return {
     id: user.id,
     courseId: newEnroll.subjectId,
-    email: newEnroll.email,
+    email: user.email,
     message: "OTP sent! Please verify your email to complete enrollment.",
   };
 };
-
 
 const enrollVerification = async (data: {
   userId: string;
   subjectId: string;
   otp: string;
 }) => {
+  const user = await prisma.user.findUnique({
+    where: { id: data.userId },
+  });
+
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
 
   const course = await prisma.subject.findUnique({
     where: {
       id: data.subjectId,
-    }
-  })
+    },
+  });
 
-  if(!course){
+  if (!course) {
     throw new ApiError(httpStatus.NOT_FOUND, "Course not found");
   }
 
@@ -242,21 +252,28 @@ const enrollVerification = async (data: {
     throw new ApiError(httpStatus.NOT_FOUND, "Enrollment not found");
   }
 
-
   if (enrollment.otp !== data.otp) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Invalid OTP");
   }
 
+  if (enrollment.otp === data.otp) {
+    await prisma.courseEnroll.update({
+      where: { id: enrollment.id },
+      data: { enrollStatus: EnrollStatus.SUCCESS, otp: null },
+    });
+  }
 
   return {
     success: true,
     message: "Enrollment verified successfully",
-    email: enrollment.email,
+    email: user.email,
   };
 };
 
-
-const checkingEnrollment = async (userId: string, subjectId: string): Promise<boolean> => {
+const checkingEnrollment = async (
+  userId: string,
+  subjectId: string
+) => {
   const enroll = await prisma.courseEnroll.findFirst({
     where: {
       userId,
@@ -264,16 +281,11 @@ const checkingEnrollment = async (userId: string, subjectId: string): Promise<bo
     },
   });
 
-  // If not enrolled or not verified, return false
-  if (!enroll) {
-    return false;
+
+  return {
+    isEnrilled: enroll?.enrollStatus
   }
-
-  // If enrolled and verified
-  return true;
 };
-
-
 
 const getAllCourseReview = async (
   filters: {
@@ -299,7 +311,7 @@ const getAllCourseReview = async (
   }
 
   const whereConditions: Prisma.CourseReviewWhereInput = {
-    AND: [...andConditions,],
+    AND: [...andConditions],
   };
 
   const blogs = await prisma.courseReview.findMany({
@@ -339,5 +351,5 @@ export const CourseService = {
   createCourseEnroll,
   enrollVerification,
   checkingEnrollment,
-  getAllCourseReview
+  getAllCourseReview,
 };

@@ -13,6 +13,13 @@ enum UserRole {
   ADMIN
 }
 
+
+
+enum EnrollStatus {
+   SUCCESS
+  PENDING
+}
+
 model User {
   id String @id @default(cuid())
 
@@ -129,7 +136,7 @@ model Subject {
 model Chapter {
   id String @id @default(cuid())
 
-  sLNumber String  // 1
+  sLNumber String // 1
 
   subjectId String
   subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
@@ -141,8 +148,6 @@ model Chapter {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-   @@unique([subjectId, sLNumber]) // Ensure unique chapter per subject based on sLNumber
 
   podcasts      Podcast[]
   courseReviews CourseReview[]
@@ -162,6 +167,7 @@ model Chapter {
   userStepProgress    UserStepProgress?
   userChapterProgress UserChapterProgress?
 
+  @@unique([subjectId, sLNumber]) // Ensure unique chapter per subject based on sLNumber
   @@map("chapters")
 }
 
@@ -293,7 +299,7 @@ model StepSeven {
 model StepEight {
   id String @id @default(cuid())
 
-  chapterId String 
+  chapterId String
   chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
   questionType        String
@@ -329,13 +335,13 @@ model StepEightQuiz {
 
 model StepEightQuizAttempt {
   id     String @id @default(cuid())
-  userId String 
+  userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  quizId String
-  stepEightQuiz   StepEightQuiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  quizId        String
+  stepEightQuiz StepEightQuiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
-  selectedOption String 
+  selectedOption String
   isCorrect      Boolean
 
   createdAt DateTime @default(now())
@@ -375,9 +381,9 @@ model CourseEnroll {
 
   name         String
   phoneNumber  String
-  email        String
   otp          String?
   otpExpiresAt DateTime?
+  enrollStatus EnrollStatus @default(PENDING)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -10,3 +10,10 @@ export interface IUser {
   password: string;
   role: UserRole.STUDENT;
 }
+
+export interface ICourse {
+  name: string;
+  phoneNumber: string;
+  userId: string;
+  subjectId: string;
+}
