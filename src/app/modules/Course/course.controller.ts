@@ -25,11 +25,11 @@ const courseDetails = catchAsync(async (req: Request, res: Response) => {
 
 const courseReview = catchAsync(async (req: Request, res: Response) => {
   const chapterId = req.params.chapterId;
-  const useId = req.user.id;
+  const userId = req.user.id;
 
   const body = {
     chapterId,
-    useId,
+    userId,
     ...req.body
   }
 
@@ -127,6 +127,20 @@ const checkingEnrollment = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
+const getAllReview = catchAsync(async (req: Request, res: Response) => {
+  const filters = pick(req.query, ["searchTerm"]);
+  const options = pick(req.query, paginationFields);
+
+  const blogs = await CourseService.getAllReview(filters, options);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Blogs retrieved successfully",
+    data: blogs,
+  });
+});
+
 export const CourseController = {
   courseDetails,
   courseReview,
@@ -134,5 +148,6 @@ export const CourseController = {
   createCourseEnroll,
   verifyEnrollment,
   checkingEnrollment,
-  getAllCourseReview
+  getAllCourseReview,
+  getAllReview
 };

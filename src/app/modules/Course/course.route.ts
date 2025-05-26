@@ -15,7 +15,13 @@ router.get('/checking-enrollment/:subjectId', auth(), CourseController.checkingE
 // Couese review 
 router.post('/course-review/:chapterId', auth(), CourseController.courseReview);
 router.get('/course-review', auth(), CourseController.getAllCourseReview);
+
+// Admin 
+router.get('/admin-course-review', CourseController.getAllCourseReview); //  <--- Admin
+
 router.get('/course-review/:subjectId', CourseController.getCourseReview);
+
+
 
 // Course Entroll
 router.post('/course-enroll/:subjectId', auth(), CourseController.createCourseEnroll)

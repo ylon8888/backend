@@ -427,6 +427,85 @@ const getAllCourseReview = async (
   };
 };
 
+
+const getAllReview = async (
+  filters: { searchTerm?: string },
+  options: IPaginationOptions
+) => {
+  const { searchTerm } = filters;
+  const { page, skip, limit, sortBy = "createdAt", sortOrder = "desc" } =
+    paginationHelpers.calculatePagination(options);
+
+  // Build search conditions
+  const whereConditions: Prisma.CourseReviewWhereInput = {};
+
+  if (searchTerm) {
+    // Assuming review message or user name can be searched
+    whereConditions.OR = [
+      {
+        message: {
+          contains: searchTerm,
+          mode: "insensitive",
+        },
+      },
+      {
+        user: {
+          OR: [
+            { firstName: { contains: searchTerm, mode: "insensitive" } },
+            { lastName: { contains: searchTerm, mode: "insensitive" } },
+          ],
+        },
+      },
+    ];
+  }
+
+  // Get total count of matching reviews
+  const total = await prisma.courseReview.count({ where: whereConditions });
+
+  // Fetch paginated reviews
+  const reviewsData = await prisma.courseReview.findMany({
+    where: whereConditions,
+    orderBy: {
+      [sortBy]: sortOrder,
+    },
+    skip,
+    take: limit,
+    select: {
+      rating: true,
+      message: true,
+      user: {
+        select: {
+          firstName: true,
+          lastName: true,
+          email: true,
+        },
+      },
+    },
+  });
+
+  // Map reviews to desired format
+  const reviews = reviewsData.map((review) => ({
+    name: `${review.user.firstName} ${review.user.lastName}`,
+    email: review.user.email,
+    rating: review.rating,
+    message: review.message,
+  }));
+
+  // Calculate total pages
+  const totalPages = Math.ceil(total / limit);
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+      totalPages,
+    },
+    data: reviews,
+  };
+};
+
+
 export const CourseService = {
   courseDetails,
   courseReview,
@@ -435,4 +514,5 @@ export const CourseService = {
   enrollVerification,
   checkingEnrollment,
   getAllCourseReview,
+  getAllReview
 };
