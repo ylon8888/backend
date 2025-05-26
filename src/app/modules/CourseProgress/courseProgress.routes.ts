@@ -4,7 +4,7 @@ import { CourseProgresscontroller } from "./courseProgress.controller";
 
 const router = express.Router();
 
-router.post('/chapter-progress', auth(), CourseProgresscontroller.createChapterProgress)
-router.post('/step-progress', auth(), CourseProgresscontroller.createChapterProgress)
+router.post('/create-progress', auth(), CourseProgresscontroller.createProgress)
+
 
 export const ProgressRoutes = router;

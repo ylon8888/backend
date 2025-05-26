@@ -7,17 +7,15 @@ import { paginationFields } from "../../../constants/pagination";
 import { CourseProgressService } from "./courseProgress.service";
 
 
-const createChapterProgress = catchAsync(async (req: Request, res: Response) => {
+const createProgress = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.id;
-  const chapterId = req.params.id;
 
   const progressData = {
     userId,
-    chapterId,
     ...req.body
   }
 
-  const chapterProgress = await  CourseProgressService.createChapterProgress(progressData);
+  const chapterProgress = await  CourseProgressService.createProgress(progressData);
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
@@ -28,26 +26,9 @@ const createChapterProgress = catchAsync(async (req: Request, res: Response) => 
 });
 
 
-const createStepProgress = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.user.id;
-
-  const progressData = {
-    userId,
-    ...req.body
-  }
-
-  const chapterProgress = await  CourseProgressService.createStepProgress(progressData);
-
-  sendResponse(res, {
-    statusCode: httpStatus.CREATED,
-    success: true,
-    message: "Create step progress sucessfully",
-    data: chapterProgress,
-  });
-});
 
 
 export const CourseProgresscontroller = {
-  createChapterProgress,
-  createStepProgress
+  createProgress,
+
 }

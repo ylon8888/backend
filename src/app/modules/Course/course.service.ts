@@ -337,20 +337,19 @@ const enrollVerification = async (data: {
       data: {
         userId: user.id,
         chapterId: firstChapter.id,
-        isCompleted: true,
+        isCompleted: false, // True then 
       },
     });
 
     // chapter Progress
-    await prisma.userStepProgress.create({
-      data: {
-        userId: user.id,
-        chapterId: firstChapter.id,
-        stepId: firstChapter?.id,
-        stepType: StepType.STEP_ONE,
-        isCompleted: true,
-      },
-    });
+    // await prisma.userStepProgress.create({
+    //   data: {
+    //     userId: user.id,
+    //     chapterId: firstChapter.id,
+    //     stepId: firstChapter?.id,
+    //     stepType: StepType.STEP_ONE,
+    //   },
+    // });
   }
 
   return {
