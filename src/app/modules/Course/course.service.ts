@@ -259,7 +259,8 @@ const enrollVerification = async (data: {
     select: {
       chapters: {
         select: {
-          sLNumber: true
+          sLNumber: true,
+          id: true
         }
       }
     }
@@ -274,7 +275,7 @@ const enrollVerification = async (data: {
         select: {
           stepOne: {
             select: {
-             stepDescription: true
+              type: true,
             }
           }
         }
