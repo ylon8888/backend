@@ -4,6 +4,8 @@ import catchAsync from "../../../shared/catchAsync";
 import sendResponse from "../../../shared/sendResponse";
 import { StudentService } from "./student.service";
 import ApiError from "../../../errors/ApiErrors";
+import pick from "../../../shared/pick";
+import { paginationFields } from "../../../constants/pagination";
 
 
 const registration = catchAsync(async (req: Request, res: Response) => {
@@ -63,27 +65,91 @@ const getStudentProfile =  catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "OTP sent! Please verify your email to complete registration.",
+    message: "Retrive student successfully",
     data: result,
   });
 });
 
 
 const getStudentById = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.params.userId;
+  const userId = req.params.studentId;
 
-  const result = await StudentService.getStudentProfile(userId);
+  const result = await StudentService.getStudentById(userId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "OTP sent! Please verify your email to complete registration.",
+    message: "Retrive student success",
     data: result,
   });
 });
 
+
+const getAllStudents = catchAsync(async (req: Request, res: Response) => {
+  const filters = pick(req.query, ["searchTerm"]);
+  const options = pick(req.query, paginationFields);
+
+  const blogs = await StudentService.getAllStudents(filters, options);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Students retrieved successfully",
+    data: blogs,
+  });
+});
+
+const studentDetails = catchAsync(async (req: Request, res: Response) => {
+
+  const result = await StudentService.studentDetails();
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Retrive student success",
+    data: result,
+  });
+});
+
+const getOverallGraph = catchAsync(async (req: Request, res: Response) => {
+  const fromDateStr = req.query.fromDate as string;
+
+  if (!fromDateStr) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "fromDate query parameter is required");
+  }
+
+  const result = await StudentService.overalGraph(fromDateStr);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Overall progress data retrieved successfully",
+    data: result,
+  });
+}
+)
+
+
+const participation = catchAsync(async (req: Request, res: Response) => {
+
+  const result = await StudentService.participation();
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "participation data retrieved successfully",
+    data: result,
+  });
+}
+)
+
+
 export const StudentController = {
   registration,
   createUpdateProfile,
-  getStudentProfile
+  getStudentProfile,
+  getStudentById,
+  getAllStudents,
+  studentDetails,
+  getOverallGraph,
+  participation
 };

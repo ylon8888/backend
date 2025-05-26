@@ -5,6 +5,7 @@ import { createStorage } from "../../../helpars/fileUploader";
 import multer from "multer";
 import validateRequest from "../../middlewares/validateRequest";
 import { createProfileSchema } from "./student.validation";
+import { UserRole } from "@prisma/client";
 
 
 const router = express.Router();
@@ -20,6 +21,11 @@ router.post("/register", StudentController.registration);
 router.post('/create-profile',auth(), fileUpload, validateRequest(createProfileSchema), StudentController.createUpdateProfile);
 
 // Admin Dashboard get Student Information
-router.get('/admin-get-student/:userId',auth(), StudentController.getStudentProfile);
+router.get('/retrive-studnt-details', StudentController.studentDetails);
+router.get('/admin-get-all-students', StudentController.getAllStudents);  // auth(UserRole.ADMIN)
+router.get('/overall-graph', StudentController.getOverallGraph); // auth(UserRole.ADMIN)
+router.get('/participation', StudentController.participation); // auth(UserRole.ADMIN)
+router.get('/admin-get-student/:studentId', StudentController.getStudentById); // auth(UserRole.ADMIN)
+
 
 export const StudentRoutes = router;
