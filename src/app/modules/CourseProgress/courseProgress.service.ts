@@ -80,49 +80,68 @@ const createProgress = async (progressData: ICourseProgress) => {
   };
 };
 
-const getNextChapter = async (
-  userId: string,
-  courseId: string,
-  currentChapterId: string
-) => {
-  const currentChapter = await prisma.chapter.findUnique({
-    where: { id: currentChapterId },
+const createNextProgress = async (progressData: any) => {
+  const existingProgress = await prisma.userChapterProgress.findFirst({
+    where: {
+      userId: progressData.userId,
+      chapterId: progressData.chapterId,
+    },
   });
 
-  if (!currentChapter) {
-    throw new Error("Current chapter not found");
+  if (!existingProgress) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Chapter progress not found");
   }
 
-  // Optionally, check if the user has completed the current chapter
-  const isCompleted = await prisma.userChapterProgress.findFirst({
+  await prisma.userChapterProgress.update({
     where: {
-      userId,
-      chapterId: currentChapterId,
+      id: existingProgress.id,
+    },
+    data: {
       isCompleted: true,
     },
   });
 
-  if (!isCompleted) {
-    throw new Error("Current chapter is not completed yet");
+  const chapter = await prisma.chapter.findUnique({
+    where: {
+      id: progressData.chapterId
+    }
+  })
+
+  if (!chapter) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
   }
 
-  // Find the next chapter in the same course
-  const nextChapter = await prisma.chapter.findFirst({
+   const nextChapter = await prisma.chapter.findFirst({
     where: {
-      id: currentChapter.id,
+      id: chapter.id,
       sLNumber: {
-        gt: currentChapter.sLNumber,
+        gt: chapter.sLNumber,
       },
     },
     orderBy: {
-      sLNumber: "asc",
+      sLNumber: 'asc',
     },
   });
 
-  return nextChapter;
+  if (!nextChapter) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Next chapter not found");
+  }
+
+  const nextProgress = await prisma.userChapterProgress.create({
+    data: {
+      userId: progressData.userId,
+      chapterId: nextChapter.id,
+    },
+  });
+
+  return {
+    nextProgress
+  }
+
+
 };
 
 export const CourseProgressService = {
   createProgress,
-  getNextChapter,
+  createNextProgress,
 };

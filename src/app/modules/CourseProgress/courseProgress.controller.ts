@@ -26,9 +26,26 @@ const createProgress = catchAsync(async (req: Request, res: Response) => {
 });
 
 
+const createNextProgress = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user.id;
+
+  const progressData = {
+    userId,
+    ...req.body
+  }
+
+  const nextProgress = await CourseProgressService.createNextProgress(progressData);
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Create next chapter progress successfully",
+    data: nextProgress,
+  });
+});
 
 
 export const CourseProgresscontroller = {
   createProgress,
-
+  createNextProgress
 }

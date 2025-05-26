@@ -337,7 +337,7 @@ const enrollVerification = async (data: {
       data: {
         userId: user.id,
         chapterId: firstChapter.id,
-        isCompleted: false, // True then 
+        isCompleted: false, // True when chapter is completed
       },
     });
 
