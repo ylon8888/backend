@@ -35,6 +35,6 @@ router.patch('/disable-quiz/:quizId', StepController.disableQuize);
 router.post('/quiz/:quizId',quizUpload, StepController.uploadQuiz);
 
 // Submit Quiz Answers
-router.post('/submit-quiz', auth(), StepController.submitQuizAnswers);
+router.post('/submit-quiz/:stepEightId', auth(), StepController.submitQuizAnswers);
 
 export const StepsRoutes = router;

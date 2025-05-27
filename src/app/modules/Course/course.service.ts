@@ -542,6 +542,7 @@ const chapterEnrollStudent = async (
     skip,
     take: limit,
     select: {
+      id: true,
       subject: {
         select: {
           createdAt: true,
@@ -552,6 +553,7 @@ const chapterEnrollStudent = async (
               phoneNumber: true,
               user: {
                 select: {
+                  id: true,
                   email: true,
                 },
               },
@@ -584,44 +586,137 @@ const chapterEnrollStudent = async (
   };
 };
 
-const capterQuizDetails = async (userId: string, chapterId: string, ) => {
-  console.log(chapterId)
-  const chapter = await prisma.chapter.findUnique({
-    where: {
-      id: chapterId
-    }
-  })
+// const capterQuizDetails = async (userId: string, chapterId: string, ) => {
+//   console.log(chapterId)
+//   const chapter = await prisma.chapter.findUnique({
+//     where: {
+//       id: chapterId
+//     }
+//   })
 
-  if(!chapter){
+//   if(!chapter){
+//     throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
+//   }
+
+//   const courseEnroll = await prisma.$transaction(async (TX) => {
+//     const quiz = await TX.chapter.findMany({
+//       where: {
+//         id: chapterId,
+//       },
+//       select: {
+//         stepEight: {
+//           select: {
+//             stepEightQuizzes: {
+//               select: {
+//                 stepEightQuizAttempts: {
+//                   where: {
+//                     userId,
+//                   },
+//                 },
+//               },
+//             },
+//           },
+//         },
+//       },
+//     });
+
+//     return{
+//       quiz
+//     }
+//   });
+
+//   return {
+//     courseEnroll,
+//   };
+// };
+
+const capterQuizDetails = async (userId: string, chapterId: string) => {
+  const chapter = await prisma.chapter.findUnique({
+    where: { id: chapterId },
+  });
+
+  if (!chapter) {
     throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
   }
 
   const courseEnroll = await prisma.$transaction(async (TX) => {
-    const quiz = await TX.chapter.findMany({
+    const wrongAttemptsCount = await TX.stepEightQuizAttempt.count({
       where: {
-        id: chapterId,
-      },
-      select: {
-        stepEight: {
-          select: {
-            stepEightQuizzes: {
-              select: {
-                stepEightQuizAttempts: {
-                  where: {
-                    userId,
-                  },
-                },
-              },
-            },
+        userId: userId,
+        isCorrect: false,
+        stepEightQuiz: {
+          stepEight: {
+            chapterId: chapterId,
           },
         },
       },
     });
 
+    const correctAttemptsCount = await TX.stepEightQuizAttempt.count({
+      where: {
+        userId: userId,
+        isCorrect: true,
+        stepEightQuiz: {
+          stepEight: {
+            chapterId: chapterId,
+          },
+        },
+      },
+    });
 
-    return{
-      quiz
-    }
+    const quizPracticed = await TX.stepEightQuizSession.count({
+      where: {
+        userId,
+        stepEight: {
+          chapterId,
+        },
+      },
+    });
+
+    const correctRate =
+      (correctAttemptsCount / (correctAttemptsCount + wrongAttemptsCount)) *
+      100;
+
+    const resultQuiz = await TX.stepEightQuizSession.findMany({
+      where: {
+        userId,
+        stepEight: {
+          chapterId,
+        },
+      },
+      select: {
+        id: true,
+        createdAt: true,
+        stepEightQuizAttempts: {
+          include: {
+            stepEightQuiz: true,
+          },
+        },
+      },
+    });
+
+    const resultQuizWithCounts = resultQuiz.map((session) => {
+      const correctCount = session.stepEightQuizAttempts.filter(
+        (a) => a.isCorrect
+      ).length;
+      const wrongCount = session.stepEightQuizAttempts.filter(
+        (a) => !a.isCorrect
+      ).length;
+
+      return {
+        correctCount,
+        wrongCount,
+        ...session,
+      };
+    });
+
+    return {
+      wrongQuiz: wrongAttemptsCount,
+      correctQuiz: correctAttemptsCount,
+      quizPracticed,
+      correctRate,
+      resultQuizWithCounts,
+    };
   });
 
   return {
@@ -639,5 +734,5 @@ export const CourseService = {
   getAllCourseReview,
   getAllReview,
   chapterEnrollStudent,
-  capterQuizDetails
+  capterQuizDetails,
 };

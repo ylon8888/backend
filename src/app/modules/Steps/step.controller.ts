@@ -321,6 +321,7 @@ const getQuizQustion = catchAsync(async (req: Request, res: Response) => {
 export const submitQuizAnswers = catchAsync(
   async (req: Request, res: Response) => {
     const userId = req.user?.id;
+    const stepEightId = req.params.stepEightId;
     const { answers } = req.body;
 
     if (!userId) {
@@ -331,7 +332,9 @@ export const submitQuizAnswers = catchAsync(
       return res.status(400).json({ success: false, message: 'Answers are required' });
     }
 
-    const result = await StepService.submitQuizAnswers(userId, answers);
+    console.log(stepEightId)
+
+    const result = await StepService.submitQuizAnswers(userId, stepEightId, answers);
 
     sendResponse(res, {
       statusCode: 200,

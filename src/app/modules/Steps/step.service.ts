@@ -462,12 +462,23 @@ export interface Answer {
   selectedOption: "optionA" | "optionB" | "optionC" | "optionD";
 }
 
-export const submitQuizAnswers = async (userId: string, answers: Answer[]) => {
+export const submitQuizAnswers = async (userId: string,stepEightId: string, answers: Answer[]) => {
   const results = [];
+
+  const stepEight = await prisma.stepEight.findUnique({
+    where: {
+      id: stepEightId
+    }
+  })
+
+  if(!stepEight){
+    throw new ApiError(httpStatus.NOT_FOUND, "Step eight not found");
+  }
 
   const session = await prisma.stepEightQuizSession.create({
     data: {
       userId,
+      stepEightId 
     },
   });
 

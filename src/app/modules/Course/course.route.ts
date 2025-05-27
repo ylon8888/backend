@@ -11,6 +11,7 @@ router.get('/chapter-enroll-student/:chapterId', CourseController.chapterEnrollS
 router.get('/chapter-quiz-details', CourseController.capterQuizDetails);
 
 
+
 // Course details
 router.get('/course-details/:subjectId', CourseController.courseDetails);
 
