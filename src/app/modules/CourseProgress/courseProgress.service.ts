@@ -112,16 +112,17 @@ const createNextProgress = async (progressData: any) => {
   }
 
    const nextChapter = await prisma.chapter.findFirst({
-    where: {
-      id: chapter.id,
-      sLNumber: {
-        gt: chapter.sLNumber,
-      },
+  where: {
+    subjectId: chapter.subjectId,
+    sLNumber: {
+      gt: chapter.sLNumber,
     },
-    orderBy: {
-      sLNumber: 'asc',
-    },
-  });
+  },
+  orderBy: {
+    sLNumber: 'asc',
+  },
+});
+
 
   if (!nextChapter) {
     throw new ApiError(httpStatus.NOT_FOUND, "Next chapter not found");
