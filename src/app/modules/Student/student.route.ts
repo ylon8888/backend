@@ -21,7 +21,7 @@ router.post("/register", StudentController.registration);
 router.post('/create-profile',auth(), fileUpload, validateRequest(createProfileSchema), StudentController.createUpdateProfile);
 
 // Admin Dashboard get Student Information
-router.get('/retrive-studnt-details', StudentController.studentDetails);
+router.get('/retrive-student-details', StudentController.studentDetails);
 router.get('/admin-get-all-students', StudentController.getAllStudents);  // auth(UserRole.ADMIN)
 router.get('/overall-graph', StudentController.getOverallGraph); // auth(UserRole.ADMIN)
 router.get('/participation', StudentController.participation); // auth(UserRole.ADMIN)

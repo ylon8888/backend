@@ -140,16 +140,37 @@ const getAllStudents = async (
     });
   }
 
-  const whereConditions: Prisma.StudentProfileWhereInput = {
-    AND: [...andConditions],
+  const whereConditions: Prisma.UserWhereInput = {
+    AND: [...andConditions, {role: UserRole.STUDENT}],
   };
 
-  const profile = await prisma.studentProfile.findMany({
+  const profile = await prisma.user.findMany({
     where: {
       ...whereConditions,
     },
     skip,
     take: limit,
+    select: {
+      firstName: true,
+      lastName: true,
+      email: true,
+      courseEnrolls: {
+        select:{
+          createdAt: true,
+          phoneNumber: true,
+          subject:{
+            select:{
+              subjectName: true,
+              class:{
+                select:{
+                  className: true
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     orderBy:
       sortBy && sortOrder
         ? { [sortBy]: sortOrder }
@@ -158,7 +179,7 @@ const getAllStudents = async (
           },
   });
 
-  const total = await prisma.studentProfile.count({
+  const total = await prisma.user.count({
     where: {
       ...whereConditions,
     },
