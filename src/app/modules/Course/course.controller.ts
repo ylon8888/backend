@@ -6,13 +6,10 @@ import { CourseService } from "./course.service";
 import pick from "../../../shared/pick";
 import { paginationFields } from "../../../constants/pagination";
 
-
 const courseDetails = catchAsync(async (req: Request, res: Response) => {
   const subjectId = req.params.subjectId;
 
-  const classVisibility = await CourseService.courseDetails(
-    subjectId
-  );
+  const classVisibility = await CourseService.courseDetails(subjectId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -22,7 +19,6 @@ const courseDetails = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 const courseReview = catchAsync(async (req: Request, res: Response) => {
   const chapterId = req.params.chapterId;
   const userId = req.user.id;
@@ -30,10 +26,10 @@ const courseReview = catchAsync(async (req: Request, res: Response) => {
   const body = {
     chapterId,
     userId,
-    ...req.body
-  }
+    ...req.body,
+  };
 
-  const classVisibility = await CourseService.courseReview(body)
+  const classVisibility = await CourseService.courseReview(body);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -43,15 +39,10 @@ const courseReview = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
-
-
 const getCourseReview = catchAsync(async (req: Request, res: Response) => {
   const subjectId = req.params.subjectId;
 
-  const classVisibility = await CourseService.getCourseReview(
-    subjectId
-  );
+  const classVisibility = await CourseService.getCourseReview(subjectId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -62,10 +53,13 @@ const getCourseReview = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllCourseReview = catchAsync(async (req: Request, res: Response) => {
-    const filters = pick(req.query, ["searchTerm"]);
+  const filters = pick(req.query, ["searchTerm"]);
   const options = pick(req.query, paginationFields);
 
-  const classVisibility = await CourseService.getAllCourseReview(filters, options);
+  const classVisibility = await CourseService.getAllCourseReview(
+    filters,
+    options
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -75,18 +69,17 @@ const getAllCourseReview = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
-const createCourseEnroll =  catchAsync(async (req: Request, res: Response) => {
+const createCourseEnroll = catchAsync(async (req: Request, res: Response) => {
   const subjectId = req.params.subjectId;
   const userId = req.user.id;
 
   const bodyData = {
     subjectId,
     userId,
-    ...req.body
-  }
+    ...req.body,
+  };
 
-  const courseEntroll = await CourseService.createCourseEnroll(bodyData)
+  const courseEntroll = await CourseService.createCourseEnroll(bodyData);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -101,7 +94,11 @@ const verifyEnrollment = catchAsync(async (req: Request, res: Response) => {
 
   const { subjectId, otp } = req.body;
 
-  const result = await CourseService.enrollVerification({ userId, subjectId, otp });
+  const result = await CourseService.enrollVerification({
+    userId,
+    subjectId,
+    otp,
+  });
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -111,13 +108,14 @@ const verifyEnrollment = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 const checkingEnrollment = catchAsync(async (req: Request, res: Response) => {
   const subjectId = req.params.subjectId;
   const userId = req.user.id;
 
-
-  const courseEntroll = await CourseService.checkingEnrollment(userId, subjectId)
+  const courseEntroll = await CourseService.checkingEnrollment(
+    userId,
+    subjectId
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -127,17 +125,48 @@ const checkingEnrollment = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 const getAllReview = catchAsync(async (req: Request, res: Response) => {
   const filters = pick(req.query, ["searchTerm"]);
   const options = pick(req.query, paginationFields);
 
-  const blogs = await CourseService.getAllReview(filters, options);
+  const review = await CourseService.getAllReview(filters, options);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Blogs retrieved successfully",
-    data: blogs,
+    message: "Course retrieved successfully",
+    data: review,
+  });
+});
+
+const chapterEnrollStudent = catchAsync(async (req: Request, res: Response) => {
+  const filters = pick(req.query, ["searchTerm"]);
+  const options = pick(req.query, paginationFields);
+  const chapterId = req.params.chapterId;
+
+  const chapter = await CourseService.chapterEnrollStudent(
+    chapterId,
+    filters,
+    options
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Chapter retrieved successfully",
+    data: chapter,
+  });
+});
+
+const capterQuizDetails = catchAsync(async (req: Request, res: Response) => {
+  const { userId, chapterId } = req.body;
+
+  const result = await CourseService.capterQuizDetails(userId, chapterId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Retrive chapter quiz details successfully",
+    data: result,
   });
 });
 
@@ -149,5 +178,7 @@ export const CourseController = {
   verifyEnrollment,
   checkingEnrollment,
   getAllCourseReview,
-  getAllReview
+  getAllReview,
+  chapterEnrollStudent,
+  capterQuizDetails,
 };

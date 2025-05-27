@@ -6,6 +6,11 @@ import { CourseController } from "./course.controller";
 const router = express.Router();
 
 
+// Admin Dashboard Chapter finished functionality   ----> Chapter wise details
+router.get('/chapter-enroll-student/:chapterId', CourseController.chapterEnrollStudent);
+router.get('/chapter-quiz-details', CourseController.capterQuizDetails);
+
+
 // Course details
 router.get('/course-details/:subjectId', CourseController.courseDetails);
 

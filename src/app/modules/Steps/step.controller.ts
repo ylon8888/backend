@@ -240,7 +240,7 @@ const disableQuize = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Quize disable successfully",
+    message: `Quize ${req.body.isDisable ? "disabled" : "enabled"} successfully`,
     data: step,
   });
 });

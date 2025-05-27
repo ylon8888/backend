@@ -314,20 +314,18 @@ const enrollVerification = async (data: {
       where: {
         userId: user.id,
         chapterId: firstChapter.id,
-
-      }
+      },
     });
-
 
     const existingStep = await prisma.userStepProgress.findFirst({
       where: {
         userId: user.id,
         chapterId: firstChapter.id,
-      }
-    })
+      },
+    });
 
-    if(existingProgress && existingStep){
-      return
+    if (existingProgress && existingStep) {
+      return;
     }
 
     // Student Chapter Progress
@@ -427,14 +425,18 @@ const getAllCourseReview = async (
   };
 };
 
-
 const getAllReview = async (
   filters: { searchTerm?: string },
   options: IPaginationOptions
 ) => {
   const { searchTerm } = filters;
-  const { page, skip, limit, sortBy = "createdAt", sortOrder = "desc" } =
-    paginationHelpers.calculatePagination(options);
+  const {
+    page,
+    skip,
+    limit,
+    sortBy = "createdAt",
+    sortOrder = "desc",
+  } = paginationHelpers.calculatePagination(options);
 
   // Build search conditions
   const whereConditions: Prisma.CourseReviewWhereInput = {};
@@ -505,6 +507,127 @@ const getAllReview = async (
   };
 };
 
+const chapterEnrollStudent = async (
+  chapterId: string,
+  filters: {
+    searchTerm?: string;
+  },
+  options: IPaginationOptions
+) => {
+  const { searchTerm } = filters;
+  const { page, skip, limit, sortBy, sortOrder } =
+    paginationHelpers.calculatePagination(options);
+
+  const andConditions = [];
+
+  if (searchTerm) {
+    andConditions.push({
+      OR: ["title", "category"].map((field) => ({
+        [field]: {
+          contains: searchTerm,
+          mode: "insensitive",
+        },
+      })),
+    });
+  }
+
+  const whereConditions: Prisma.ChapterWhereInput = {
+    AND: [...andConditions, { id: chapterId }],
+  };
+
+  const blogs = await prisma.chapter.findMany({
+    where: {
+      ...whereConditions,
+    },
+    skip,
+    take: limit,
+    select: {
+      subject: {
+        select: {
+          createdAt: true,
+          subjectName: true,
+          courseEnrolls: {
+            select: {
+              name: true,
+              phoneNumber: true,
+              user: {
+                select: {
+                  email: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    orderBy:
+      sortBy && sortOrder
+        ? { [sortBy]: sortOrder }
+        : {
+            createdAt: "desc",
+          },
+  });
+
+  const total = await prisma.chapter.count({
+    where: {
+      ...whereConditions,
+    },
+  });
+
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: blogs,
+  };
+};
+
+const capterQuizDetails = async (chapterId: string, userId: string) => {
+
+  const chapter = await prisma.chapter.findUnique({
+    where: {
+      id: chapterId
+    }
+  })
+
+  if(!chapter){
+    throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
+  }
+
+  const courseEnroll = await prisma.$transaction(async (TX) => {
+    const quiz = await TX.chapter.findMany({
+      where: {
+        id: chapterId,
+      },
+      select: {
+        stepEight: {
+          select: {
+            stepEightQuizzes: {
+              select: {
+                stepEightQuizAttempts: {
+                  // where: {
+                  //   userId,
+                  // },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+
+    return{
+      quiz
+    }
+  });
+
+  return {
+    courseEnroll,
+  };
+};
 
 export const CourseService = {
   courseDetails,
@@ -514,5 +637,7 @@ export const CourseService = {
   enrollVerification,
   checkingEnrollment,
   getAllCourseReview,
-  getAllReview
+  getAllReview,
+  chapterEnrollStudent,
+  capterQuizDetails
 };
