@@ -584,8 +584,8 @@ const chapterEnrollStudent = async (
   };
 };
 
-const capterQuizDetails = async (chapterId: string, userId: string) => {
-
+const capterQuizDetails = async (userId: string, chapterId: string, ) => {
+  console.log(chapterId)
   const chapter = await prisma.chapter.findUnique({
     where: {
       id: chapterId
@@ -607,9 +607,9 @@ const capterQuizDetails = async (chapterId: string, userId: string) => {
             stepEightQuizzes: {
               select: {
                 stepEightQuizAttempts: {
-                  // where: {
-                  //   userId,
-                  // },
+                  where: {
+                    userId,
+                  },
                 },
               },
             },

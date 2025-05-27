@@ -465,6 +465,12 @@ export interface Answer {
 export const submitQuizAnswers = async (userId: string, answers: Answer[]) => {
   const results = [];
 
+  const session = await prisma.stepEightQuizSession.create({
+    data: {
+      userId,
+    },
+  });
+
   for (const answer of answers) {
     const quiz = await prisma.stepEightQuiz.findUnique({
       where: { id: answer.quizId },
@@ -472,26 +478,17 @@ export const submitQuizAnswers = async (userId: string, answers: Answer[]) => {
 
     if (!quiz) continue;
 
-    // Corrected comparison logic
     const isCorrect =
       answer.selectedOption.toLowerCase() === quiz.correctAnswer.toLowerCase();
 
     const selectedValue = quiz[answer.selectedOption];
 
-    await prisma.stepEightQuizAttempt.upsert({
-      where: {
-        userId_quizId: {
-          userId,
-          quizId: quiz.id,
-        },
-      },
-      update: {
-        selectedOption: answer.selectedOption,
-        isCorrect,
-      },
-      create: {
+  
+    await prisma.stepEightQuizAttempt.create({
+      data: {
         userId,
         quizId: quiz.id,
+        sessionId: session.id, // ✅ link to session
         selectedOption: answer.selectedOption,
         isCorrect,
       },
@@ -514,6 +511,7 @@ export const submitQuizAnswers = async (userId: string, answers: Answer[]) => {
 
   return {
     userId,
+    sessionId: session.id,
     summary: {
       totalQuestions: total,
       correctAnswers: correct,
@@ -523,6 +521,7 @@ export const submitQuizAnswers = async (userId: string, answers: Answer[]) => {
     details: results,
   };
 };
+
 
 export const StepService = {
   createStepOne,

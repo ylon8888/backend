@@ -46,7 +46,8 @@ model User {
   userStepProgress      UserStepProgress[]
   userChapterProgress   UserChapterProgress[]
   stepEightQuizAttempts StepEightQuizAttempt[]
-  studentProfiles        StudentProfile?
+  studentProfiles       StudentProfile?
+  stepEightQuizSessions  StepEightQuizSession[]
 
   @@map("users")
 }
@@ -331,20 +332,30 @@ model StepEightQuiz {
   @@map("stepEightQuiz")
 }
 
+model StepEightQuizSession {
+  id                    String                 @id @default(cuid())
+  userId                String
+  user                  User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt             DateTime               @default(now())
+  stepEightQuizAttempts StepEightQuizAttempt[]
+
+  @@map("stepEightQuizSession")
+}
+
 model StepEightQuizAttempt {
-  id     String @id @default(cuid())
-  userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  quizId        String
-  stepEightQuiz StepEightQuiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
-
+  id             String               @id @default(cuid())
+  
+  quizId         String
+  sessionId      String
   selectedOption String
   isCorrect      Boolean
 
-  createdAt DateTime @default(now())
+  createdAt      DateTime             @default(now())
+  session        StepEightQuizSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  stepEightQuiz  StepEightQuiz        @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  User           User?                @relation(fields: [userId], references: [id])
+  userId         String?
 
-  @@unique([userId, quizId])
   @@map("stepEightQuizAttempt")
 }
 
