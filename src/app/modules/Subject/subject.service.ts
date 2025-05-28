@@ -94,7 +94,12 @@ const subjectWiseChapter = async (
       id: true,
       subjectName: true,
       subjectDescription: true,
-      banner: true
+      banner: true,
+      class:{
+        select:{
+          className: true
+        }
+      }
     }
   });
 

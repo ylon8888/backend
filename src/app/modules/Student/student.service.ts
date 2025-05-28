@@ -102,18 +102,16 @@ const getStudentProfile = async (userId: string) => {
 };
 
 const getStudentById = async (userId: string) => {
-
   const profile = await prisma.user.findUnique({
     where: {
       id: userId,
     },
-    select:{
+    select: {
       email: true,
       firstName: true,
       lastName: true,
-      studentProfiles:{
-      }
-    }
+      studentProfiles: {},
+    },
   });
 
   if (!profile) {
@@ -163,17 +161,17 @@ const getAllStudents = async (
       firstName: true,
       lastName: true,
       email: true,
-      _count:{
-        select:{
-          courseEnrolls: true
+      _count: {
+        select: {
+          courseEnrolls: true,
         },
       },
       // studentProfiles:{
       //   select:{
-          
+
       //   }
       // }
-      
+
       // courseEnrolls: {
       //   select: {
       //     createdAt: true,
@@ -257,15 +255,33 @@ const studentDetails = async () => {
   return studentProgress;
 };
 
-const overalGraph = async (fromDateStr: string) => {
-  const fromDate = new Date(fromDateStr);
+const overalGraph = async (period: string) => {
+  let date: Date;
+
+  // Calculate date based on period
+  switch (period) {
+    case '7days':
+      date = subDays(new Date(), 7);
+      break;
+    case '30days':
+      date = subDays(new Date(), 30);
+      break;
+    case '90days':
+      date = subDays(new Date(), 90);
+      break;
+    case '365days':
+      date = subDays(new Date(), 365);
+      break;
+    default:
+      date = subDays(new Date(), 7);
+  }
 
   const overalProgress = await prisma.$transaction(async (TX) => {
     const student = await TX.user.count({
       where: {
         role: UserRole.STUDENT,
         createdAt: {
-          gte: fromDate,
+          gte: date,
         },
       },
     });
@@ -274,7 +290,7 @@ const overalGraph = async (fromDateStr: string) => {
       where: {
         isCorrect: true,
         createdAt: {
-          gte: fromDate,
+          gte: date,
         },
       },
     });
@@ -283,7 +299,7 @@ const overalGraph = async (fromDateStr: string) => {
       where: {
         isCorrect: false,
         createdAt: {
-          gte: fromDate,
+          gte: date,
         },
       },
     });
@@ -298,31 +314,33 @@ const overalGraph = async (fromDateStr: string) => {
   return overalProgress;
 };
 
-// const participation = async () => {
-//   const sevenDaysAgo = new Date();
-//   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-//   const participate = await prisma.stepEightQuizAttempt.count({
-//     where: {
-//       createdAt: {
-//         gte: sevenDaysAgo,
-//       },
-//     },
-//   });
+const participation = async (period: string) => {
+  // Determine start date based on period
+  let startDate: Date;
+  const now = new Date();
 
-//   return {
-//     participate,
-//   };
-// };
+  if (period === "Monthly") {
+    // last 7 days
+    startDate = new Date();
+    startDate.setDate(now.getDate() - 6);
+  } else if (period === "Yearly") {
+    // last 12 months, start from beginning of month 11 months ago
+    startDate = new Date(now.getFullYear(), now.getMonth() - 11, 1);
+  } else if (period === "Quarterly") {
+    // last 4 quarters (each 3 months), start from beginning of quarter 3 quarters ago
+    const currentQuarter = Math.floor(now.getMonth() / 3);
+    const startQuarterMonth = (currentQuarter - 3) * 3;
+    startDate = new Date(now.getFullYear(), startQuarterMonth, 1);
+  } else {
+    throw new Error("Invalid period");
+  }
 
-const participation = async () => {
-  const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
-
+  // Fetch all attempts from startDate
   const attempts = await prisma.stepEightQuizAttempt.findMany({
     where: {
       createdAt: {
-        gte: sevenDaysAgo,
+        gte: startDate,
       },
     },
     select: {
@@ -330,35 +348,113 @@ const participation = async () => {
     },
   });
 
-  const dayNames = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-  ] as const;
-  type DayName = (typeof dayNames)[number];
+  if (period === "Monthly") {
+    // Aggregate by day name for last 7 days
+    const dayNames = [
+      "Sunday",
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+    ] as const;
 
-  const counts: Record<DayName, number> = {
-    Sunday: 0,
-    Monday: 0,
-    Tuesday: 0,
-    Wednesday: 0,
-    Thursday: 0,
-    Friday: 0,
-    Saturday: 0,
-  };
+    // Initialize counts with 0
+    const counts: Record<string, number> = {};
+    // We want counts for the last 7 days specifically by day name + date (to distinguish repeating days)
+    // But you requested just day names, so will sum all attempts by day name in the last 7 days
 
-  attempts.forEach(({ createdAt }) => {
-    const day = new Date(createdAt).getDay();
-    const dayName = dayNames[day];
-    counts[dayName]++;
-  });
+    dayNames.forEach((day) => (counts[day] = 0));
 
-  return counts;
+    attempts.forEach(({ createdAt }) => {
+      const dayIndex = new Date(createdAt).getDay();
+      const dayName = dayNames[dayIndex];
+      counts[dayName]++;
+    });
+
+    return counts;
+  } else if (period === "Yearly") {
+    // Aggregate by month names for last 12 months
+    const monthNames = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+
+    // Initialize counts for last 12 months only (from startDate)
+    const counts: Record<string, number> = {};
+    for (let i = 0; i < 12; i++) {
+      // calculate month/year labels
+      const date = new Date(startDate.getFullYear(), startDate.getMonth() + i, 1);
+      const monthName = monthNames[date.getMonth()];
+      counts[monthName] = 0;
+    }
+
+    attempts.forEach(({ createdAt }) => {
+      const date = new Date(createdAt);
+      const monthName = monthNames[date.getMonth()];
+      // count only if in range (safety)
+      if (date >= startDate) {
+        counts[monthName] = (counts[monthName] || 0) + 1;
+      }
+    });
+
+    return counts;
+  } else if (period === "Quarterly") {
+    // Aggregate by quarters for last 4 quarters
+
+    // Define quarter labels for the last 4 quarters
+    // For example: "Jan-Apr", "May-Aug", "Sep-Dec", "Jan-Apr" (rolling)
+    // But months don't align exactly to quarters, quarters are usually 3 months: Q1 (Jan-Mar), Q2 (Apr-Jun), etc.
+    // You wrote jan-april, may-august, etc. Let's use 4-month quarters as example:
+    // Q1: Jan-Apr, Q2: May-Aug, Q3: Sep-Dec
+
+    // Let's define 4 quarters (each 4 months) backward from current date
+    // We'll do 3 months quarters (standard) instead:
+    // Q1: Jan-Mar, Q2: Apr-Jun, Q3: Jul-Sep, Q4: Oct-Dec
+    // Let's build last 4 quarters labels with year, e.g. "Q1 2024"
+
+    const quartersLabels: string[] = [];
+    const counts: Record<string, number> = {};
+
+    // Helper to get quarter number from month
+    function getQuarter(month: number) {
+      return Math.floor(month / 3) + 1;
+    }
+
+    // Build last 4 quarters labels with year
+    for (let i = 3; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i * 3, 1);
+      const quarter = getQuarter(d.getMonth());
+      const label = `Q${quarter} ${d.getFullYear()}`;
+      quartersLabels.push(label);
+      counts[label] = 0;
+    }
+
+    attempts.forEach(({ createdAt }) => {
+      const d = new Date(createdAt);
+      const quarter = getQuarter(d.getMonth());
+      const label = `Q${quarter} ${d.getFullYear()}`;
+
+      if (label in counts) {
+        counts[label]++;
+      }
+    });
+
+    return counts;
+  }
 };
+
 
 const studentEnrollCourse = async (userId: string) => {
   const enroll = await prisma.courseEnroll.findMany({
@@ -371,7 +467,6 @@ const studentEnrollCourse = async (userId: string) => {
     enroll,
   };
 };
-
 
 // const studentChapterQuiz = async(chapterId: string, userId: string) =>{
 
@@ -398,7 +493,7 @@ const studentEnrollCourse = async (userId: string) => {
 //   //           },
 //   //           select:{
 //   //             stepEightQuizAttempts:{
-                
+
 //   //             }
 //   //           }
 //   //         }
@@ -426,14 +521,12 @@ const studentEnrollCourse = async (userId: string) => {
 //     }
 //   })
 
-
-
 //   return {
 //     quiz
 //   }
 // }
 
-const studentChapterQuiz = async (chapterId: string, userId: string) => {
+const studentChapterQuizAttempt = async (chapterId: string, userId: string) => {
   const chapter = await prisma.chapter.findUnique({
     where: { id: chapterId },
   });
@@ -444,14 +537,14 @@ const studentChapterQuiz = async (chapterId: string, userId: string) => {
 
   const quiz = await prisma.stepEight.findMany({
     where: {
-      chapterId
+      chapterId,
     },
     select: {
       questionType: true,
       questionDescription: true,
       stepEightQuizSessions: {
         where: {
-          userId: userId
+          userId: userId,
         },
         select: {
           id: true,
@@ -461,19 +554,21 @@ const studentChapterQuiz = async (chapterId: string, userId: string) => {
               isCorrect: true,
               selectedOption: true,
               quizId: true,
-              createdAt: true
-            }
-          }
-        }
-      }
-    }
+              createdAt: true,
+            },
+          },
+        },
+      },
+    },
   });
 
   // Count right and wrong attempts per session
-  const enrichedQuiz = quiz.map(q => {
-    const sessions = q.stepEightQuizSessions.map(session => {
+  const enrichedQuiz = quiz.map((q) => {
+    const sessions = q.stepEightQuizSessions.map((session) => {
       const totalAttempts = session.stepEightQuizAttempts.length;
-      const correctAttempts = session.stepEightQuizAttempts.filter(a => a.isCorrect).length;
+      const correctAttempts = session.stepEightQuizAttempts.filter(
+        (a) => a.isCorrect
+      ).length;
       const wrongAttempts = totalAttempts - correctAttempts;
 
       return {
@@ -494,7 +589,66 @@ const studentChapterQuiz = async (chapterId: string, userId: string) => {
   });
 
   return {
-    quiz: enrichedQuiz
+    quiz: enrichedQuiz,
+  };
+};
+
+const studentProgress = async (userId: string) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+  });
+
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not foud");
+  }
+
+  const studentProgress = await prisma.stepEight.findMany({
+    select: {
+      chapter: {
+        select: {
+          chapterName: true,
+          chapterDescription: true,
+          stepEight: {
+            select: {
+              id: true,
+              stepEightQuizSessions: {
+                select: {
+                  stepEightQuizAttempts: {
+                    select: {
+                      selectedOption: true,
+                      isCorrect: true,
+                      stepEightQuiz: {
+                        select: {
+                          questionText: true,
+                          optionA: true,
+                          optionB: true,
+                          optionC: true,
+                          optionD: true,
+                        },
+                      },
+                    },
+                  },
+                },
+                orderBy: {
+                  createdAt: "desc",
+                },
+                take: 1,
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const quizPracticed = await prisma.stepEightQuizSession.count()
+
+
+  return {
+    quizPracticed,
+    studentProgress,
   };
 };
 
@@ -509,5 +663,6 @@ export const StudentService = {
   overalGraph,
   participation,
   studentEnrollCourse,
-  studentChapterQuiz
+  studentChapterQuizAttempt,
+  studentProgress,
 };

@@ -91,6 +91,7 @@ const courseDetails = async (subjectId: string) => {
       course: subject,
       averageRating,
       totalReviews,
+      className: ratingData?.class?.className || null, // <-- added className here
       chapterCount,
       learnFromCourse,
     },

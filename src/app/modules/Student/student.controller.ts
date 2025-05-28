@@ -111,13 +111,13 @@ const studentDetails = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getOverallGraph = catchAsync(async (req: Request, res: Response) => {
-  const fromDateStr = req.query.fromDate as string;
+  const period = req.query.period as string;
 
-  if (!fromDateStr) {
+  if (!period) {
     throw new ApiError(httpStatus.BAD_REQUEST, "fromDate query parameter is required");
   }
 
-  const result = await StudentService.overalGraph(fromDateStr);
+  const result = await StudentService.overalGraph(period);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -130,8 +130,13 @@ const getOverallGraph = catchAsync(async (req: Request, res: Response) => {
 
 
 const participation = catchAsync(async (req: Request, res: Response) => {
+  const period = req.query.period as string;
 
-  const result = await StudentService.participation();
+  if (!period) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "fromDate query parameter is required");
+  }
+
+  const result = await StudentService.participation(period);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -157,11 +162,11 @@ const studentEnrollCourse =  catchAsync(async (req: Request, res: Response) => {
 )
 
 
-const studentChapterQuiz = catchAsync(async (req: Request, res: Response) => {
+const studentChapterQuizAttempt = catchAsync(async (req: Request, res: Response) => {
   const chapterId = req.params.chapterId;
   const userId = req.user.id;
 
-  const result = await StudentService.studentChapterQuiz(chapterId, userId);
+  const result = await StudentService.studentChapterQuizAttempt(chapterId, userId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -171,6 +176,22 @@ const studentChapterQuiz = catchAsync(async (req: Request, res: Response) => {
   });
 }
 )
+
+
+const studentProgress = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user.id;
+
+  const result = await StudentService.studentProgress(userId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Retrieved student progress successfully",
+    data: result,
+  });
+}
+)
+
 
 export const StudentController = {
   registration,
@@ -182,5 +203,6 @@ export const StudentController = {
   getOverallGraph,
   participation,
   studentEnrollCourse,
-  studentChapterQuiz
+  studentChapterQuizAttempt,
+  studentProgress
 };
