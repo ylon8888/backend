@@ -142,6 +142,35 @@ const participation = catchAsync(async (req: Request, res: Response) => {
 }
 )
 
+const studentEnrollCourse =  catchAsync(async (req: Request, res: Response) => {
+  const userId = req.params.id;
+
+  const result = await StudentService.studentEnrollCourse(userId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "participation data retrieved successfully",
+    data: result,
+  });
+}
+)
+
+
+const studentChapterQuiz = catchAsync(async (req: Request, res: Response) => {
+  const chapterId = req.params.chapterId;
+  const userId = req.user.id;
+
+  const result = await StudentService.studentChapterQuiz(chapterId, userId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Retrieved chapter quiz successfully",
+    data: result,
+  });
+}
+)
 
 export const StudentController = {
   registration,
@@ -151,5 +180,7 @@ export const StudentController = {
   getAllStudents,
   studentDetails,
   getOverallGraph,
-  participation
+  participation,
+  studentEnrollCourse,
+  studentChapterQuiz
 };

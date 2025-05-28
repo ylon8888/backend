@@ -53,7 +53,7 @@ const getCourseReview = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getAllCourseReview = catchAsync(async (req: Request, res: Response) => {
-  const filters = pick(req.query, ["searchTerm"]);
+  const filters = pick(req.query, ["searchTerm", "date"]);
   const options = pick(req.query, paginationFields);
 
   const classVisibility = await CourseService.getAllCourseReview(

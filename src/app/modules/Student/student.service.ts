@@ -141,7 +141,7 @@ const getAllStudents = async (
   }
 
   const whereConditions: Prisma.UserWhereInput = {
-    AND: [...andConditions, {role: UserRole.STUDENT}],
+    AND: [...andConditions, { role: UserRole.STUDENT }],
   };
 
   const profile = await prisma.user.findMany({
@@ -151,25 +151,31 @@ const getAllStudents = async (
     skip,
     take: limit,
     select: {
+      id: true,
       firstName: true,
       lastName: true,
       email: true,
-      courseEnrolls: {
+      _count:{
         select:{
-          createdAt: true,
-          phoneNumber: true,
-          subject:{
-            select:{
-              subjectName: true,
-              class:{
-                select:{
-                  className: true
-                }
-              }
-            }
-          }
-        }
-      }
+          courseEnrolls: true
+        },
+      },
+      // courseEnrolls: {
+      //   select: {
+      //     createdAt: true,
+      //     phoneNumber: true,
+      //     subject: {
+      //       select: {
+      //         subjectName: true,
+      //         class: {
+      //           select: {
+      //             className: true,
+      //           },
+      //         },
+      //       },
+      //     },
+      //   },
+      // },
     },
     orderBy:
       sortBy && sortOrder
@@ -340,8 +346,76 @@ const participation = async () => {
   return counts;
 };
 
+const studentEnrollCourse = async (userId: string) => {
+  const enroll = await prisma.courseEnroll.findMany({
+    where: {
+      userId,
+    },
+  });
+
+  return {
+    enroll,
+  };
+};
 
 
+const studentChapterQuiz = async(chapterId: string, userId: string) =>{
+
+  const chapter = await prisma.chapter.findUnique({
+    where: {
+      id: chapterId
+    }
+  })
+
+  if(!chapter){
+    throw new ApiError(httpStatus.NOT_FOUND, "chapter not found");
+  }
+
+  // const quiz = await prisma.chapter.findUnique({
+  //   where:{
+  //     id: chapterId
+  //   },
+  //   select:{
+  //     stepEight:{
+  //       select:{
+  //         stepEightQuizSessions:{
+  //           where:{
+  //             userId: userId
+  //           },
+  //           select:{
+  //             stepEightQuizAttempts:{
+                
+  //             }
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+  // })
+
+  const quiz = await prisma.stepEight.findFirst({
+    where:{
+      chapterId
+    },
+    select:{
+      questionType: true,
+      
+      stepEightQuizSessions:{
+        select: {
+          stepEightQuizAttempts:{
+
+          }
+        }
+      }
+    }
+  })
+
+
+
+  return {
+    quiz
+  }
+}
 
 export const StudentService = {
   registration,
@@ -352,4 +426,6 @@ export const StudentService = {
   studentDetails,
   overalGraph,
   participation,
+  studentEnrollCourse,
+  studentChapterQuiz
 };

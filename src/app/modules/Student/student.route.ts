@@ -16,6 +16,11 @@ const fileUpload = upload.single("file");
 
 router.get('/profile',auth(), StudentController.getStudentProfile);
 
+
+// Student Enroll course
+router.get('/enroll-course', auth(), StudentController.studentEnrollCourse);
+router.get('/chapter-quiz/:chapterId', auth(), StudentController.studentChapterQuiz)
+
 router.post("/register", StudentController.registration);
 
 router.post('/create-profile',auth(), fileUpload, validateRequest(createProfileSchema), StudentController.createUpdateProfile);

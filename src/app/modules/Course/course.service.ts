@@ -371,49 +371,90 @@ const checkingEnrollment = async (userId: string, subjectId: string) => {
 const getAllCourseReview = async (
   filters: {
     searchTerm?: string;
+    date?: string; // Format: 'dd-mm-yyyy'
   },
   options: IPaginationOptions
 ) => {
-  const { searchTerm } = filters;
+  const { searchTerm, date } = filters;
   const { page, skip, limit, sortBy, sortOrder } =
     paginationHelpers.calculatePagination(options);
 
-  const andConditions = [];
+  const andConditions: Prisma.CourseReviewWhereInput[] = [];
 
   if (searchTerm) {
     andConditions.push({
-      OR: ["title", "category"].map((field) => ({
-        [field]: {
-          contains: searchTerm,
-          mode: "insensitive",
+      OR: [
+        {
+          message: {
+            contains: searchTerm,
+            mode: "insensitive" as const,
+          },
         },
-      })),
+        {
+          user: {
+            is: {
+              firstName: {
+                contains: searchTerm,
+                mode: "insensitive" as const,
+              },
+            },
+          },
+        },
+        {
+          user: {
+            is: {
+              lastName: {
+                contains: searchTerm,
+                mode: "insensitive" as const,
+              },
+            },
+          },
+        },
+      ],
     });
   }
 
-  const whereConditions: Prisma.CourseReviewWhereInput = {
-    AND: [...andConditions],
-  };
+  if (date) {
+    const [day, month, year] = date.split("-");
+    const startDate = new Date(`${year}-${month}-${day}T00:00:00.000Z`);
+    const endDate = new Date(`${year}-${month}-${day}T23:59:59.999Z`);
 
-  const blogs = await prisma.courseReview.findMany({
-    where: {
-      ...whereConditions,
+    andConditions.push({
+      createdAt: {
+        gte: startDate,
+        lte: endDate,
+      },
+    });
+  }
+
+  const whereConditions: Prisma.CourseReviewWhereInput =
+    andConditions.length > 0 ? { AND: andConditions } : {};
+
+  const reviews = await prisma.courseReview.findMany({
+    where: whereConditions,
+    select: {
+      rating: true,
+      message: true,
+      user: {
+        select: {
+          firstName: true,
+          lastName: true,
+          email: true,
+          studentProfiles: {
+            select: {
+              profileImage: true,
+            },
+          },
+        },
+      },
     },
     skip,
     take: limit,
     orderBy:
-      sortBy && sortOrder
-        ? { [sortBy]: sortOrder }
-        : {
-            createdAt: "desc",
-          },
+      sortBy && sortOrder ? { [sortBy]: sortOrder } : { createdAt: "desc" },
   });
 
-  const total = await prisma.courseReview.count({
-    where: {
-      ...whereConditions,
-    },
-  });
+  const total = await prisma.courseReview.count({ where: whereConditions });
 
   return {
     meta: {
@@ -421,7 +462,7 @@ const getAllCourseReview = async (
       limit,
       total,
     },
-    data: blogs,
+    data: reviews,
   };
 };
 
