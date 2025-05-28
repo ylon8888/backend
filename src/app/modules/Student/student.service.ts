@@ -260,16 +260,16 @@ const overalGraph = async (period: string) => {
 
   // Calculate date based on period
   switch (period) {
-    case '7days':
+    case "7days":
       date = subDays(new Date(), 7);
       break;
-    case '30days':
+    case "30days":
       date = subDays(new Date(), 30);
       break;
-    case '90days':
+    case "90days":
       date = subDays(new Date(), 90);
       break;
-    case '365days':
+    case "365days":
       date = subDays(new Date(), 365);
       break;
     default:
@@ -313,7 +313,6 @@ const overalGraph = async (period: string) => {
 
   return overalProgress;
 };
-
 
 const participation = async (period: string) => {
   // Determine start date based on period
@@ -395,7 +394,11 @@ const participation = async (period: string) => {
     const counts: Record<string, number> = {};
     for (let i = 0; i < 12; i++) {
       // calculate month/year labels
-      const date = new Date(startDate.getFullYear(), startDate.getMonth() + i, 1);
+      const date = new Date(
+        startDate.getFullYear(),
+        startDate.getMonth() + i,
+        1
+      );
       const monthName = monthNames[date.getMonth()];
       counts[monthName] = 0;
     }
@@ -454,7 +457,6 @@ const participation = async (period: string) => {
     return counts;
   }
 };
-
 
 const studentEnrollCourse = async (userId: string) => {
   const enroll = await prisma.courseEnroll.findMany({
@@ -643,15 +645,75 @@ const studentProgress = async (userId: string) => {
     },
   });
 
-  const quizPracticed = await prisma.stepEightQuizSession.count()
+  const quizPracticed = await prisma.stepEightQuizSession.count({
+    where: {
+      userId,
+    },
+  });
 
+  const studentInfo = await prisma.user.findUnique({
+    where:{
+      id: userId
+    },
+    select:{
+      email: true,
+      firstName: true,
+      lastName: true,
+      createdAt: true,
+      studentProfiles: {
+        select: {
+          profileImage: true,
+        },
+      },
+    }
+  })
+
+  let correctQuiz = 0;
+  let wrongQuiz = 0;
+
+  for (const progress of studentProgress) {
+    for (const step of progress.chapter.stepEight) {
+      for (const session of step.stepEightQuizSessions) {
+        for (const attempt of session.stepEightQuizAttempts) {
+          if (attempt.isCorrect) {
+            correctQuiz++;
+          } else {
+            wrongQuiz++;
+          }
+        }
+      }
+    }
+  }
+
+  const total = correctQuiz + wrongQuiz;
+  const correctAnswerRate = total > 0 ? (correctQuiz / total) * 100 : 0;
+
+
+  const courseProgress = await prisma.courseEnroll.findMany({
+    where:{
+      userId
+    },
+    select:{
+      subject:{
+        select: {
+          id: true,
+          subjectName: true,
+          subjectDescription: true
+        }
+      }
+    }
+  })
 
   return {
     quizPracticed,
-    studentProgress,
+    correctQuiz,
+    wrongQuiz,
+    correctAnswerRate: parseFloat(correctAnswerRate.toFixed(2)),
+    studentInfo,
+    courseProgress
+    // studentProgress,
   };
 };
-
 
 export const StudentService = {
   registration,
