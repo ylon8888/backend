@@ -102,10 +102,18 @@ const getStudentProfile = async (userId: string) => {
 };
 
 const getStudentById = async (userId: string) => {
-  const profile = await prisma.studentProfile.findUnique({
+
+  const profile = await prisma.user.findUnique({
     where: {
-      userId,
+      id: userId,
     },
+    select:{
+      email: true,
+      firstName: true,
+      lastName: true,
+      studentProfiles:{
+      }
+    }
   });
 
   if (!profile) {
@@ -160,6 +168,12 @@ const getAllStudents = async (
           courseEnrolls: true
         },
       },
+      // studentProfiles:{
+      //   select:{
+          
+      //   }
+      // }
+      
       // courseEnrolls: {
       //   select: {
       //     createdAt: true,
@@ -359,63 +373,131 @@ const studentEnrollCourse = async (userId: string) => {
 };
 
 
-const studentChapterQuiz = async(chapterId: string, userId: string) =>{
+// const studentChapterQuiz = async(chapterId: string, userId: string) =>{
 
+//   const chapter = await prisma.chapter.findUnique({
+//     where: {
+//       id: chapterId
+//     }
+//   })
+
+//   if(!chapter){
+//     throw new ApiError(httpStatus.NOT_FOUND, "chapter not found");
+//   }
+
+//   // const quiz = await prisma.chapter.findUnique({
+//   //   where:{
+//   //     id: chapterId
+//   //   },
+//   //   select:{
+//   //     stepEight:{
+//   //       select:{
+//   //         stepEightQuizSessions:{
+//   //           where:{
+//   //             userId: userId
+//   //           },
+//   //           select:{
+//   //             stepEightQuizAttempts:{
+                
+//   //             }
+//   //           }
+//   //         }
+//   //       }
+//   //     }
+//   //   }
+//   // })
+
+//   const quiz = await prisma.stepEight.findMany({
+//     where:{
+//       chapterId
+//     },
+//     select:{
+//       questionType: true,
+//       questionDescription: true,
+//       stepEightQuizSessions:{
+//         select: {
+//           stepEightQuizAttempts:{
+//             where:{
+//               // isCorrect: false
+//             }
+//           }
+//         }
+//       }
+//     }
+//   })
+
+
+
+//   return {
+//     quiz
+//   }
+// }
+
+const studentChapterQuiz = async (chapterId: string, userId: string) => {
   const chapter = await prisma.chapter.findUnique({
-    where: {
-      id: chapterId
-    }
-  })
+    where: { id: chapterId },
+  });
 
-  if(!chapter){
+  if (!chapter) {
     throw new ApiError(httpStatus.NOT_FOUND, "chapter not found");
   }
 
-  // const quiz = await prisma.chapter.findUnique({
-  //   where:{
-  //     id: chapterId
-  //   },
-  //   select:{
-  //     stepEight:{
-  //       select:{
-  //         stepEightQuizSessions:{
-  //           where:{
-  //             userId: userId
-  //           },
-  //           select:{
-  //             stepEightQuizAttempts:{
-                
-  //             }
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-  // })
-
-  const quiz = await prisma.stepEight.findFirst({
-    where:{
+  const quiz = await prisma.stepEight.findMany({
+    where: {
       chapterId
     },
-    select:{
+    select: {
       questionType: true,
-      
-      stepEightQuizSessions:{
+      questionDescription: true,
+      stepEightQuizSessions: {
+        where: {
+          userId: userId
+        },
         select: {
-          stepEightQuizAttempts:{
-
+          id: true,
+          createdAt: true,
+          stepEightQuizAttempts: {
+            select: {
+              isCorrect: true,
+              selectedOption: true,
+              quizId: true,
+              createdAt: true
+            }
           }
         }
       }
     }
-  })
+  });
 
+  // Count right and wrong attempts per session
+  const enrichedQuiz = quiz.map(q => {
+    const sessions = q.stepEightQuizSessions.map(session => {
+      const totalAttempts = session.stepEightQuizAttempts.length;
+      const correctAttempts = session.stepEightQuizAttempts.filter(a => a.isCorrect).length;
+      const wrongAttempts = totalAttempts - correctAttempts;
 
+      return {
+        sessionId: session.id,
+        attemptedAt: session.createdAt,
+        totalAttempts,
+        correctAttempts,
+        wrongAttempts,
+        attempts: session.stepEightQuizAttempts,
+      };
+    });
+
+    return {
+      questionType: q.questionType,
+      questionDescription: q.questionDescription,
+      sessions,
+    };
+  });
 
   return {
-    quiz
-  }
-}
+    quiz: enrichedQuiz
+  };
+};
+
 
 export const StudentService = {
   registration,
