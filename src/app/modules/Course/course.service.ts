@@ -318,14 +318,7 @@ const enrollVerification = async (data: {
       },
     });
 
-    const existingStep = await prisma.userStepProgress.findFirst({
-      where: {
-        userId: user.id,
-        chapterId: firstChapter.id,
-      },
-    });
-
-    if (existingProgress && existingStep) {
+    if (existingProgress) {
       return;
     }
 
