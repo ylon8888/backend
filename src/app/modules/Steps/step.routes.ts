@@ -25,6 +25,16 @@ router.post('/seven/:chapterId', fileUpload, StepController.createStepSeven);
 router.post('/eight/:chapterId', StepController.createStepEight);
 router.post('/nine/:chapterId', fileUpload, StepController.createStepNine);
 
+// Get all steps
+router.get('/one/:stepId', StepController.getStepOne);
+router.get('/two/:stepId', StepController.getStepTwo);
+router.get('/three/:stepId', StepController.getStepThree);
+router.get('/four/:stepId', StepController.getStepFour);
+router.get('/five/:stepId', StepController.getStepFive);
+router.get('/six/:stepId', StepController.getStepSix);
+router.get('/seven/:stepId', StepController.getStepSeven);
+router.get('/eight/:stepId', StepController.getStepEight);
+
 // Quiz
 router.get('/get-quizes/:chapterId', StepController.getQuizes);
 router.get('/get-student-quizes/:chapterId', StepController.getStudentQuizes);

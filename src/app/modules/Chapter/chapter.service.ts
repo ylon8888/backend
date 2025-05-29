@@ -111,12 +111,12 @@ const getChapterWiseSteps = async (
   });
 
   return {
-    meta: {
-      page,
-      limit,
-      total,
-    },
-    data: chapters,
+    // meta: {
+    //   page,
+    //   limit,
+    //   total,
+    // },
+   chapters
   };
 };
 

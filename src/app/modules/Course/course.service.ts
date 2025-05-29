@@ -585,12 +585,15 @@ const chapterEnrollStudent = async (
     take: limit,
     select: {
       id: true,
+      sLNumber: true,
+      chapterName: true,
       subject: {
         select: {
           createdAt: true,
           subjectName: true,
           courseEnrolls: {
             select: {
+              createdAt: true,
               name: true,
               phoneNumber: true,
               user: {

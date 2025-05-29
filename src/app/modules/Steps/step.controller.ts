@@ -346,6 +346,110 @@ export const submitQuizAnswers = catchAsync(
 );
 
 
+const getStepOne = catchAsync(async (req: Request, res: Response) => {
+  const stepId = req.params.stepId;  
+
+  const step = await StepService.getStepOne(stepId); 
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "retrive stem one successfully",
+    data: step,
+  });
+});
+
+
+const getStepTwo = catchAsync(async (req: Request, res: Response) => {
+  const stepId = req.params.stepId;  
+
+  const step = await StepService.getStepTwo(stepId); 
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "retrive stem two successfully",
+    data: step,
+  });
+});
+
+const getStepThree = catchAsync(async (req: Request, res: Response) => {
+  const stepId = req.params.stepId;
+
+  const step = await StepService.getStepThree(stepId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "retrieve step three successfully",
+    data: step,
+  });
+});
+
+const getStepFour = catchAsync(async (req: Request, res: Response) => {
+  const stepId = req.params.stepId;
+
+  const step = await StepService.getStepFour(stepId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "retrieve step four successfully",
+    data: step,
+  });
+});
+
+const getStepFive = catchAsync(async (req: Request, res: Response) => {
+  const stepId = req.params.stepId;
+
+  const step = await StepService.getStepFive(stepId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "retrieve step five successfully",
+    data: step,
+  });
+});
+
+const getStepSix = catchAsync(async (req: Request, res: Response) => {
+  const stepId = req.params.stepId;
+
+  const step = await StepService.getStepSix(stepId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "retrieve step six successfully",
+    data: step,
+  });
+});
+
+const getStepSeven = catchAsync(async (req: Request, res: Response) => {
+  const stepId = req.params.stepId;
+
+  const step = await StepService.getStepSeven(stepId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "retrieve step seven successfully",
+    data: step,
+  });
+});
+
+const getStepEight = catchAsync(async (req: Request, res: Response) => {
+  const stepId = req.params.stepId;
+
+  const step = await StepService.getStepEight(stepId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "retrieve step eight successfully",
+    data: step,
+  });
+});
 
 
 export const StepController = {
@@ -363,5 +467,14 @@ export const StepController = {
   uploadQuiz,
   createStepNine,
   getQuizQustion,
-  submitQuizAnswers
+  submitQuizAnswers,
+  ////
+  getStepOne,
+  getStepTwo,
+  getStepThree,
+  getStepFour,
+  getStepFive,
+  getStepSix,
+  getStepSeven,
+  getStepEight,
 };
