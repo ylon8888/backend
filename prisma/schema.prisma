@@ -472,9 +472,9 @@ model UserChapterProgress {
 model UserStepProgress {
   id String @id @default(cuid())
 
+  stepSerial            String // ex: 1,2,3
   userChapterProgressId String
   stepId                String // ex: stepOneId
-  stepType              StepType // ex: STEP_ONE
   isCompleted           Boolean  @default(false)
 
   userChapterProgress UserChapterProgress @relation(fields: [userChapterProgressId], references: [id], onDelete: Cascade)
@@ -486,7 +486,7 @@ model UserStepProgress {
   Chapter   Chapter? @relation(fields: [chapterId], references: [id])
   chapterId String?
 
-  @@unique([stepId, stepType])
+  @@unique([stepId, userChapterProgressId, stepSerial]) // Ensures each step in a chapter for a user is unique
   @@map("userStepProgress")
 }
 

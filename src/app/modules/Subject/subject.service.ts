@@ -48,9 +48,19 @@ const classWiseSubject = async (classId: string) => {
     },
   });
 
-  
+  const enrollStudent = await prisma.courseEnroll.count({
+    where: {
+      subjectId: classId,
+    },
+  });
 
-  return { subject };
+  const totalChapter = await prisma.chapter.count({
+    where: {
+      subjectId: classId,
+    },
+  });
+
+  return { subject, enrollStudent, totalChapter, lesson: totalChapter * 9 };
 };
 
 const updatevisibility = async (subjectId: string, isVisible: boolean) => {
@@ -90,17 +100,17 @@ const subjectWiseChapter = async (
   // Check if the subject exists
   const subject = await prisma.subject.findUnique({
     where: { id: subjectId },
-    select:{
+    select: {
       id: true,
       subjectName: true,
       subjectDescription: true,
       banner: true,
-      class:{
-        select:{
-          className: true
-        }
-      }
-    }
+      class: {
+        select: {
+          className: true,
+        },
+      },
+    },
   });
 
   if (!subject) {
@@ -129,12 +139,12 @@ const subjectWiseChapter = async (
   // Get filtered chapters
   const chapters = await prisma.chapter.findMany({
     where: whereConditions,
-    select:{
+    select: {
       id: true,
       sLNumber: true,
       chapterName: true,
       chapterDescription: true,
-      thumbnail: true
+      thumbnail: true,
     },
     skip,
     take: limit,
@@ -162,5 +172,5 @@ export const SubjectService = {
   updatevisibility,
   getAllSubjects,
   subjectWiseChapter,
-  classWiseSubject
+  classWiseSubject,
 };

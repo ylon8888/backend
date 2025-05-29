@@ -18,6 +18,9 @@ const createProgress = async (progressData: ICourseProgress) => {
       userId: progressData.userId,
       chapterId: progressData.chapterId,
     },
+    orderBy: {
+      createdAt: "desc",
+    },
   });
 
   // if Existing progress
@@ -26,24 +29,44 @@ const createProgress = async (progressData: ICourseProgress) => {
 
     const existingStep = await prisma.userStepProgress.findFirst({
       where: {
-
+        userChapterProgressId: existingProgress.id,
         stepId: progressData.stepId,
-        stepType: progressData.stepType as StepType,
+      },
+      orderBy: {
+        createdAt: "desc",
       },
     });
 
     if (existingStep) {
+      console.log("existing step number", existingStep.stepSerial);
       return {
         existingProgress,
         existingStep,
       };
     }
 
+    // Now check is previous step is completed or not
+    const previousStep = await prisma.userStepProgress.findFirst({
+      where: {
+        userChapterProgressId: existingProgress.id,
+        stepSerial: {
+          lt: progressData.stepSerial,
+        },
+      },
+      orderBy: {
+        stepSerial: "desc",
+      },
+    });
+
+    const stepNumber = previousStep
+      ? (parseInt(previousStep.stepSerial) + 1).toString()
+      : "1";
+
     const createStep = await prisma.userStepProgress.create({
       data: {
+        stepSerial: stepNumber,
         userChapterProgressId: existingProgress.id,
         stepId: progressData.stepId,
-        stepType: progressData.stepType as StepType,
         isCompleted: true,
       },
     });
@@ -54,26 +77,51 @@ const createProgress = async (progressData: ICourseProgress) => {
     };
   }
 
-  const createChapter = await prisma.userChapterProgress.create({
-    data: {
-      userId: progressData.userId,
-      chapterId: progressData.chapterId,
-      isCompleted: true,
-    },
-  });
+  //  if not existing progress
+  const step = await prisma.$transaction(async (TX) => {
+    const createChapterProgress = await TX.userChapterProgress.create({
+      data: {
+        userId: progressData.userId,
+        chapterId: progressData.chapterId,
+        isCompleted: true,
+      },
+    });
 
-  const createStep = await prisma.userStepProgress.create({
-    data: {
-      userChapterProgressId: createChapter.id,
-      stepId: progressData.stepId,
-      stepType: progressData.stepType as StepType,
-      isCompleted: true,
-    },
+    // Now check is previous step is completed or not
+    const previousStep = await prisma.userStepProgress.findFirst({
+      where: {
+        userChapterProgressId: createChapterProgress.id,
+        stepSerial: {
+          lt: progressData.stepSerial,
+        },
+      },
+      orderBy: {
+        stepSerial: "desc",
+      },
+    });
+
+    const stepNumber = previousStep
+      ? (parseInt(previousStep.stepSerial) + 1).toString()
+      : "1";
+
+    // Create step progress
+    const createStep = await TX.userStepProgress.create({
+      data: {
+        stepSerial: stepNumber,
+        userChapterProgressId: createChapterProgress.id,
+        stepId: progressData.stepId,
+        isCompleted: true,
+      },
+    });
+
+    return {
+      createChapterProgress,
+      createStep,
+    };
   });
 
   return {
-    createChapter,
-    createStep,
+    step,
   };
 };
 
@@ -83,6 +131,9 @@ const createNextProgress = async (progressData: any) => {
       userId: progressData.userId,
       chapterId: progressData.chapterId,
     },
+    orderBy:{
+      createdAt: "desc"
+    }
   });
 
   if (!existingProgress) {
@@ -100,26 +151,25 @@ const createNextProgress = async (progressData: any) => {
 
   const chapter = await prisma.chapter.findUnique({
     where: {
-      id: progressData.chapterId
-    }
-  })
+      id: progressData.chapterId,
+    },
+  });
 
   if (!chapter) {
     throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
   }
 
-   const nextChapter = await prisma.chapter.findFirst({
-  where: {
-    subjectId: chapter.subjectId,
-    sLNumber: {
-      gt: chapter.sLNumber,
+  const nextChapter = await prisma.chapter.findFirst({
+    where: {
+      subjectId: chapter.subjectId,
+      sLNumber: {
+        gt: chapter.sLNumber,
+      },
     },
-  },
-  orderBy: {
-    sLNumber: 'asc',
-  },
-});
-
+    orderBy: {
+      sLNumber: "asc",
+    },
+  });
 
   if (!nextChapter) {
     throw new ApiError(httpStatus.NOT_FOUND, "Next chapter not found");
@@ -133,10 +183,8 @@ const createNextProgress = async (progressData: any) => {
   });
 
   return {
-    nextProgress
-  }
-
-
+    nextProgress,
+  };
 };
 
 export const CourseProgressService = {

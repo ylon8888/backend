@@ -28,7 +28,6 @@ router.get('/course-review', CourseController.getAllCourseReview);  //  <--- Adm
 router.get('/course-review/:subjectId', CourseController.getCourseReview);
 
 
-
 // Course Entroll
 router.post('/course-enroll/:subjectId', auth(), CourseController.createCourseEnroll)
 router.patch('/verify-enrollment', auth(), CourseController.verifyEnrollment)

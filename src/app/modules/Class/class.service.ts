@@ -77,13 +77,28 @@ const getAllClass = async (
     },
   });
 
+const enhancedClasses = classes.map((cls) => {
+  const totalSubjects = cls.subjects.length;
+
+  const totalChapters = cls.subjects.reduce((sum, subject) => {
+    return sum + subject._count.chapters;
+  }, 0);
+
+  return {
+    ...cls,
+    totalSubjects,
+    totalChapters,
+    lessons: totalChapters * 9,
+  };
+});
+
   return {
     meta: {
       page,
       limit,
       total,
     },
-    data: classes,
+    data: enhancedClasses,
   };
 };
 

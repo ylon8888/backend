@@ -4,12 +4,12 @@ export interface ICourseProgress {
   userId: string;
   chapterId: string;
   stepId: string;
-  stepType: StepType;
+  stepSerial: string;
 }
 
 export interface IStepProgress {
   userId: string;
   chapterId: string;
   stepId: string;
-  stepType: StepType;
+  stepSerial: string;
 }
