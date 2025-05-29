@@ -7,9 +7,8 @@ export interface ICourseProgress {
   stepSerial: string;
 }
 
-export interface IStepProgress {
+export interface INextStepProgress {
   userId: string;
   chapterId: string;
-  stepId: string;
   stepSerial: string;
 }
