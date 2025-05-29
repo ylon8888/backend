@@ -22,7 +22,6 @@ const createProgress = async (progressData: ICourseProgress) => {
 
   // if Existing progress
   if (existingProgress) {
-
     const existingStep = await prisma.userStepProgress.findFirst({
       where: {
         userChapterProgressId: existingProgress.id,
@@ -47,13 +46,37 @@ const createProgress = async (progressData: ICourseProgress) => {
       },
     });
 
-    const stepNumber = previousStep
-      ? (parseInt(previousStep.stepSerial) + 1).toString()
-      : "1";
+    if (previousStep) {
+      const prevSerial = parseInt(previousStep.stepSerial);
+      const currentSerial = parseInt(progressData.stepSerial);
+
+      if (currentSerial - prevSerial !== 1) {
+        throw new Error(
+          "You must complete the previous step before accessing this one."
+        );
+      }
+      const stepNumber = previousStep
+        ? (parseInt(previousStep.stepSerial) + 1).toString()
+        : "1";
+
+      const createStep = await prisma.userStepProgress.create({
+        data: {
+          stepSerial: stepNumber,
+          userChapterProgressId: existingProgress.id,
+          stepId: progressData.stepId,
+          isCompleted: true,
+        },
+      });
+
+      return {
+        createStep
+      }
+    }
+
 
     const createStep = await prisma.userStepProgress.create({
       data: {
-        stepSerial: stepNumber,
+        stepSerial: "1",
         userChapterProgressId: existingProgress.id,
         stepId: progressData.stepId,
         isCompleted: true,
