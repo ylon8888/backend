@@ -21,10 +21,10 @@ enum EnrollStatus {
 model User {
   id String @id @default(cuid())
 
-  firstName   String
-  lastName    String
-  email       String  @unique
-  password    String
+  firstName String
+  lastName  String
+  email     String @unique
+  password  String
 
   role UserRole @default(STUDENT)
 
@@ -461,8 +461,9 @@ model UserChapterProgress {
 
   isCompleted Boolean @default(false)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  userStepProgress UserStepProgress[]
 
   @@unique([userId, chapterId]) // Ensures each user-chapter pair is unique
   @@map("userChapterProgress")
@@ -471,19 +472,21 @@ model UserChapterProgress {
 model UserStepProgress {
   id String @id @default(cuid())
 
-  userId      String
-  chapterId   String
-  stepId      String // ex: stepOneId
-  stepType    StepType // ex: STEP_ONE
-  isCompleted Boolean  @default(false)
+  userChapterProgressId String
+  stepId                String // ex: stepOneId
+  stepType              StepType // ex: STEP_ONE
+  isCompleted           Boolean  @default(false)
 
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  userChapterProgress UserChapterProgress @relation(fields: [userChapterProgressId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    String?
+  Chapter   Chapter? @relation(fields: [chapterId], references: [id])
+  chapterId String?
 
-  @@unique([userId, chapterId, stepId, stepType])
+  @@unique([stepId, stepType])
   @@map("userStepProgress")
 }
 

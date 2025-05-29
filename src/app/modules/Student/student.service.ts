@@ -315,27 +315,19 @@ const overalGraph = async (period: string) => {
 };
 
 const participation = async (period: string) => {
-  // Determine start date based on period
   let startDate: Date;
   const now = new Date();
 
   if (period === "Monthly") {
-    // last 7 days
-    startDate = new Date();
-    startDate.setDate(now.getDate() - 6);
-  } else if (period === "Yearly") {
-    // last 12 months, start from beginning of month 11 months ago
     startDate = new Date(now.getFullYear(), now.getMonth() - 11, 1);
+  } else if (period === "Yearly") {
+    startDate = new Date(now.getFullYear() - 4, 0, 1);
   } else if (period === "Quarterly") {
-    // last 4 quarters (each 3 months), start from beginning of quarter 3 quarters ago
-    const currentQuarter = Math.floor(now.getMonth() / 3);
-    const startQuarterMonth = (currentQuarter - 3) * 3;
-    startDate = new Date(now.getFullYear(), startQuarterMonth, 1);
+    startDate = new Date(now.getFullYear(), now.getMonth() - 11, 1);
   } else {
     throw new Error("Invalid period");
   }
 
-  // Fetch all attempts from startDate
   const attempts = await prisma.stepEightQuizAttempt.findMany({
     where: {
       createdAt: {
@@ -348,106 +340,62 @@ const participation = async (period: string) => {
   });
 
   if (period === "Monthly") {
-    // Aggregate by day name for last 7 days
-    const dayNames = [
-      "Sunday",
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-    ] as const;
-
-    // Initialize counts with 0
-    const counts: Record<string, number> = {};
-    // We want counts for the last 7 days specifically by day name + date (to distinguish repeating days)
-    // But you requested just day names, so will sum all attempts by day name in the last 7 days
-
-    dayNames.forEach((day) => (counts[day] = 0));
-
-    attempts.forEach(({ createdAt }) => {
-      const dayIndex = new Date(createdAt).getDay();
-      const dayName = dayNames[dayIndex];
-      counts[dayName]++;
-    });
-
-    return counts;
-  } else if (period === "Yearly") {
-    // Aggregate by month names for last 12 months
     const monthNames = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December",
     ];
 
-    // Initialize counts for last 12 months only (from startDate)
     const counts: Record<string, number> = {};
     for (let i = 0; i < 12; i++) {
-      // calculate month/year labels
-      const date = new Date(
-        startDate.getFullYear(),
-        startDate.getMonth() + i,
-        1
-      );
-      const monthName = monthNames[date.getMonth()];
-      counts[monthName] = 0;
-    }
-
-    attempts.forEach(({ createdAt }) => {
-      const date = new Date(createdAt);
-      const monthName = monthNames[date.getMonth()];
-      // count only if in range (safety)
-      if (date >= startDate) {
-        counts[monthName] = (counts[monthName] || 0) + 1;
-      }
-    });
-
-    return counts;
-  } else if (period === "Quarterly") {
-    // Aggregate by quarters for last 4 quarters
-
-    // Define quarter labels for the last 4 quarters
-    // For example: "Jan-Apr", "May-Aug", "Sep-Dec", "Jan-Apr" (rolling)
-    // But months don't align exactly to quarters, quarters are usually 3 months: Q1 (Jan-Mar), Q2 (Apr-Jun), etc.
-    // You wrote jan-april, may-august, etc. Let's use 4-month quarters as example:
-    // Q1: Jan-Apr, Q2: May-Aug, Q3: Sep-Dec
-
-    // Let's define 4 quarters (each 4 months) backward from current date
-    // We'll do 3 months quarters (standard) instead:
-    // Q1: Jan-Mar, Q2: Apr-Jun, Q3: Jul-Sep, Q4: Oct-Dec
-    // Let's build last 4 quarters labels with year, e.g. "Q1 2024"
-
-    const quartersLabels: string[] = [];
-    const counts: Record<string, number> = {};
-
-    // Helper to get quarter number from month
-    function getQuarter(month: number) {
-      return Math.floor(month / 3) + 1;
-    }
-
-    // Build last 4 quarters labels with year
-    for (let i = 3; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i * 3, 1);
-      const quarter = getQuarter(d.getMonth());
-      const label = `Q${quarter} ${d.getFullYear()}`;
-      quartersLabels.push(label);
+      const date = new Date(startDate.getFullYear(), startDate.getMonth() + i, 1);
+      const label = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
       counts[label] = 0;
     }
 
     attempts.forEach(({ createdAt }) => {
-      const d = new Date(createdAt);
-      const quarter = getQuarter(d.getMonth());
-      const label = `Q${quarter} ${d.getFullYear()}`;
+      const date = new Date(createdAt);
+      const label = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
+      if (label in counts) {
+        counts[label]++;
+      }
+    });
+
+    return counts;
+
+  } else if (period === "Yearly") {
+    const counts: Record<string, number> = {};
+    for (let i = 0; i < 5; i++) {
+      const year = startDate.getFullYear() + i;
+      counts[`${year}`] = 0;
+    }
+
+    attempts.forEach(({ createdAt }) => {
+      const year = new Date(createdAt).getFullYear();
+      if (counts[year]) {
+        counts[year]++;
+      } else if (year >= startDate.getFullYear()) {
+        counts[year] = 1;
+      }
+    });
+
+    return counts;
+
+  } else if (period === "Quarterly") {
+    const counts: Record<string, number> = {
+      "Q1": 0,
+      "Q2": 0,
+      "Q3": 0,
+      "Q4": 0,
+    };
+
+    attempts.forEach(({ createdAt }) => {
+      const month = new Date(createdAt).getMonth(); // 0-11
+
+      let label = "";
+      if (month >= 0 && month <= 2) label = "Q1";
+      else if (month >= 3 && month <= 5) label = "Q2";
+      else if (month >= 6 && month <= 8) label = "Q3";
+      else if (month >= 9 && month <= 11) label = "Q4";
 
       if (label in counts) {
         counts[label]++;
@@ -457,6 +405,8 @@ const participation = async (period: string) => {
     return counts;
   }
 };
+
+
 
 const studentEnrollCourse = async (userId: string) => {
   const enroll = await prisma.courseEnroll.findMany({

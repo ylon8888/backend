@@ -26,8 +26,7 @@ const createProgress = async (progressData: ICourseProgress) => {
 
     const existingStep = await prisma.userStepProgress.findFirst({
       where: {
-        userId: progressData.userId,
-        chapterId: progressData.chapterId,
+
         stepId: progressData.stepId,
         stepType: progressData.stepType as StepType,
       },
@@ -42,8 +41,7 @@ const createProgress = async (progressData: ICourseProgress) => {
 
     const createStep = await prisma.userStepProgress.create({
       data: {
-        userId: progressData.userId,
-        chapterId: progressData.chapterId,
+        userChapterProgressId: existingProgress.id,
         stepId: progressData.stepId,
         stepType: progressData.stepType as StepType,
         isCompleted: true,
@@ -66,8 +64,7 @@ const createProgress = async (progressData: ICourseProgress) => {
 
   const createStep = await prisma.userStepProgress.create({
     data: {
-      userId: progressData.userId,
-      chapterId: progressData.chapterId,
+      userChapterProgressId: createChapter.id,
       stepId: progressData.stepId,
       stepType: progressData.stepType as StepType,
       isCompleted: true,
