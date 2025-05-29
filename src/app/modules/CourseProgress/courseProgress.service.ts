@@ -22,7 +22,6 @@ const createProgress = async (progressData: ICourseProgress) => {
 
   // if Existing progress
   if (existingProgress) {
-    console.log("existing Chapter");
 
     const existingStep = await prisma.userStepProgress.findFirst({
       where: {
@@ -32,7 +31,6 @@ const createProgress = async (progressData: ICourseProgress) => {
     });
 
     if (existingStep) {
-      console.log("existing step number", existingStep.stepSerial);
       return {
         existingProgress,
         existingStep,
@@ -43,9 +41,9 @@ const createProgress = async (progressData: ICourseProgress) => {
     const previousStep = await prisma.userStepProgress.findFirst({
       where: {
         userChapterProgressId: existingProgress.id,
-        stepSerial: {
-          lt: progressData.stepSerial,
-        },
+      },
+      orderBy: {
+        stepSerial: "desc",
       },
     });
 
@@ -67,50 +65,6 @@ const createProgress = async (progressData: ICourseProgress) => {
       createStep,
     };
   }
-
-  //  if not existing progress
-  // const step = await prisma.$transaction(async (TX) => {
-  //   const createChapterProgress = await TX.userChapterProgress.create({
-  //     data: {
-  //       userId: progressData.userId,
-  //       chapterId: progressData.chapterId,
-  //       isCompleted: true,
-  //     },
-  //   });
-
-  //   // Now check is previous step is completed or not
-  //   const previousStep = await prisma.userStepProgress.findFirst({
-  //     where: {
-  //       userChapterProgressId: createChapterProgress.id,
-  //       stepSerial: {
-  //         lt: progressData.stepSerial,
-  //       },
-  //     },
-  //     orderBy: {
-  //       stepSerial: "desc",
-  //     },
-  //   });
-
-  //   const stepNumber = previousStep
-  //     ? (parseInt(previousStep.stepSerial) + 1).toString()
-  //     : "1";
-
-  //   // Create step progress
-  //   const createStep = await TX.userStepProgress.create({
-  //     data: {
-  //       stepSerial: stepNumber,
-  //       userChapterProgressId: createChapterProgress.id,
-  //       stepId: progressData.stepId,
-  //       isCompleted: true,
-  //     },
-  //   });
-
-  //   return {
-  //     createChapterProgress,
-  //     createStep,
-  //   };
-  // });
-
   return {
     existingProgress,
   };
@@ -167,8 +121,8 @@ const createNextProgress = async (progressData: INextStepProgress) => {
     });
 
     return {
-      createChapterProgress
-    }
+      createChapterProgress,
+    };
   }
 
   return {
