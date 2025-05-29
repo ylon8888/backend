@@ -153,7 +153,31 @@ const createNextProgress = async (progressData: INextStepProgress) => {
   };
 };
 
+const studentProgress = async(userId: string,stepId: string) => {
+   const student = await prisma.user.findUnique({
+    where:{
+      id: userId
+    }
+   })
+
+   if(!student){
+    throw new ApiError(httpStatus.NOT_FOUND, "Student not found");
+   }
+
+   const visible = await prisma.userStepProgress.findUnique({
+    where:{
+      id: stepId
+    },
+    select:{
+      isCompleted: true
+    }
+   })
+
+   return visible;
+}
+
 export const CourseProgressService = {
   createProgress,
   createNextProgress,
+  studentProgress
 };

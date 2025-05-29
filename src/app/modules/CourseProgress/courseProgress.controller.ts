@@ -45,7 +45,24 @@ const createNextProgress = catchAsync(async (req: Request, res: Response) => {
 });
 
 
+const studentProgress  =  catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const { stepId} = req.query;
+
+
+  const nextProgress = await CourseProgressService.studentProgress(userId, stepId as string);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Rettive student successfully",
+    data: nextProgress,
+  });
+});
+
+
 export const CourseProgresscontroller = {
   createProgress,
-  createNextProgress
+  createNextProgress,
+  studentProgress
 }
