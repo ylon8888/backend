@@ -158,9 +158,9 @@ const chapterEnrollStudent = catchAsync(async (req: Request, res: Response) => {
 });
 
 const capterQuizDetails = catchAsync(async (req: Request, res: Response) => {
-  const {userId, chapterId} = req.body;
+  const {studentId, chapterId} = req.body;
 
-  const result = await CourseService.capterQuizDetails(userId, chapterId);
+  const result = await CourseService.capterQuizDetails(studentId, chapterId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

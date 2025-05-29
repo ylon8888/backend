@@ -593,6 +593,7 @@ const chapterEnrollStudent = async (
           subjectName: true,
           courseEnrolls: {
             select: {
+              id: true,
               createdAt: true,
               name: true,
               phoneNumber: true,
