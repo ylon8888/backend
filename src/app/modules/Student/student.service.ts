@@ -639,20 +639,20 @@ const studentProgress = async (userId: string) => {
   const correctAnswerRate = total > 0 ? (correctQuiz / total) * 100 : 0;
 
 
-  const courseProgress = await prisma.courseEnroll.findMany({
-    where:{
-      userId
-    },
-    select:{
-      subject:{
-        select: {
-          id: true,
-          subjectName: true,
-          subjectDescription: true
-        }
-      }
-    }
-  })
+  // const courseProgress = await prisma.courseEnroll.findMany({
+  //   where:{
+  //     userId
+  //   },
+  //   select:{
+  //     subject:{
+  //       select: {
+  //         id: true,
+  //         subjectName: true,
+  //         subjectDescription: true
+  //       }
+  //     }
+  //   }
+  // })
 
   return {
     quizPracticed,
@@ -660,10 +660,87 @@ const studentProgress = async (userId: string) => {
     wrongQuiz,
     correctAnswerRate: parseFloat(correctAnswerRate.toFixed(2)),
     studentInfo,
-    courseProgress
+    // courseProgress
     // studentProgress,
   };
 };
+
+
+const subjectCourseProgress = async (userId: string) => {
+  const enrollments = await prisma.courseEnroll.findMany({
+    where: { userId },
+    select: {
+      subject: {
+        select: {
+          id: true,
+          subjectName: true,
+          subjectDescription: true,
+          chapters: {
+            select: {
+              id: true,
+              stepOne: { select: { id: true } },
+              stepTwo: { select: { id: true } },
+              stepThree: { select: { id: true } },
+              stepFour: { select: { id: true } },
+              stepFive: { select: { id: true } },
+              stepSix: { select: { id: true } },
+              stepSeven: { select: { id: true } },
+              stepEight: { select: { id: true } }, 
+              stepNine: { select: { id: true } },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const result = [];
+
+  for (const enrollment of enrollments) {
+    const subject = enrollment.subject;
+    let totalSteps = 0;
+
+    // Count steps for each chapter
+    for (const chapter of subject.chapters) {
+      if (chapter.stepOne) totalSteps += 1;
+      if (chapter.stepTwo) totalSteps += 1;
+      if (chapter.stepThree) totalSteps += 1;
+      if (chapter.stepFour) totalSteps += 1;
+      if (chapter.stepFive) totalSteps += 1;
+      if (chapter.stepSix) totalSteps += 1;
+      if (chapter.stepSeven) totalSteps += 1;
+      if (chapter.stepEight) totalSteps += chapter.stepEight.length; // array
+      if (chapter.stepNine) totalSteps += 1;
+    }
+
+    // 2. Count user's completed steps for this subject using correct relation field 'Chapter'
+    const completedSteps = await prisma.userStepProgress.count({
+      where: {
+        userId,
+        isCompleted: true,
+        Chapter: {
+          subjectId: subject.id,
+        },
+      },
+    });
+
+    const progressPercentage =
+      totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+
+    result.push({
+      subjectId: subject.id,
+      subjectName: subject.subjectName,
+      subjectDescription: subject.subjectDescription,
+      totalSteps,
+      completedSteps,
+      progress: progressPercentage,
+    });
+  }
+
+  return result;
+};
+
+
 
 export const StudentService = {
   registration,
@@ -677,4 +754,5 @@ export const StudentService = {
   studentEnrollCourse,
   studentChapterQuizAttempt,
   studentProgress,
+  subjectCourseProgress
 };
