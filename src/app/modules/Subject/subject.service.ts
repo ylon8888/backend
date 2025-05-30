@@ -42,25 +42,63 @@ const getAllSubjects = async () => {
 };
 
 const classWiseSubject = async (classId: string) => {
-  const subject = await prisma.subject.findMany({
+  const subjects = await prisma.subject.findMany({
     where: {
-      classId: classId,
+      classId,
+    },
+    include: {
+      _count: {
+        select: {
+          chapters: true,
+          courseEnrolls: true,
+        },
+      },
+      chapters: {
+        select: {
+          stepOne: { select: { id: true } },
+          stepTwo: { select: { id: true } },
+          stepThree: { select: { id: true } },
+          stepFour: { select: { id: true } },
+          stepFive: { select: { id: true } },
+          stepSix: { select: { id: true } },
+          stepSeven: { select: { id: true } },
+          stepEight: { select: { id: true } },
+          stepNine: { select: { id: true } },
+        },
+      },
     },
   });
 
-  const enrollStudent = await prisma.courseEnroll.count({
-    where: {
-      subjectId: classId,
-    },
+  const cleanedSubjects = subjects.map((subject) => {
+    let totalLessons = 0;
+
+    for (const chapter of subject.chapters) {
+      if (chapter.stepOne) totalLessons++;
+      if (chapter.stepTwo) totalLessons++;
+      if (chapter.stepThree) totalLessons++;
+      if (chapter.stepFour) totalLessons++;
+      if (chapter.stepFive) totalLessons++;
+      if (chapter.stepSix) totalLessons++;
+      if (chapter.stepSeven) totalLessons++;
+      if (chapter.stepNine) totalLessons++;
+      if (chapter.stepEight && chapter.stepEight.length > 0) {
+        totalLessons += chapter.stepEight.length;
+      }
+    }
+
+    return {
+      id: subject.id,
+      classId: subject.classId,
+      subjectName: subject.subjectName,
+      subjectDescription: subject.subjectDescription,
+      banner: subject.banner,
+      isVisible: subject.isVisible,
+      _count: subject._count,
+      totalLessons,
+    };
   });
 
-  const totalChapter = await prisma.chapter.count({
-    where: {
-      subjectId: classId,
-    },
-  });
-
-  return { subject, enrollStudent, totalChapter, lesson: totalChapter * 9 };
+  return { subject: cleanedSubjects };
 };
 
 const updatevisibility = async (subjectId: string, isVisible: boolean) => {

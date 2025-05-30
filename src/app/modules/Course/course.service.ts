@@ -679,6 +679,7 @@ const capterQuizDetails = async (userId: string, chapterId: string) => {
   }
 
   const courseEnroll = await prisma.$transaction(async (TX) => {
+    const now = new Date();
     const wrongAttemptsCount = await TX.stepEightQuizAttempt.count({
       where: {
         userId: userId,
@@ -749,12 +750,50 @@ const capterQuizDetails = async (userId: string, chapterId: string) => {
       };
     });
 
+    const performanceData: { name: string; correct: number; wrong: number }[] =
+      [];
+
+    for (let i = 0; i < 4; i++) {
+      const startDate = new Date(now);
+      startDate.setDate(startDate.getDate() - 7 * (i + 1));
+      const endDate = new Date(now);
+      endDate.setDate(now.getDate() - 7 * i);
+
+      const weeklyAttempts = await TX.stepEightQuizAttempt.findMany({
+        where: {
+          userId,
+          createdAt: {
+            gte: startDate,
+            lt: endDate,
+          },
+          stepEightQuiz: {
+            stepEight: {
+              chapterId,
+            },
+          },
+        },
+        include: {
+          stepEightQuiz: true,
+        },
+      });
+
+      const correct = weeklyAttempts.filter((a) => a.isCorrect).length;
+      const wrong = weeklyAttempts.filter((a) => !a.isCorrect).length;
+
+      performanceData.unshift({
+        name: `Week ${4 - i}`,
+        correct,
+        wrong,
+      });
+    }
+
     return {
       wrongQuiz: wrongAttemptsCount,
       correctQuiz: correctAttemptsCount,
       quizPracticed,
       correctRate,
       resultQuizWithCounts,
+      performanceData,
     };
   });
 
