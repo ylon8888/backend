@@ -192,6 +192,20 @@ const studentProgress = catchAsync(async (req: Request, res: Response) => {
 }
 )
 
+const subjectCourseProgress = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user.id;
+
+  const result = await StudentService.subjectCourseProgress(userId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Course progress successfully",
+    data: result,
+  });
+}
+)
+
 
 export const StudentController = {
   registration,
@@ -204,5 +218,6 @@ export const StudentController = {
   participation,
   studentEnrollCourse,
   studentChapterQuizAttempt,
-  studentProgress
+  studentProgress,
+  subjectCourseProgress
 };
