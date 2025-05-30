@@ -89,7 +89,6 @@ model Blog {
   excerpt     String
   description String
   image       String
-  category    String
   isDeleted   Boolean @default(false)
 
   createdAt DateTime @default(now())
