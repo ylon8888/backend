@@ -193,7 +193,9 @@ model StepTwo {
   chapterId String  @unique
   chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
+  
   podcastName  String
+  thumbnail    String
   podcastVideo String[]
 
   type StepType @default(STEP_TWO)

@@ -9,9 +9,13 @@ const router = express.Router();
 const upload = multer({ storage: createStorage("step") });
 const fileUpload = upload.single("file");
 
+
+
 const uploadPodcast = upload.fields([
-  { name: "poadcast", maxCount: 6 },
+  { name: "poadcast", maxCount: 1 },
+  { name: "thumbnail", maxCount: 1 },
 ]);
+
 
 const quizUpload = upload.single("quiz");
 

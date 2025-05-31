@@ -45,8 +45,17 @@ const createStepTwo = catchAsync(async (req: Request, res: Response) => {
       "Invalid file upload data."
     );
   }
+  
+  if(!req.files["poadcast"]){
+    throw new ApiError(httpStatus.NOT_FOUND, "Poadcast file upload required");
+  }
+
+  if(!req.files["thumbnail"]){
+    throw new ApiError(httpStatus.NOT_FOUND, "Thumbnail file upload required");
+  }
 
   const podcastContent = req.files["poadcast"] as Express.Multer.File[];
+  const thumbnailContent = req.files["thumbnail"] as Express.Multer.File[];
 
   const podcastVideo =
     podcastContent?.map(
@@ -59,9 +68,14 @@ const createStepTwo = catchAsync(async (req: Request, res: Response) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "Podcast name is required.");
   }
 
+  const thumbnail =
+    thumbnailContent?.[0] &&
+    `${process.env.BACKEND_IMAGE_URL}/step/${thumbnailContent[0].filename}`;
+
   const stepData = {
     podcastVideo,
-    podcastName: parseData.podcastName, // ensure it's included
+    podcastName: parseData.podcastName,
+    thumbnail
   };
 
   const step = await StepService.createStepTwo(chapterId, stepData);
@@ -217,7 +231,6 @@ const createStepEight = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 const getQuizes = catchAsync(async (req: Request, res: Response) => {
   const chapterId = req.params.chapterId;
 
@@ -231,7 +244,6 @@ const getQuizes = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 const disableQuize = catchAsync(async (req: Request, res: Response) => {
   const quizId = req.params.quizId;
 
@@ -240,7 +252,9 @@ const disableQuize = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: `Quize ${req.body.isDisable ? "disabled" : "enabled"} successfully`,
+    message: `Quize ${
+      req.body.isDisable ? "disabled" : "enabled"
+    } successfully`,
     data: step,
   });
 });
@@ -275,7 +289,6 @@ const uploadQuiz = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 const createStepNine = catchAsync(async (req: Request, res: Response) => {
   const chapterId = req.params.chapterId;
 
@@ -292,7 +305,6 @@ const createStepNine = catchAsync(async (req: Request, res: Response) => {
     ...parseData,
   };
 
-
   const step = await StepService.createStepNine(chapterId, stepData);
 
   sendResponse(res, {
@@ -303,11 +315,10 @@ const createStepNine = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 const getQuizQustion = catchAsync(async (req: Request, res: Response) => {
-  const quizId = req.params.quizId;  // Step 8 ID
+  const quizId = req.params.quizId; // Step 8 ID
 
-  const step = await StepService.getQuizQustion(quizId); 
+  const step = await StepService.getQuizQustion(quizId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -317,7 +328,6 @@ const getQuizQustion = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 export const submitQuizAnswers = catchAsync(
   async (req: Request, res: Response) => {
     const userId = req.user?.id;
@@ -325,31 +335,36 @@ export const submitQuizAnswers = catchAsync(
     const { answers } = req.body;
 
     if (!userId) {
-      return res.status(401).json({ success: false, message: 'Unauthorized' });
+      return res.status(401).json({ success: false, message: "Unauthorized" });
     }
 
     if (!Array.isArray(answers) || answers.length === 0) {
-      return res.status(400).json({ success: false, message: 'Answers are required' });
+      return res
+        .status(400)
+        .json({ success: false, message: "Answers are required" });
     }
 
-    console.log(stepEightId)
+    console.log(stepEightId);
 
-    const result = await StepService.submitQuizAnswers(userId, stepEightId, answers);
+    const result = await StepService.submitQuizAnswers(
+      userId,
+      stepEightId,
+      answers
+    );
 
     sendResponse(res, {
       statusCode: 200,
       success: true,
-      message: 'Quiz submitted successfully',
+      message: "Quiz submitted successfully",
       data: result,
     });
   }
 );
 
-
 const getStepOne = catchAsync(async (req: Request, res: Response) => {
-  const stepId = req.params.stepId;  
+  const stepId = req.params.stepId;
 
-  const step = await StepService.getStepOne(stepId); 
+  const step = await StepService.getStepOne(stepId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -359,11 +374,10 @@ const getStepOne = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 const getStepTwo = catchAsync(async (req: Request, res: Response) => {
-  const stepId = req.params.stepId;  
+  const stepId = req.params.stepId;
 
-  const step = await StepService.getStepTwo(stepId); 
+  const step = await StepService.getStepTwo(stepId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -450,7 +464,6 @@ const getStepEight = catchAsync(async (req: Request, res: Response) => {
     data: step,
   });
 });
-
 
 export const StepController = {
   createStepOne,
