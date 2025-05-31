@@ -361,6 +361,21 @@ export const submitQuizAnswers = catchAsync(
   }
 );
 
+
+const getQuizResult = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user?.id;
+  const quizId = req.params.quizId;
+
+  const step = await StepService.getQuizResult(userId, quizId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "retrive quiz answer successfully",
+    data: step,
+  });
+});
+
 const getStepOne = catchAsync(async (req: Request, res: Response) => {
   const stepId = req.params.stepId;
 
@@ -481,6 +496,7 @@ export const StepController = {
   createStepNine,
   getQuizQustion,
   submitQuizAnswers,
+  getQuizResult,
   ////
   getStepOne,
   getStepTwo,

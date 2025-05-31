@@ -43,6 +43,8 @@ router.get('/eight/:stepId', StepController.getStepEight);
 router.get('/get-quizes/:chapterId', StepController.getQuizes);
 router.get('/get-student-quizes/:chapterId', StepController.getStudentQuizes);
 router.get('/quiz-question/:quizId', StepController.getQuizQustion);  // Step 8 id
+router.get('/quiz-result/:quizId', auth(), StepController.getQuizResult);   // <--- Student Quiz result
+
 router.patch('/disable-quiz/:quizId', StepController.disableQuize);
 
 // Create Quiz Question

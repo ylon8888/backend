@@ -34,7 +34,7 @@ const courseReview = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Create course review successfully",
+    message: "Thank you! Your feedback has been submitted.",
     data: classVisibility,
   });
 });

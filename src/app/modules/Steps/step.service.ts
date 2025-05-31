@@ -535,6 +535,70 @@ export const submitQuizAnswers = async (userId: string,stepEightId: string, answ
 };
 
 
+const getQuizResult = async (userId: string, quizId: string) => {
+
+  const quizExist = await prisma.stepEight.findUnique({
+    where: { id: quizId },
+  });
+
+  if (!quizExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Quiz not found");
+  }
+
+  const isUserExist = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!isUserExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  const quizresult = await prisma.stepEight.findUnique({
+    where: { id: quizId },
+    select: {
+      questionType: true,
+      questionDescription: true,
+      stepEightQuizSessions: {
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        select: {
+          stepEightQuizAttempts: {
+            orderBy: { createdAt: "desc" },
+            select: {
+              id: true,
+              isCorrect: true,
+              selectedOption: true,
+              stepEightQuiz: {
+                select: {
+                  questionText: true,
+                  optionA: true,
+                  optionB: true,
+                  optionC: true,
+                  optionD: true,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const attempts = quizresult?.stepEightQuizSessions[0]?.stepEightQuizAttempts || [];
+
+  const correctCount = attempts.filter((attempt) => attempt.isCorrect).length;
+  const wrongCount = attempts.length - correctCount;
+
+  return {
+    total: attempts.length,
+    correct: correctCount,
+    wrong: wrongCount,
+    quizresult
+  };
+};
+
+
+
 const getStepOne = async(stepId: string) => {
   const step = await prisma.stepOne.findUnique({
     where:{
@@ -632,6 +696,7 @@ export const StepService = {
   createStepNine,
   getQuizQustion,
   submitQuizAnswers,
+  getQuizResult,
 
   // 
   getStepOne,
