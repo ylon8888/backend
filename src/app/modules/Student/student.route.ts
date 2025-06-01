@@ -19,6 +19,7 @@ router.get('/profile',auth(), StudentController.getStudentProfile);
 
 // Student Enroll course
 router.get('/enroll-course', auth(), StudentController.studentEnrollCourse);
+router.get('/enroll-course-chapter/:subjectId', auth(), StudentController.studentEnrollChapter);
 router.get('/chapter-quiz/:chapterId', auth(), StudentController.studentChapterQuizAttempt);
 router.get('/progress', auth(), StudentController.studentProgress);
 router.get('/course-progress', auth(), StudentController.subjectCourseProgress);

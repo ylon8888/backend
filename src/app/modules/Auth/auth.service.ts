@@ -186,6 +186,8 @@ const loginUser = async (
       config.jwt.expires_in as string
     );
 
+    console.log("expires_in: ",config.jwt.expires_in)
+
     // const accessToken = jwtHelpers.generateToken(
     //   {
     //     id: userData.id,

@@ -148,7 +148,7 @@ const participation = catchAsync(async (req: Request, res: Response) => {
 )
 
 const studentEnrollCourse =  catchAsync(async (req: Request, res: Response) => {
-  const userId = req.params.id;
+  const userId = req.user.id;
 
   const result = await StudentService.studentEnrollCourse(userId);
 
@@ -206,6 +206,24 @@ const subjectCourseProgress = catchAsync(async (req: Request, res: Response) => 
 }
 )
 
+const studentEnrollChapter = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const subjectId = req.params.subjectId;
+
+  console.log("subjectId",subjectId)
+
+  const result = await StudentService.studentEnrollChapter(userId, subjectId as string);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Chapte retrive successfully",
+    data: result,
+  });
+}
+)
+
+
 
 export const StudentController = {
   registration,
@@ -219,5 +237,6 @@ export const StudentController = {
   studentEnrollCourse,
   studentChapterQuizAttempt,
   studentProgress,
-  subjectCourseProgress
+  subjectCourseProgress,
+  studentEnrollChapter
 };

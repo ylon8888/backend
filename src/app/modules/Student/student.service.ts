@@ -423,16 +423,68 @@ const participation = async (period: string) => {
 };
 
 const studentEnrollCourse = async (userId: string) => {
+  if (!userId) {
+    throw new Error("userId is required");
+  }
   const enroll = await prisma.courseEnroll.findMany({
     where: {
       userId,
     },
+    select:{
+      subject:{
+        select:{
+          id: true,
+          subjectName: true,
+          subjectDescription: true,
+          banner: true,
+          _count:{
+            select:{
+              chapters: true
+            }
+          }
+        }
+      }
+    }
   });
 
   return {
     enroll,
   };
 };
+
+
+const studentEnrollChapter = async (userId: string,subjectId: string) => {
+  if (!userId) {
+    throw new Error("userId is required");
+  }
+  const enroll = await prisma.courseEnroll.findFirst({
+    where: {
+      userId,
+      subjectId
+    },
+    select:{
+      subject:{
+        select:{
+          id: true,
+          subjectName: true,
+          subjectDescription: true,
+          chapters:{
+            select:{sLNumber: true,
+              chapterName: true,
+              chapterDescription: true,
+              thumbnail: true
+            }
+          }          
+        }
+      }
+    }
+  });
+
+  return {
+    enroll,
+  };
+};
+
 
 // const studentChapterQuiz = async(chapterId: string, userId: string) =>{
 
@@ -765,4 +817,5 @@ export const StudentService = {
   studentChapterQuizAttempt,
   studentProgress,
   subjectCourseProgress,
+  studentEnrollChapter
 };
