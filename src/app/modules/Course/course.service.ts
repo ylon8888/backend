@@ -808,6 +808,48 @@ const capterQuizDetails = async (userId: string, chapterId: string) => {
   };
 };
 
+
+const resendOtp = async (userId: string, subjectId: string) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
+  }
+
+  const existingEnroll = await prisma.courseEnroll.findFirst({
+    where: {
+      userId,
+      subjectId,
+      enrollStatus: EnrollStatus.PENDING,
+    },
+  });
+
+  if (!existingEnroll) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "You are already verified"
+    );
+  }
+
+  const randomOtp = Math.floor(100000 + Math.random() * 900000).toString();
+  const html = otpEmail(randomOtp);
+
+  await prisma.courseEnroll.update({
+    where: { id: existingEnroll.id },
+    data: { otp: randomOtp },
+  });
+
+  await emailSender("OTP", user.email, html);
+
+  return {
+    courseId: existingEnroll.subjectId,
+    email: user.email,
+  };
+};
+
+
 export const CourseService = {
   courseDetails,
   courseReview,
@@ -819,4 +861,5 @@ export const CourseService = {
   getAllReview,
   chapterEnrollStudent,
   capterQuizDetails,
+  resendOtp
 };

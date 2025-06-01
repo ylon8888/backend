@@ -171,6 +171,21 @@ const capterQuizDetails = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const resendOtp = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user.id;
+  const subjectId = req.params.subjectId;
+
+  const result = await CourseService.resendOtp(userId, subjectId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "OTP resent! Please check your email.",
+    data: result,
+  });
+});
+
+
 export const CourseController = {
   courseDetails,
   courseReview,
@@ -182,4 +197,5 @@ export const CourseController = {
   getAllReview,
   chapterEnrollStudent,
   capterQuizDetails,
+  resendOtp
 };

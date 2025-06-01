@@ -438,8 +438,8 @@ model CourseEnroll {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  name         String
-  phoneNumber  String
+  name         String?
+  phoneNumber  String?
   otp          String?
   otpExpiresAt DateTime?
   enrollStatus EnrollStatus @default(PENDING)
