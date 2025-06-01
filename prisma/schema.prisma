@@ -48,7 +48,7 @@ model User {
   stepEightQuizAttempts StepEightQuizAttempt[]
   studentProfiles       StudentProfile?
   stepEightQuizSessions StepEightQuizSession[]
-  completedQuizes       CompletedQuiz?
+  completedQuizes       CompletedQuiz[]
 
   @@map("users")
 }
@@ -165,7 +165,7 @@ model Chapter {
   // student
   userStepProgress    UserStepProgress[]
   userChapterProgress UserChapterProgress[]
-  completedQuizes       CompletedQuiz[]
+  completedQuizes     CompletedQuiz[]
 
   @@unique([subjectId, sLNumber]) // Ensure unique chapter per subject based on sLNumber
   @@map("chapters")
@@ -321,7 +321,7 @@ model StepEight {
   updatedAt             DateTime               @updatedAt
   stepEightQuizzes      StepEightQuiz[]
   stepEightQuizSessions StepEightQuizSession[]
-  completedQuizes       CompletedQuiz?
+  completedQuizes       CompletedQuiz[]
 
   @@map("stepEight")
 }
@@ -376,16 +376,17 @@ model StepEightQuizAttempt {
 }
 
 model CompletedQuiz {
-  id          String @id @default(cuid())
-  
-  stepEightId String @unique
-  userId      String @unique
+  id String @id @default(cuid())
+
+  stepEightId String
+  userId      String
   chapterId   String
 
   stepEight StepEight @relation(fields: [stepEightId], references: [id], onDelete: Cascade)
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   chapter   Chapter   @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-  
+
+  @@unique([stepEightId, userId])
 }
 
 model StepNine {

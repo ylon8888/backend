@@ -486,15 +486,24 @@ export const submitQuizAnswers = async (
     },
   });
 
-  
   // Create completed quiz
-  await prisma.completedQuiz.create({
-    data: {
-      stepEightId: stepEightId,
-      userId: userId,
-      chapterId: stepEight.chapterId,
+  await prisma.completedQuiz.upsert({
+  where: {
+    stepEightId_userId: {
+      stepEightId,
+      userId,
     },
-  });
+  },
+  update: {
+    chapterId: stepEight.chapterId, // in case chapter changed
+  },
+  create: {
+    stepEightId,
+    userId,
+    chapterId: stepEight.chapterId,
+  },
+});
+
 
   for (const answer of answers) {
     const quiz = await prisma.stepEightQuiz.findUnique({
