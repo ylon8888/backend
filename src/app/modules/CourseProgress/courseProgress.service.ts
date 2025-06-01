@@ -93,16 +93,53 @@ const createProgress = async (progressData: ICourseProgress) => {
 };
 
 const completeStepEightProgress = async (progressData: ICourseProgress) => {
-  const existingSteps = await prisma.userStepProgress.findFirst({
+  const existingProgress = await prisma.userChapterProgress.findFirst({
     where: {
       userId: progressData.userId,
       chapterId: progressData.chapterId,
-      stepId: progressData.stepId,
     },
   });
 
-  if (!existingSteps) {
-    const createStepEight = "";
+  if (!existingProgress) {
+    return {
+      message: "Progress not found",
+    };
+  }
+
+  const previousStep = await prisma.userStepProgress.findFirst({
+    where: {
+      userChapterProgressId: existingProgress.id,
+    },
+    orderBy: {
+      stepSerial: "desc",
+    },
+  });
+
+  if (previousStep) {
+    const prevSerial = parseInt(previousStep.stepSerial);
+    const currentSerial = parseInt(progressData.stepSerial);
+
+    if (currentSerial - prevSerial !== 1) {
+      throw new Error(
+        "You must complete the previous step before accessing this one."
+      );
+    }
+    const stepNumber = previousStep
+      ? (parseInt(previousStep.stepSerial) + 1).toString()
+      : "1";
+
+    const createStep = await prisma.userStepProgress.create({
+      data: {
+        stepSerial: stepNumber,
+        userChapterProgressId: existingProgress.id,
+        stepId: progressData.stepId,
+        isCompleted: false,
+      },
+    });
+
+    return {
+      createStep,
+    };
   }
 };
 
@@ -183,7 +220,6 @@ const studentProgress = async (userId: string, stepId: string) => {
     },
   });
 
-
   if (!step) {
     return {
       isCompleted: false,
@@ -192,7 +228,7 @@ const studentProgress = async (userId: string, stepId: string) => {
 
   const visible = await prisma.userStepProgress.findFirst({
     where: {
-      stepId
+      stepId,
     },
     select: {
       isCompleted: true,

@@ -128,7 +128,7 @@ const getCourseReview = async (subjectId: string) => {
             orderBy: {
               createdAt: "desc",
             },
-            take: 3,
+            // take: 3,
             select: {
               rating: true,
               message: true,
@@ -137,6 +137,11 @@ const getCourseReview = async (subjectId: string) => {
                   firstName: true,
                   lastName: true,
                   email: true,
+                  studentProfiles:{
+                    select: {
+                      profileImage: true
+                    }
+                  }
                 },
               },
             },
@@ -154,6 +159,7 @@ const getCourseReview = async (subjectId: string) => {
         email: review.user.email,
         rating: review.rating,
         message: review.message,
+        profileImage: review.user.studentProfiles?.profileImage || null,
       }))
     )
   );

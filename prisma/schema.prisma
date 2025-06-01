@@ -499,11 +499,11 @@ model StudentProfile {
 
   profileImage        String?
   gurdianContact      Json
-  academicInformation Json
-  experience          Json
-  hobbies             Json
-  skill               Json
-  socialProfile       Json
+  academicInformation Json?
+  experience          Json?
+  hobbies             Json?
+  skill               Json?
+  socialProfile       Json?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

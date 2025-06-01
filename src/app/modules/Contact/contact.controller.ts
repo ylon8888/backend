@@ -15,7 +15,7 @@ const createContact = catchAsync(async (req: Request, res: Response) => {
     sendResponse(res, {
     success: true,
     statusCode: httpStatus.CREATED,
-    message: "Contact created successfully",
+    message: "Thank you for contacting us. We’ll get back to you shortly.",
     data: contact,
   });
 })

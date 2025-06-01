@@ -71,11 +71,11 @@ const socialProfileSchema = z.array(z.object({
 export const createProfileSchema = z.object({
   body: z.object({
     gurdianContact: z.preprocess(parseJSON, jsonArrayValidator(guardianContactSchema)),
-    academicInformation: z.preprocess(parseJSON, jsonArrayValidator(academicInfoSchema)),
-    experience: z.preprocess(parseJSON, jsonArrayValidator(experienceSchema)),
-    hobbies: z.preprocess(parseJSON, jsonArrayValidator(hobbySchema)),
-    skill: z.preprocess(parseJSON, jsonArrayValidator(skillSchema)),
-    socialProfile: z.preprocess(parseJSON, jsonArrayValidator(socialProfileSchema))
+    // academicInformation: z.preprocess(parseJSON, jsonArrayValidator(academicInfoSchema)),
+    // experience: z.preprocess(parseJSON, jsonArrayValidator(experienceSchema)),
+    // hobbies: z.preprocess(parseJSON, jsonArrayValidator(hobbySchema)),
+    // skill: z.preprocess(parseJSON, jsonArrayValidator(skillSchema)),
+    // socialProfile: z.preprocess(parseJSON, jsonArrayValidator(socialProfileSchema))
   })
 });
 
