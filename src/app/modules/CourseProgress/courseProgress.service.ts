@@ -140,7 +140,7 @@ const completeStepEightProgress = async (progressData: ICourseProgress) => {
     const chapterStepEightQuizCount = await prisma.stepEight.count({
       where: {
         chapterId: progressData.chapterId,
-        id: progressData.stepId
+        // id: progressData.stepId
       },
     });
 

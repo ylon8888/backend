@@ -19,7 +19,7 @@ router.patch(
   AuthController.logOutUser
 );
 
-router.get("/refresh-token", AuthController.refreshToken);
+router.post("/refresh-token", AuthController.refreshToken);
 
 router.get(
   "/me",
