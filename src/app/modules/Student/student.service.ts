@@ -86,9 +86,15 @@ const createUpdateProfile = async (profileData: any) => {
 };
 
 const getStudentProfile = async (userId: string) => {
-  const profile = await prisma.studentProfile.findUnique({
+  const profile = await prisma.user.findUnique({
     where: {
-      userId,
+      id: userId,
+    },
+    select: {
+      email: true,
+      firstName: true,
+      lastName: true,
+      studentProfiles: {},
     },
   });
 
@@ -96,9 +102,7 @@ const getStudentProfile = async (userId: string) => {
     throw new ApiError(httpStatus.NOT_FOUND, "Profile not found");
   }
 
-  return {
-    profile,
-  };
+  return profile;
 };
 
 const getStudentById = async (userId: string) => {
@@ -341,13 +345,27 @@ const participation = async (period: string) => {
 
   if (period === "Monthly") {
     const monthNames = [
-      "January", "February", "March", "April", "May", "June",
-      "July", "August", "September", "October", "November", "December",
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
     ];
 
     const counts: Record<string, number> = {};
     for (let i = 0; i < 12; i++) {
-      const date = new Date(startDate.getFullYear(), startDate.getMonth() + i, 1);
+      const date = new Date(
+        startDate.getFullYear(),
+        startDate.getMonth() + i,
+        1
+      );
       const label = `${monthNames[date.getMonth()]} ${date.getFullYear()}`;
       counts[label] = 0;
     }
@@ -361,7 +379,6 @@ const participation = async (period: string) => {
     });
 
     return counts;
-
   } else if (period === "Yearly") {
     const counts: Record<string, number> = {};
     for (let i = 0; i < 5; i++) {
@@ -379,13 +396,12 @@ const participation = async (period: string) => {
     });
 
     return counts;
-
   } else if (period === "Quarterly") {
     const counts: Record<string, number> = {
-      "Q1": 0,
-      "Q2": 0,
-      "Q3": 0,
-      "Q4": 0,
+      Q1: 0,
+      Q2: 0,
+      Q3: 0,
+      Q4: 0,
     };
 
     attempts.forEach(({ createdAt }) => {
@@ -405,8 +421,6 @@ const participation = async (period: string) => {
     return counts;
   }
 };
-
-
 
 const studentEnrollCourse = async (userId: string) => {
   const enroll = await prisma.courseEnroll.findMany({
@@ -602,10 +616,10 @@ const studentProgress = async (userId: string) => {
   });
 
   const studentInfo = await prisma.user.findUnique({
-    where:{
-      id: userId
+    where: {
+      id: userId,
     },
-    select:{
+    select: {
       email: true,
       firstName: true,
       lastName: true,
@@ -615,8 +629,8 @@ const studentProgress = async (userId: string) => {
           profileImage: true,
         },
       },
-    }
-  })
+    },
+  });
 
   let correctQuiz = 0;
   let wrongQuiz = 0;
@@ -637,7 +651,6 @@ const studentProgress = async (userId: string) => {
 
   const total = correctQuiz + wrongQuiz;
   const correctAnswerRate = total > 0 ? (correctQuiz / total) * 100 : 0;
-
 
   // const courseProgress = await prisma.courseEnroll.findMany({
   //   where:{
@@ -665,7 +678,6 @@ const studentProgress = async (userId: string) => {
   };
 };
 
-
 const subjectCourseProgress = async (userId: string) => {
   const enrollments = await prisma.courseEnroll.findMany({
     where: { userId },
@@ -685,7 +697,7 @@ const subjectCourseProgress = async (userId: string) => {
               stepFive: { select: { id: true } },
               stepSix: { select: { id: true } },
               stepSeven: { select: { id: true } },
-              stepEight: { select: { id: true } }, 
+              stepEight: { select: { id: true } },
               stepNine: { select: { id: true } },
             },
           },
@@ -740,8 +752,6 @@ const subjectCourseProgress = async (userId: string) => {
   return result;
 };
 
-
-
 export const StudentService = {
   registration,
   createUpdateProfile,
@@ -754,5 +764,5 @@ export const StudentService = {
   studentEnrollCourse,
   studentChapterQuizAttempt,
   studentProgress,
-  subjectCourseProgress
+  subjectCourseProgress,
 };

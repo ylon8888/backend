@@ -36,7 +36,7 @@ const jsonArrayValidator = <T extends z.ZodTypeAny>(schema: T) =>
 const guardianContactSchema = z.array(z.object({
   gurdianName: z.string().min(1, "Guardian name is required"),
   gurdianNumber: z.string()
-    .regex(/^01[3-9]\d{8}$/, "Invalid Bangladeshi phone number")
+    // .regex(/^01[3-9]\d{8}$/, "Invalid Bangladeshi phone number")
     .min(11, "Phone number must be 11 digits")
     .max(11, "Phone number must be 11 digits")
 })).min(1, "At least one guardian contact is required");

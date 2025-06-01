@@ -48,6 +48,7 @@ model User {
   stepEightQuizAttempts StepEightQuizAttempt[]
   studentProfiles       StudentProfile?
   stepEightQuizSessions StepEightQuizSession[]
+  completedQuizes       CompletedQuiz?
 
   @@map("users")
 }
@@ -164,6 +165,7 @@ model Chapter {
   // student
   userStepProgress    UserStepProgress[]
   userChapterProgress UserChapterProgress[]
+  completedQuizes       CompletedQuiz[]
 
   @@unique([subjectId, sLNumber]) // Ensure unique chapter per subject based on sLNumber
   @@map("chapters")
@@ -175,6 +177,7 @@ model StepOne {
   chapterId String  @unique
   chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
+  stepSerial      String  @default("1")
   stepName        String
   stepDescription String?
   stepVideo       String
@@ -193,7 +196,7 @@ model StepTwo {
   chapterId String  @unique
   chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
-  
+  stepSerial   String   @default("2")
   podcastName  String
   thumbnail    String
   podcastVideo String[]
@@ -212,6 +215,7 @@ model StepThree {
   chapterId String  @unique
   chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
+  stepSerial      String @default("3")
   stepName        String
   stepDescription String
   stepVideo       String
@@ -230,6 +234,7 @@ model StepFour {
   chapterId String  @unique
   chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
+  stepSerial      String @default("4")
   stepName        String
   stepDescription String
   stepVideo       String
@@ -248,6 +253,7 @@ model StepFive {
   chapterId String  @unique
   chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
+  stepSerial     String @default("5")
   stepName       String
   stepVideo      String
   questionAnswer Json
@@ -266,6 +272,7 @@ model StepSix {
   chapterId String  @unique
   chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
+  stepSerial      String @default("6")
   stepName        String
   stepDescription String
   stepVideo       String
@@ -284,6 +291,7 @@ model StepSeven {
   chapterId String  @unique
   chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
+  stepSerial      String @default("7")
   stepName        String
   stepDescription String
   stepVideo       String
@@ -302,6 +310,7 @@ model StepEight {
   chapterId String
   chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
+  stepSerial          String  @default("8")
   questionType        String
   questionDescription String
   isDisable           Boolean @default(false)
@@ -312,6 +321,7 @@ model StepEight {
   updatedAt             DateTime               @updatedAt
   stepEightQuizzes      StepEightQuiz[]
   stepEightQuizSessions StepEightQuizSession[]
+  completedQuizes       CompletedQuiz?
 
   @@map("stepEight")
 }
@@ -365,12 +375,26 @@ model StepEightQuizAttempt {
   @@map("stepEightQuizAttempt")
 }
 
+model CompletedQuiz {
+  id          String @id @default(cuid())
+  
+  stepEightId String @unique
+  userId      String @unique
+  chapterId   String
+
+  stepEight StepEight @relation(fields: [stepEightId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chapter   Chapter   @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  
+}
+
 model StepNine {
   id String @id @default(cuid())
 
   chapterId String  @unique
   chapter   Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
+  stepSerial      String @default("9")
   stepName        String
   stepDescription String
   stepVideo       String
@@ -381,6 +405,25 @@ model StepNine {
   updatedAt DateTime @updatedAt
 
   @@map("stepNine")
+}
+
+model CourseReview {
+  id String @id @default(cuid())
+
+  chapterId String
+  userId    String
+
+  stepSerial String @default("10")
+  rating     Int    @default(1)
+  message    String
+
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("courseReviews")
 }
 
 // course Enrollment 
@@ -422,23 +465,6 @@ model Podcast {
   @@map("podcasts")
 }
 
-model CourseReview {
-  id String @id @default(cuid())
-
-  chapterId String
-  userId    String
-  rating    Int    @default(1)
-  message   String
-
-  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("courseReviews")
-}
-
 enum StepType {
   STEP_ONE
   STEP_TWO
@@ -476,7 +502,7 @@ model UserStepProgress {
   stepSerial            String // ex: 1,2,3
   userChapterProgressId String
   stepId                String // ex: stepOneId
-  isCompleted           Boolean  @default(false)
+  isCompleted           Boolean @default(false)
 
   userChapterProgress UserChapterProgress @relation(fields: [userChapterProgressId], references: [id], onDelete: Cascade)
 

@@ -12,3 +12,4 @@ export interface INextStepProgress {
   chapterId: string;
   stepSerial: string;
 }
+

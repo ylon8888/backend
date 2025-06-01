@@ -102,7 +102,7 @@ const completeStepEightProgress = async (progressData: ICourseProgress) => {
 
   if (!existingProgress) {
     return {
-      message: "Progress not found",
+      message: "Chapter progress not found",
     };
   }
 
@@ -136,6 +136,26 @@ const completeStepEightProgress = async (progressData: ICourseProgress) => {
         isCompleted: false,
       },
     });
+
+    const chapterStepEightQuizCiynt = await prisma.stepEight.count({
+      where: {
+        chapterId: progressData.chapterId,
+        id: progressData.stepId
+      },
+    });
+
+    if (!chapterStepEightQuizCiynt) {
+      throw new ApiError(httpStatus.NOT_FOUND, "Step eight not found");
+    }
+
+    const completedQuizCount = await prisma.completedQuiz.count({
+      where: {
+        chapterId: progressData.chapterId,
+        stepEightId: progressData.stepId
+      },
+    });
+
+    if(chapterStepEightQuizCiynt )
 
     return {
       createStep,
