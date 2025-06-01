@@ -13,7 +13,6 @@ const createBlog = async (blogData: IBlog) => {
       excerpt: blogData.excerpt,
       description: blogData.description,
       image: blogData.image,
-      category: blogData.category,
     },
   });
 };
