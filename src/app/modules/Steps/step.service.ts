@@ -67,7 +67,6 @@ const createStepTwo = async (chapterId: string, stepData: any) => {
   return step;
 };
 
-
 const createStepThree = async (chapterId: string, stepData: IStepOne) => {
   const chapter = await prisma.chapter.findUnique({
     where: {
@@ -463,23 +462,37 @@ export interface Answer {
   selectedOption: "optionA" | "optionB" | "optionC" | "optionD";
 }
 
-export const submitQuizAnswers = async (userId: string,stepEightId: string, answers: Answer[]) => {
+export const submitQuizAnswers = async (
+  userId: string,
+  stepEightId: string,
+  answers: Answer[]
+) => {
   const results = [];
 
   const stepEight = await prisma.stepEight.findUnique({
     where: {
-      id: stepEightId
-    }
-  })
+      id: stepEightId,
+    },
+  });
 
-  if(!stepEight){
+  if (!stepEight) {
     throw new ApiError(httpStatus.NOT_FOUND, "Step eight not found");
   }
 
   const session = await prisma.stepEightQuizSession.create({
     data: {
       userId,
-      stepEightId 
+      stepEightId,
+    },
+  });
+
+  
+  // Create completed quiz
+  await prisma.completedQuiz.create({
+    data: {
+      stepEightId: stepEightId,
+      userId: userId,
+      chapterId: stepEight.chapterId,
     },
   });
 
@@ -495,7 +508,6 @@ export const submitQuizAnswers = async (userId: string,stepEightId: string, answ
 
     const selectedValue = quiz[answer.selectedOption];
 
-  
     await prisma.stepEightQuizAttempt.create({
       data: {
         userId,
@@ -534,9 +546,7 @@ export const submitQuizAnswers = async (userId: string,stepEightId: string, answ
   };
 };
 
-
 const getQuizResult = async (userId: string, quizId: string) => {
-
   const quizExist = await prisma.stepEight.findUnique({
     where: { id: quizId },
   });
@@ -584,7 +594,8 @@ const getQuizResult = async (userId: string, quizId: string) => {
     },
   });
 
-  const attempts = quizresult?.stepEightQuizSessions[0]?.stepEightQuizAttempts || [];
+  const attempts =
+    quizresult?.stepEightQuizSessions[0]?.stepEightQuizAttempts || [];
 
   const correctCount = attempts.filter((attempt) => attempt.isCorrect).length;
   const wrongCount = attempts.length - correctCount;
@@ -593,92 +604,89 @@ const getQuizResult = async (userId: string, quizId: string) => {
     total: attempts.length,
     correct: correctCount,
     wrong: wrongCount,
-    quizresult
+    quizresult,
   };
 };
 
-
-
-const getStepOne = async(stepId: string) => {
+const getStepOne = async (stepId: string) => {
   const step = await prisma.stepOne.findUnique({
-    where:{
-      id: stepId
-    }
-  })
+    where: {
+      id: stepId,
+    },
+  });
 
   return step;
-}
+};
 
-const getStepTwo = async(stepId: string) => {
+const getStepTwo = async (stepId: string) => {
   const step = await prisma.stepTwo.findUnique({
-    where:{
-      id: stepId
-    }
-  })
+    where: {
+      id: stepId,
+    },
+  });
 
   return step;
-}
+};
 
-const getStepThree = async(stepId: string) => {
+const getStepThree = async (stepId: string) => {
   const step = await prisma.stepThree.findUnique({
-    where:{
-      id: stepId
-    }
-  })
+    where: {
+      id: stepId,
+    },
+  });
 
   return step;
-}
+};
 
-const getStepFour = async(stepId: string) => {
+const getStepFour = async (stepId: string) => {
   const step = await prisma.stepFour.findUnique({
-    where:{
-      id: stepId
-    }
-  })
+    where: {
+      id: stepId,
+    },
+  });
 
   return step;
-}
+};
 
-const getStepFive = async(stepId: string) => {
+const getStepFive = async (stepId: string) => {
   const step = await prisma.stepFive.findUnique({
-    where:{
-      id: stepId
-    }
-  })
+    where: {
+      id: stepId,
+    },
+  });
 
   return step;
-}
+};
 
-const getStepSix = async(stepId: string) => {
+const getStepSix = async (stepId: string) => {
   const step = await prisma.stepSix.findUnique({
-    where:{
-      id: stepId
-    }
-  })
+    where: {
+      id: stepId,
+    },
+  });
 
   return step;
-}
+};
 
-
-const getStepSeven = async(stepId: string) => {
+const getStepSeven = async (stepId: string) => {
   const step = await prisma.stepSeven.findUnique({
-    where:{
-      id: stepId
-    }
-  })
+    where: {
+      id: stepId,
+    },
+  });
 
   return step;
-}
+};
 
-const getStepEight = async(stepId: string) => {
+const getStepEight = async (stepId: string) => {
   const step = await prisma.stepSeven.findUnique({
-    where:{
-      id: stepId
-    }
-  })
+    where: {
+      id: stepId,
+    },
+  });
 
   return step;
-}
+};
 
 export const StepService = {
   createStepOne,
@@ -698,7 +706,7 @@ export const StepService = {
   submitQuizAnswers,
   getQuizResult,
 
-  // 
+  //
   getStepOne,
   getStepTwo,
   getStepThree,
@@ -706,5 +714,5 @@ export const StepService = {
   getStepFive,
   getStepSix,
   getStepSeven,
-  getStepEight
+  getStepEight,
 };

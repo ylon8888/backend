@@ -25,7 +25,7 @@ router.get('/course-progress', auth(), StudentController.subjectCourseProgress);
 
 router.post("/register", StudentController.registration);
 
-router.post('/create-profile',auth(), fileUpload, validateRequest(createProfileSchema), StudentController.createUpdateProfile);
+router.post('/create-profile',auth(), fileUpload, StudentController.createUpdateProfile); //  validateRequest(createProfileSchema),
 
 // Admin Dashboard get Student Information
 router.get('/retrive-student-details', StudentController.studentDetails);

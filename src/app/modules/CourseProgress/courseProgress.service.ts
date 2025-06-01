@@ -137,25 +137,28 @@ const completeStepEightProgress = async (progressData: ICourseProgress) => {
       },
     });
 
-    const chapterStepEightQuizCiynt = await prisma.stepEight.count({
+    const chapterStepEightQuizCount = await prisma.stepEight.count({
       where: {
         chapterId: progressData.chapterId,
         id: progressData.stepId
       },
     });
 
-    if (!chapterStepEightQuizCiynt) {
+    if (!chapterStepEightQuizCount) {
       throw new ApiError(httpStatus.NOT_FOUND, "Step eight not found");
     }
 
     const completedQuizCount = await prisma.completedQuiz.count({
       where: {
         chapterId: progressData.chapterId,
-        stepEightId: progressData.stepId
+        stepEightId: progressData.stepId,
+        userId: progressData.userId
       },
     });
 
-    if(chapterStepEightQuizCiynt )
+    if(chapterStepEightQuizCount !== completedQuizCount ){
+      throw new ApiError(httpStatus.CONFLICT, "Please compple quiz first");
+    }
 
     return {
       createStep,
