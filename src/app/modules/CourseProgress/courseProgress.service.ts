@@ -69,10 +69,9 @@ const createProgress = async (progressData: ICourseProgress) => {
       });
 
       return {
-        createStep
-      }
+        createStep,
+      };
     }
-
 
     const createStep = await prisma.userStepProgress.create({
       data: {
@@ -91,6 +90,20 @@ const createProgress = async (progressData: ICourseProgress) => {
   return {
     existingProgress,
   };
+};
+
+const completeStepEightProgress = async (progressData: ICourseProgress) => {
+  const existingSteps = await prisma.userStepProgress.findFirst({
+    where: {
+      userId: progressData.userId,
+      chapterId: progressData.chapterId,
+      stepId: progressData.stepId,
+    },
+  });
+
+  if (!existingSteps) {
+    const createStepEight = "";
+  }
 };
 
 const createNextProgress = async (progressData: INextStepProgress) => {
@@ -112,7 +125,7 @@ const createNextProgress = async (progressData: INextStepProgress) => {
     },
   });
 
-  if (isStepCompleted?.stepSerial === "9") {
+  if (isStepCompleted?.stepSerial === "10") {
     const isExistchapter = await prisma.chapter.findUnique({
       where: {
         id: progressData.chapterId,
@@ -153,31 +166,45 @@ const createNextProgress = async (progressData: INextStepProgress) => {
   };
 };
 
-const studentProgress = async(userId: string,stepId: string) => {
-   const student = await prisma.user.findUnique({
-    where:{
-      id: userId
-    }
-   })
-
-   if(!student){
-    throw new ApiError(httpStatus.NOT_FOUND, "Student not found");
-   }
-
-   const visible = await prisma.userStepProgress.findUnique({
-    where:{
-      id: stepId
+const studentProgress = async (userId: string, stepId: string) => {
+  const student = await prisma.user.findUnique({
+    where: {
+      id: userId,
     },
-    select:{
-      isCompleted: true
-    }
-   })
+  });
 
-   return visible;
-}
+  if (!student) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Student not found");
+  }
+
+  const step = await prisma.userStepProgress.findFirst({
+    where: {
+      stepId,
+    },
+  });
+
+
+  if (!step) {
+    return {
+      isCompleted: false,
+    };
+  }
+
+  const visible = await prisma.userStepProgress.findFirst({
+    where: {
+      stepId
+    },
+    select: {
+      isCompleted: true,
+    },
+  });
+
+  return visible;
+};
 
 export const CourseProgressService = {
   createProgress,
+  completeStepEightProgress,
   createNextProgress,
-  studentProgress
+  studentProgress,
 };
