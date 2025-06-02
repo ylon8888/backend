@@ -6,16 +6,17 @@ import pick from "../../../shared/pick";
 import { paginationFields } from "../../../constants/pagination";
 import { CourseProgressService } from "./courseProgress.service";
 
-
 const createProgress = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.id;
 
   const progressData = {
     userId,
-    ...req.body
-  }
+    ...req.body,
+  };
 
-  const chapterProgress = await  CourseProgressService.createProgress(progressData);
+  const chapterProgress = await CourseProgressService.createProgress(
+    progressData
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
@@ -25,16 +26,17 @@ const createProgress = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 const createNextProgress = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.id;
 
   const progressData = {
     userId,
-    ...req.body
-  }
+    ...req.body,
+  };
 
-  const nextProgress = await CourseProgressService.createNextProgress(progressData);
+  const nextProgress = await CourseProgressService.createNextProgress(
+    progressData
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.CREATED,
@@ -44,13 +46,14 @@ const createNextProgress = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
-const studentProgress  =  catchAsync(async (req: Request, res: Response) => {
+const studentProgress = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.id;
-  const { stepId} = req.query;
+  const { chapterId } = req.query;
 
-
-  const nextProgress = await CourseProgressService.studentProgress(userId, stepId as string);
+  const nextProgress = await CourseProgressService.studentProgress(
+    userId,
+    chapterId as string
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -60,9 +63,31 @@ const studentProgress  =  catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const completeStepEightProgress = catchAsync(
+  async (req: Request, res: Response) => {
+    const userId = req.user.id;
+
+    const progressData = {
+      userId,
+      ...req.body,
+    };
+
+    const nextProgress = await CourseProgressService.completeStepEightProgress(
+      progressData
+    );
+
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Rettive student successfully",
+      data: nextProgress,
+    });
+  }
+);
 
 export const CourseProgresscontroller = {
   createProgress,
   createNextProgress,
-  studentProgress
-}
+  studentProgress,
+  completeStepEightProgress,
+};

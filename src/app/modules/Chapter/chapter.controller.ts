@@ -40,12 +40,12 @@ const createchapter = catchAsync(async (req: Request, res: Response) => {
 
 const getChapterWiseSteps = catchAsync(async (req: Request, res: Response) => {
     const chapterId = req.params.chapterId;
-
+    const userId = req.user.id;
 
   const filters = pick(req.query, ["searchTerm"]);
   const options = pick(req.query, paginationFields);
 
-  const blogs = await ChapterService.getChapterWiseSteps(filters, options, chapterId);
+  const blogs = await ChapterService.getChapterWiseSteps(filters, options, chapterId, userId);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
