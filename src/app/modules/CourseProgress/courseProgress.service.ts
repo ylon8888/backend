@@ -2,12 +2,9 @@ import httpStatus from "http-status";
 import ApiError from "../../../errors/ApiErrors";
 import prisma from "../../../shared/prisma";
 import { ICourseProgress, INextStepProgress } from "./courseProgress.interface";
-import { log } from "console";
 
 const createProgress = async (progressData: ICourseProgress) => {
-  console.log(progressData)
-
-
+  console.log(progressData);
 
   const existingProgress = await prisma.userChapterProgress.findFirst({
     where: {
@@ -49,6 +46,32 @@ const createProgress = async (progressData: ICourseProgress) => {
         httpStatus.BAD_REQUEST,
         "You must complete the previous step before accessing this one."
       );
+    }
+
+    // ✅ Special rule for Step Eight: allow only if all quizzes are completed
+    if (currentSerial === 8) {
+      const totalQuizzes = await prisma.stepEightQuiz.count({
+        where: {
+          stepEight: {
+            chapterId: progressData.chapterId,
+          },
+        },
+      });
+
+      const completedQuizzes = await prisma.completedQuiz.count({
+        where: {
+          chapterId: progressData.chapterId,
+          stepEightId: progressData.stepId,
+          userId: progressData.userId,
+        },
+      });
+
+      if (totalQuizzes !== completedQuizzes) {
+        throw new ApiError(
+          httpStatus.CONFLICT,
+          "Please complete all quizzes for Step Eight before continuing."
+        );
+      }
     }
 
     const stepNumber = (prevSerial + 1).toString();
@@ -160,7 +183,7 @@ const completeStepEightProgress = async (progressData: ICourseProgress) => {
 };
 
 const createNextProgress = async (progressData: INextStepProgress) => {
-   console.log(progressData)
+  console.log(progressData);
   const existingProgress = await prisma.userChapterProgress.findFirst({
     where: {
       userId: progressData.userId,
@@ -247,19 +270,16 @@ const studentProgress = async (userId: string, chapterId: string) => {
       chapterId,
       userId,
     },
-    select:{
-      userStepProgress:{
-
-      }
-    }
+    select: {
+      userStepProgress: {},
+    },
   });
 
   return {
     success: true,
-    step
+    step,
+  };
 };
-}
-
 
 export const CourseProgressService = {
   createProgress,
