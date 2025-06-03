@@ -35,8 +35,6 @@ const createStepOne = catchAsync(async (req: Request, res: Response) => {
     ...parseData,
   };
 
-  console.log("controller", stepData);
-
   const step = await StepService.createStepOne(chapterId, stepData);
 
   sendResponse(res, {
@@ -68,10 +66,29 @@ const createStepTwo = catchAsync(async (req: Request, res: Response) => {
   const podcastContent = req.files["poadcast"] as Express.Multer.File[];
   const thumbnailContent = req.files["thumbnail"] as Express.Multer.File[];
 
-  const podcastVideo =
-    podcastContent?.map(
-      (file) => `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`
-    ) || [];
+  // const podcastVideo =
+  //   podcastContent?.map(
+  //     (file) => `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`
+  //   ) || [];
+
+  const podcastFile = podcastContent[0];
+  const thumbnailFile = thumbnailContent[0];
+
+  const podcastVideo = await fileUploadToS3(
+    "podcast",
+    "step",
+    podcastFile.originalname,
+    podcastFile.mimetype,
+    podcastFile.path
+  );
+
+  const thumbnail = await fileUploadToS3(
+    "thumbnail",
+    "step",
+    thumbnailFile.originalname,
+    thumbnailFile.mimetype,
+    thumbnailFile.path
+  );
 
   const parseData = req.body.data && JSON.parse(req.body.data);
 
@@ -79,12 +96,12 @@ const createStepTwo = catchAsync(async (req: Request, res: Response) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "Podcast name is required.");
   }
 
-  const thumbnail =
-    thumbnailContent?.[0] &&
-    `${process.env.BACKEND_IMAGE_URL}/step/${thumbnailContent[0].filename}`;
+  // const thumbnail =
+  //   thumbnailContent?.[0] &&
+  //   `${process.env.BACKEND_IMAGE_URL}/step/${thumbnailContent[0].filename}`;
 
   const stepData = {
-    podcastVideo,
+    podcastVideo: [podcastVideo],
     podcastName: parseData.podcastName,
     thumbnail,
   };
@@ -137,7 +154,7 @@ const createStepThree = catchAsync(async (req: Request, res: Response) => {
 
 const createStepFour = catchAsync(async (req: Request, res: Response) => {
   const chapterId = req.params.chapterId;
-  let stepVideo="";
+  let stepVideo = "";
 
   const { file } = req;
 
@@ -147,7 +164,7 @@ const createStepFour = catchAsync(async (req: Request, res: Response) => {
 
   const parseData = req.body.data && JSON.parse(req.body.data);
 
-    stepVideo = await fileUploadToS3(
+  stepVideo = await fileUploadToS3(
     "stepFile",
     "step",
     file.originalname,
@@ -173,7 +190,7 @@ const createStepFour = catchAsync(async (req: Request, res: Response) => {
 
 const createStepFive = catchAsync(async (req: Request, res: Response) => {
   const chapterId = req.params.chapterId;
-  let stepVideo="";
+  let stepVideo = "";
 
   const { file } = req;
 
@@ -183,7 +200,7 @@ const createStepFive = catchAsync(async (req: Request, res: Response) => {
 
   const parseData = req.body.data && JSON.parse(req.body.data);
 
-    stepVideo = await fileUploadToS3(
+  stepVideo = await fileUploadToS3(
     "stepFile",
     "step",
     file.originalname,
@@ -209,7 +226,7 @@ const createStepFive = catchAsync(async (req: Request, res: Response) => {
 
 const createStepSix = catchAsync(async (req: Request, res: Response) => {
   const chapterId = req.params.chapterId;
-  let stepVideo="";
+  let stepVideo = "";
   const { file } = req;
 
   if (!file) {
@@ -218,7 +235,7 @@ const createStepSix = catchAsync(async (req: Request, res: Response) => {
 
   const parseData = req.body.data && JSON.parse(req.body.data);
 
-    stepVideo = await fileUploadToS3(
+  stepVideo = await fileUploadToS3(
     "stepFile",
     "step",
     file.originalname,
@@ -245,7 +262,7 @@ const createStepSix = catchAsync(async (req: Request, res: Response) => {
 const createStepSeven = catchAsync(async (req: Request, res: Response) => {
   const chapterId = req.params.chapterId;
   let stepVideo = "";
-  
+
   const { file } = req;
 
   if (!file) {
@@ -254,7 +271,7 @@ const createStepSeven = catchAsync(async (req: Request, res: Response) => {
 
   const parseData = req.body.data && JSON.parse(req.body.data);
 
-    stepVideo = await fileUploadToS3(
+  stepVideo = await fileUploadToS3(
     "stepFile",
     "step",
     file.originalname,
@@ -339,8 +356,6 @@ const uploadQuiz = catchAsync(async (req: Request, res: Response) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "No file uploaded");
   }
 
-  console.log("-->",req.file);
-
   const step = await StepService.uploadQuiz(quizId, req.file);
 
   sendResponse(res, {
@@ -363,7 +378,7 @@ const createStepNine = catchAsync(async (req: Request, res: Response) => {
 
   const parseData = req.body.data && JSON.parse(req.body.data);
 
-    stepVideo = await fileUploadToS3(
+  stepVideo = await fileUploadToS3(
     "stepFile",
     "step",
     file.originalname,

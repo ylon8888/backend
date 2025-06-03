@@ -469,10 +469,20 @@ const studentEnrollChapter = async (userId: string,subjectId: string) => {
           subjectName: true,
           subjectDescription: true,
           chapters:{
-            select:{sLNumber: true,
+            select:{
+              id: true,
+              sLNumber: true,
               chapterName: true,
               chapterDescription: true,
-              thumbnail: true
+              thumbnail: true,
+              userChapterProgress:{
+                select:{
+                  isCompleted: true
+                },
+                where:{
+                  userId
+                }
+              }
             }
           }          
         }

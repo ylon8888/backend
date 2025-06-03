@@ -8,13 +8,17 @@ import { s3Uploader } from "../../../helpars/s3Bucket/fileUploadToS3";
 const router = express.Router();
 
 const fileUpload = s3Uploader.single("file");
+const uploadPodcast = s3Uploader.fields([
+  { name: "poadcast", maxCount: 1 },
+  { name: "thumbnail", maxCount: 1 },
+])
 
 const upload = multer({ storage: createStorage("step") });
 // const fileUpload = upload.single("file");
-const uploadPodcast = upload.fields([
-  { name: "poadcast", maxCount: 1 },
-  { name: "thumbnail", maxCount: 1 },
-]);
+// const uploadPodcast = upload.fields([
+//   { name: "poadcast", maxCount: 1 },
+//   { name: "thumbnail", maxCount: 1 },
+// ]);
 
 const quizUpload = upload.single("quiz");
 
