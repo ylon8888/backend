@@ -183,7 +183,7 @@ const completeStepEightProgress = async (progressData: ICourseProgress) => {
 };
 
 const createNextProgress = async (progressData: INextStepProgress) => {
-  console.log(progressData);
+  console.log("NextProgress: ", progressData);
   const existingProgress = await prisma.userChapterProgress.findFirst({
     where: {
       userId: progressData.userId,
@@ -204,7 +204,7 @@ const createNextProgress = async (progressData: INextStepProgress) => {
     },
   });
 
-  if (!lastStep || lastStep.stepSerial !== "10") {
+  if (!lastStep || lastStep.stepSerial !== "9") {
     return {
       success: false,
       message: "Please complete all steps in the current chapter",
@@ -223,7 +223,7 @@ const createNextProgress = async (progressData: INextStepProgress) => {
 
   const nextChapter = await prisma.chapter.findFirst({
     where: {
-      id: currentChapter.id,
+      subjectId: currentChapter.subjectId,
       sLNumber: {
         gt: currentChapter.sLNumber,
       },
@@ -233,6 +233,9 @@ const createNextProgress = async (progressData: INextStepProgress) => {
     },
   });
 
+  // console.log("nextChapter: ", nextChapter);
+
+
   if (!nextChapter) {
     return {
       success: true,
@@ -240,12 +243,29 @@ const createNextProgress = async (progressData: INextStepProgress) => {
     };
   }
 
-  const createChapterProgress = await prisma.userChapterProgress.create({
-    data: {
+  const createChapterProgress = await prisma.userChapterProgress.upsert({
+    where: {
+      userId_chapterId: {
+        userId: progressData.userId,
+        chapterId: nextChapter.id,
+      },
+    },
+    update: {},
+    create: {
       userId: progressData.userId,
       chapterId: nextChapter.id,
     },
   });
+
+  // update completed chapter when successfuly ceated next chapter
+  await prisma.userChapterProgress.update({
+    where:{
+      id: existingProgress.id
+    },
+    data:{
+      isCompleted: true
+    }
+  })
 
   return {
     success: true,

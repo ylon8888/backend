@@ -3,12 +3,14 @@ import multer from "multer";
 import { createStorage } from "../../../helpars/fileUploader";
 import { ChapterController } from "./chapter.controller";
 import auth from "../../middlewares/auth";
+import { s3Uploader } from "../../../helpars/s3Bucket/fileUploadToS3";
 
 const router = express.Router();
 
-const upload = multer({ storage: createStorage("chapter") });
+const fileUpload = s3Uploader.single("file");
 
-const fileUpload = upload.single("file");
+// const upload = multer({ storage: createStorage("chapter") });
+// const fileUpload = upload.single("file");
 
 router.post('/:subjectId', fileUpload, ChapterController.createchapter);
 router.get('/chapter-wise-steps/:chapterId', auth(), ChapterController.getChapterWiseSteps);

@@ -11,7 +11,6 @@ import { paginationFields } from "../../../constants/pagination";
 import { fileUploadToS3 } from "../../../helpars/s3Bucket/fileUploadToS3";
 
 const blogCreate = catchAsync(async (req: Request, res: Response) => {
-
   const { body, file } = req;
 
   if (!file) {
@@ -20,22 +19,19 @@ const blogCreate = catchAsync(async (req: Request, res: Response) => {
 
   const parseData = req.body.data && JSON.parse(req.body.data);
 
-  const profileImage = await fileUploadToS3(
-            "blogFile",
-            "blog",
-            file.originalname,
-            file.mimetype,
-            file.path
-        );
-
-        console.log("-->",profileImage)
+  const blogImage = await fileUploadToS3(
+    "blogFile",
+    "blog",
+    file.originalname,
+    file.mimetype,
+    file.path
+  );
 
   const blogData: IBlog = {
     // image: `${process.env.BACKEND_IMAGE_URL}/blog/${file.filename}`,
-    image: profileImage,
-    ...parseData
+    image: blogImage,
+    ...parseData,
   };
-
 
   const blog = await BlogService.createBlog(blogData);
   sendResponse(res, {
@@ -49,18 +45,25 @@ const blogCreate = catchAsync(async (req: Request, res: Response) => {
 const blogUpdate = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
   const { file } = req;
-  let image = ""
+  let image = "";
 
-  const parseData = req.body.data && JSON.parse(req.body.data)
+  const parseData = req.body.data && JSON.parse(req.body.data);
 
   if (file) {
-    image = `${process.env.BACKEND_IMAGE_URL}/blog/${file.filename}`;
+    // image = `${process.env.BACKEND_IMAGE_URL}/blog/${file.filename}`;
+    image = await fileUploadToS3(
+      "blogFile",
+      "blog",
+      file.originalname,
+      file.mimetype,
+      file.path
+    );
   }
 
   const body = {
     image,
-    ...parseData
-  }
+    ...parseData,
+  };
 
   const blog = await BlogService.updateBlog(id, body);
 
@@ -106,8 +109,6 @@ const getSingleBlog = catchAsync(async (req: Request, res: Response) => {
     data: blog,
   });
 });
-
-
 
 export const BlogController = {
   blogCreate,

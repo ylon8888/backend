@@ -126,6 +126,7 @@ const updatevisibility = async (subjectId: string, isVisible: boolean) => {
 
 const subjectWiseChapter = async (
   subjectId: string,
+  userId: string,
   filters: {
     searchTerm?: string;
   },
@@ -183,12 +184,21 @@ const subjectWiseChapter = async (
       chapterName: true,
       chapterDescription: true,
       thumbnail: true,
+      userChapterProgress:{
+        select:{
+          chapterId: true,
+          isCompleted: true
+        },
+        where:{
+          userId: userId
+        }
+      },
     },
     skip,
     take: limit,
     // orderBy: {
     //   [sortBy || "createdAt"]: sortOrder || "asc",
-    // },
+    // }
   });
 
   const total = await prisma.chapter.count({
@@ -196,11 +206,11 @@ const subjectWiseChapter = async (
   });
 
   return {
-    meta: {
-      page,
-      limit,
-      total,
-    },
+    // meta: {
+    //   page,
+    //   limit,
+    //   total,
+    // },
     data: { subject, chapters },
   };
 };

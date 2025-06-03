@@ -8,10 +8,9 @@ import pick from "../../../shared/pick";
 import { paginationFields } from "../../../constants/pagination";
 import { IChapter } from "./chapter.interface";
 import { ChapterService } from "./chapter.service";
-
+import { fileUploadToS3 } from "../../../helpars/s3Bucket/fileUploadToS3";
 
 const createchapter = catchAsync(async (req: Request, res: Response) => {
-
   const { file } = req;
   const subjectId = req.params.subjectId;
 
@@ -19,15 +18,22 @@ const createchapter = catchAsync(async (req: Request, res: Response) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "File is required");
   }
 
-  const parseData = req.body.data && JSON.parse(req.body.data)
+  const parseData = req.body.data && JSON.parse(req.body.data);
 
+  let chapterImage = await fileUploadToS3(
+    "chapterFile",
+    "chapter",
+    file.originalname,
+    file.mimetype,
+    file.path
+  );
 
   const chapterData: IChapter = {
-    thumbnail: `${process.env.BACKEND_IMAGE_URL}/chapter/${file.filename}`,
+    // thumbnail: `${process.env.BACKEND_IMAGE_URL}/chapter/${file.filename}`,
+    thumbnail: chapterImage,
     subjectId,
-    ...parseData
+    ...parseData,
   };
-
 
   const chapter = await ChapterService.createchapter(chapterData);
   sendResponse(res, {
@@ -39,13 +45,18 @@ const createchapter = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getChapterWiseSteps = catchAsync(async (req: Request, res: Response) => {
-    const chapterId = req.params.chapterId;
-    const userId = req.user.id;
+  const chapterId = req.params.chapterId;
+  const userId = req.user.id;
 
   const filters = pick(req.query, ["searchTerm"]);
   const options = pick(req.query, paginationFields);
 
-  const blogs = await ChapterService.getChapterWiseSteps(filters, options, chapterId, userId);
+  const blogs = await ChapterService.getChapterWiseSteps(
+    filters,
+    options,
+    chapterId,
+    userId
+  );
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -55,6 +66,6 @@ const getChapterWiseSteps = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const ChapterController = {
-    createchapter,
-    getChapterWiseSteps
-}
+  createchapter,
+  getChapterWiseSteps,
+};
