@@ -2,12 +2,14 @@ import express from "express";
 import { BlogController } from "./blog.controller";
 import multer from "multer";
 import { createStorage } from "../../../helpars/fileUploader";
+import {s3Uploader} from "../../../helpars/s3Bucket/fileUploadToS3";
 
 const router = express.Router();
 
-const upload = multer({ storage: createStorage("blog") });
+const fileUpload = s3Uploader.single("file");
 
-const fileUpload = upload.single("file");
+// const upload = multer({ storage: createStorage("blog") });
+// const fileUpload = upload.single("file");
 
 router.post("/", fileUpload, BlogController.blogCreate);
 router.get("/", BlogController.getAllBlogs);

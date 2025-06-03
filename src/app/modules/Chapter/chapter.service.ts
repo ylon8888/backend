@@ -118,11 +118,11 @@ const getChapterWiseSteps = async (
           },
   });
 
-  const total = await prisma.chapter.count({
-    where: {
-      ...whereConditions,
-    },
-  });
+  // const total = await prisma.chapter.count({
+  //   where: {
+  //     ...whereConditions,
+  //   },
+  // });
 
   return {
     // meta: {

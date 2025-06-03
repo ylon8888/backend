@@ -8,7 +8,7 @@ import { fileFilter } from "../fileFilter";
 // Initialize S3 client
 export const s3Client = new S3Client({
   region: config.aws.region as string,
-  endpoint: "https://nyc3.digitaloceanspaces.com",
+  endpoint: "https://fra1.digitaloceanspaces.com",
   credentials: {
     accessKeyId: config.aws.accessKeyId as string,
     secretAccessKey: config.aws.secretAccessKey as string,
@@ -48,7 +48,7 @@ export const fileUploadToS3 = async (
 
   try {
     await s3Client.send(command);
-    return `https://${bucketName}.nyc3.digitaloceanspaces.com/${fileName}`;
+    return `https://${bucketName}.fra1.digitaloceanspaces.com/${fileName}`;
   } catch (error) {
     console.error("S3 Multipart Upload Error:", error);
     throw new Error("Failed to upload large file to S3");

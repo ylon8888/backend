@@ -8,6 +8,7 @@ import config from "../../../config";
 import { IBlog } from "./blog.interface";
 import pick from "../../../shared/pick";
 import { paginationFields } from "../../../constants/pagination";
+import { fileUploadToS3 } from "../../../helpars/s3Bucket/fileUploadToS3";
 
 const blogCreate = catchAsync(async (req: Request, res: Response) => {
 
@@ -17,11 +18,21 @@ const blogCreate = catchAsync(async (req: Request, res: Response) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "File is required");
   }
 
-  const parseData = req.body.data && JSON.parse(req.body.data)
+  const parseData = req.body.data && JSON.parse(req.body.data);
 
+  const profileImage = await fileUploadToS3(
+            "blogFile",
+            "blog",
+            file.originalname,
+            file.mimetype,
+            file.path
+        );
+
+        console.log("-->",profileImage)
 
   const blogData: IBlog = {
-    image: `${process.env.BACKEND_IMAGE_URL}/blog/${file.filename}`,
+    // image: `${process.env.BACKEND_IMAGE_URL}/blog/${file.filename}`,
+    image: profileImage,
     ...parseData
   };
 
