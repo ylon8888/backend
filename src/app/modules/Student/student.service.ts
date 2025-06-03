@@ -496,64 +496,6 @@ const studentEnrollChapter = async (userId: string,subjectId: string) => {
 };
 
 
-// const studentChapterQuiz = async(chapterId: string, userId: string) =>{
-
-//   const chapter = await prisma.chapter.findUnique({
-//     where: {
-//       id: chapterId
-//     }
-//   })
-
-//   if(!chapter){
-//     throw new ApiError(httpStatus.NOT_FOUND, "chapter not found");
-//   }
-
-//   // const quiz = await prisma.chapter.findUnique({
-//   //   where:{
-//   //     id: chapterId
-//   //   },
-//   //   select:{
-//   //     stepEight:{
-//   //       select:{
-//   //         stepEightQuizSessions:{
-//   //           where:{
-//   //             userId: userId
-//   //           },
-//   //           select:{
-//   //             stepEightQuizAttempts:{
-
-//   //             }
-//   //           }
-//   //         }
-//   //       }
-//   //     }
-//   //   }
-//   // })
-
-//   const quiz = await prisma.stepEight.findMany({
-//     where:{
-//       chapterId
-//     },
-//     select:{
-//       questionType: true,
-//       questionDescription: true,
-//       stepEightQuizSessions:{
-//         select: {
-//           stepEightQuizAttempts:{
-//             where:{
-//               // isCorrect: false
-//             }
-//           }
-//         }
-//       }
-//     }
-//   })
-
-//   return {
-//     quiz
-//   }
-// }
-
 const studentChapterQuizAttempt = async (chapterId: string, userId: string) => {
   const chapter = await prisma.chapter.findUnique({
     where: { id: chapterId },
@@ -583,6 +525,7 @@ const studentChapterQuizAttempt = async (chapterId: string, userId: string) => {
               selectedOption: true,
               quizId: true,
               createdAt: true,
+              stepEightQuiz:true
             },
           },
         },
