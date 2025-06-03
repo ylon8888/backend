@@ -7,9 +7,11 @@ import config from "../../../config";
 import pick from "../../../shared/pick";
 import { paginationFields } from "../../../constants/pagination";
 import { StepService } from "./step.service";
+import { fileUploadToS3 } from "../../../helpars/s3Bucket/fileUploadToS3";
 
 const createStepOne = catchAsync(async (req: Request, res: Response) => {
   const chapterId = req.params.chapterId;
+  let stepVideo = "";
 
   const { file } = req;
 
@@ -19,8 +21,17 @@ const createStepOne = catchAsync(async (req: Request, res: Response) => {
 
   const parseData = req.body.data && JSON.parse(req.body.data);
 
+  stepVideo = await fileUploadToS3(
+    "stepFile",
+    "step",
+    file.originalname,
+    file.mimetype,
+    file.path
+  );
+
   const stepData: any = {
-    stepVideo: `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`,
+    // stepVideo: `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`,
+    stepVideo,
     ...parseData,
   };
 
@@ -45,12 +56,12 @@ const createStepTwo = catchAsync(async (req: Request, res: Response) => {
       "Invalid file upload data."
     );
   }
-  
-  if(!req.files["poadcast"]){
+
+  if (!req.files["poadcast"]) {
     throw new ApiError(httpStatus.NOT_FOUND, "Poadcast file upload required");
   }
 
-  if(!req.files["thumbnail"]){
+  if (!req.files["thumbnail"]) {
     throw new ApiError(httpStatus.NOT_FOUND, "Thumbnail file upload required");
   }
 
@@ -75,7 +86,7 @@ const createStepTwo = catchAsync(async (req: Request, res: Response) => {
   const stepData = {
     podcastVideo,
     podcastName: parseData.podcastName,
-    thumbnail
+    thumbnail,
   };
 
   const step = await StepService.createStepTwo(chapterId, stepData);
@@ -90,6 +101,7 @@ const createStepTwo = catchAsync(async (req: Request, res: Response) => {
 
 const createStepThree = catchAsync(async (req: Request, res: Response) => {
   const chapterId = req.params.chapterId;
+  let stepVideo = "";
 
   const { file } = req;
 
@@ -99,8 +111,17 @@ const createStepThree = catchAsync(async (req: Request, res: Response) => {
 
   const parseData = req.body.data && JSON.parse(req.body.data);
 
+  stepVideo = await fileUploadToS3(
+    "stepFile",
+    "step",
+    file.originalname,
+    file.mimetype,
+    file.path
+  );
+
   const stepData: any = {
-    stepVideo: `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`,
+    // stepVideo: `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`,
+    stepVideo,
     ...parseData,
   };
 
@@ -116,6 +137,7 @@ const createStepThree = catchAsync(async (req: Request, res: Response) => {
 
 const createStepFour = catchAsync(async (req: Request, res: Response) => {
   const chapterId = req.params.chapterId;
+  let stepVideo="";
 
   const { file } = req;
 
@@ -125,8 +147,17 @@ const createStepFour = catchAsync(async (req: Request, res: Response) => {
 
   const parseData = req.body.data && JSON.parse(req.body.data);
 
+    stepVideo = await fileUploadToS3(
+    "stepFile",
+    "step",
+    file.originalname,
+    file.mimetype,
+    file.path
+  );
+
   const stepData: any = {
-    stepVideo: `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`,
+    // stepVideo: `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`,
+    stepVideo,
     ...parseData,
   };
 
@@ -142,6 +173,7 @@ const createStepFour = catchAsync(async (req: Request, res: Response) => {
 
 const createStepFive = catchAsync(async (req: Request, res: Response) => {
   const chapterId = req.params.chapterId;
+  let stepVideo="";
 
   const { file } = req;
 
@@ -151,8 +183,17 @@ const createStepFive = catchAsync(async (req: Request, res: Response) => {
 
   const parseData = req.body.data && JSON.parse(req.body.data);
 
+    stepVideo = await fileUploadToS3(
+    "stepFile",
+    "step",
+    file.originalname,
+    file.mimetype,
+    file.path
+  );
+
   const stepData: any = {
-    stepVideo: `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`,
+    // stepVideo: `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`,
+    stepVideo,
     ...parseData,
   };
 
@@ -168,7 +209,7 @@ const createStepFive = catchAsync(async (req: Request, res: Response) => {
 
 const createStepSix = catchAsync(async (req: Request, res: Response) => {
   const chapterId = req.params.chapterId;
-
+  let stepVideo="";
   const { file } = req;
 
   if (!file) {
@@ -177,8 +218,17 @@ const createStepSix = catchAsync(async (req: Request, res: Response) => {
 
   const parseData = req.body.data && JSON.parse(req.body.data);
 
+    stepVideo = await fileUploadToS3(
+    "stepFile",
+    "step",
+    file.originalname,
+    file.mimetype,
+    file.path
+  );
+
   const stepData: any = {
-    stepVideo: `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`,
+    // stepVideo: `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`,
+    stepVideo,
     ...parseData,
   };
 
@@ -194,7 +244,8 @@ const createStepSix = catchAsync(async (req: Request, res: Response) => {
 
 const createStepSeven = catchAsync(async (req: Request, res: Response) => {
   const chapterId = req.params.chapterId;
-
+  let stepVideo = "";
+  
   const { file } = req;
 
   if (!file) {
@@ -203,8 +254,17 @@ const createStepSeven = catchAsync(async (req: Request, res: Response) => {
 
   const parseData = req.body.data && JSON.parse(req.body.data);
 
+    stepVideo = await fileUploadToS3(
+    "stepFile",
+    "step",
+    file.originalname,
+    file.mimetype,
+    file.path
+  );
+
   const stepData: any = {
-    stepVideo: `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`,
+    // stepVideo: `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`,
+    stepVideo,
     ...parseData,
   };
 
@@ -279,6 +339,8 @@ const uploadQuiz = catchAsync(async (req: Request, res: Response) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "No file uploaded");
   }
 
+  console.log("-->",req.file);
+
   const step = await StepService.uploadQuiz(quizId, req.file);
 
   sendResponse(res, {
@@ -291,6 +353,7 @@ const uploadQuiz = catchAsync(async (req: Request, res: Response) => {
 
 const createStepNine = catchAsync(async (req: Request, res: Response) => {
   const chapterId = req.params.chapterId;
+  let stepVideo = "";
 
   const { file } = req;
 
@@ -300,8 +363,17 @@ const createStepNine = catchAsync(async (req: Request, res: Response) => {
 
   const parseData = req.body.data && JSON.parse(req.body.data);
 
+    stepVideo = await fileUploadToS3(
+    "stepFile",
+    "step",
+    file.originalname,
+    file.mimetype,
+    file.path
+  );
+
   const stepData: any = {
-    stepVideo: `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`,
+    // stepVideo: `${process.env.BACKEND_IMAGE_URL}/step/${file.filename}`,
+    stepVideo,
     ...parseData,
   };
 
@@ -360,7 +432,6 @@ export const submitQuizAnswers = catchAsync(
     });
   }
 );
-
 
 const getQuizResult = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user?.id;

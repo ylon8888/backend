@@ -8,6 +8,7 @@ import pick from "../../../shared/pick";
 import { paginationFields } from "../../../constants/pagination";
 import { SubjectService } from "./subject.service";
 import { Isubject } from "./subject.interface";
+import { fileUploadToS3 } from "../../../helpars/s3Bucket/fileUploadToS3";
 
 const createSubject = catchAsync(async (req: Request, res: Response) => {
   const classId = req.params.classId;
@@ -17,10 +18,21 @@ const createSubject = catchAsync(async (req: Request, res: Response) => {
     throw new ApiError(httpStatus.BAD_REQUEST, "File is required");
   }
 
+  
   const parseData = req.body.data && JSON.parse(req.body.data);
 
+    let bannerImage = await fileUploadToS3(
+      "subjectFile",
+      "subject",
+      file.originalname,
+      file.mimetype,
+      file.path
+    );
+  
+
   const subjectData: Isubject = {
-    banner: `${process.env.BACKEND_IMAGE_URL}/subject/${file.filename}`,
+    // banner: `${process.env.BACKEND_IMAGE_URL}/subject/${file.filename}`,
+    banner: bannerImage,
     classId,
     ...parseData,
   };

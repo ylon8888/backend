@@ -6,7 +6,7 @@ import { StudentService } from "./student.service";
 import ApiError from "../../../errors/ApiErrors";
 import pick from "../../../shared/pick";
 import { paginationFields } from "../../../constants/pagination";
-
+import { fileUploadToS3 } from "../../../helpars/s3Bucket/fileUploadToS3";
 
 const registration = catchAsync(async (req: Request, res: Response) => {
   const result = await StudentService.registration(req.body);
@@ -19,19 +19,25 @@ const registration = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-
 const createUpdateProfile = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.id;
   const { file } = req;
   let profileImage;
 
   if (file) {
-    profileImage = `${process.env.BACKEND_IMAGE_URL}/profile/${file.filename}`
+    // profileImage = `${process.env.BACKEND_IMAGE_URL}/profile/${file.filename}`
+    profileImage = await fileUploadToS3(
+      "profileFile",
+      "profile",
+      file.originalname,
+      file.mimetype,
+      file.path
+    );
   }
 
   const parseJSON = (value: any) => {
     try {
-      return typeof value === 'string' ? JSON.parse(value) : value;
+      return typeof value === "string" ? JSON.parse(value) : value;
     } catch {
       return [];
     }
@@ -40,12 +46,12 @@ const createUpdateProfile = catchAsync(async (req: Request, res: Response) => {
   const profileData = {
     userId,
     profileImage,
-    gurdianContact: parseJSON(req.body.gurdianContact),          // Array
+    gurdianContact: parseJSON(req.body.gurdianContact), // Array
     academicInformation: parseJSON(req.body.academicInformation), // Array
-    experience: parseJSON(req.body.experience),                 // Array
-    hobbies: parseJSON(req.body.hobbies),                       // Array
-    skill: parseJSON(req.body.skill),                           // Array
-    socialProfile: parseJSON(req.body.socialProfile),           // Array
+    experience: parseJSON(req.body.experience), // Array
+    hobbies: parseJSON(req.body.hobbies), // Array
+    skill: parseJSON(req.body.skill), // Array
+    socialProfile: parseJSON(req.body.socialProfile), // Array
   };
 
   const profile = await StudentService.createUpdateProfile(profileData);
@@ -58,7 +64,7 @@ const createUpdateProfile = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const getStudentProfile =  catchAsync(async (req: Request, res: Response) => {
+const getStudentProfile = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.id;
   const result = await StudentService.getStudentProfile(userId);
 
@@ -69,7 +75,6 @@ const getStudentProfile =  catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
-
 
 const getStudentById = catchAsync(async (req: Request, res: Response) => {
   const userId = req.params.studentId;
@@ -83,7 +88,6 @@ const getStudentById = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
-
 
 const getAllStudents = catchAsync(async (req: Request, res: Response) => {
   const filters = pick(req.query, ["searchTerm"]);
@@ -99,7 +103,6 @@ const getAllStudents = catchAsync(async (req: Request, res: Response) => {
 });
 
 const studentDetails = catchAsync(async (req: Request, res: Response) => {
-
   const result = await StudentService.studentDetails();
 
   sendResponse(res, {
@@ -114,7 +117,10 @@ const getOverallGraph = catchAsync(async (req: Request, res: Response) => {
   const period = req.query.period as string;
 
   if (!period) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "fromDate query parameter is required");
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "fromDate query parameter is required"
+    );
   }
 
   const result = await StudentService.overalGraph(period);
@@ -125,15 +131,16 @@ const getOverallGraph = catchAsync(async (req: Request, res: Response) => {
     message: "Overall progress data retrieved successfully",
     data: result,
   });
-}
-)
-
+});
 
 const participation = catchAsync(async (req: Request, res: Response) => {
   const period = req.query.period as string;
 
   if (!period) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "fromDate query parameter is required");
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      "fromDate query parameter is required"
+    );
   }
 
   const result = await StudentService.participation(period);
@@ -144,10 +151,9 @@ const participation = catchAsync(async (req: Request, res: Response) => {
     message: "participation data retrieved successfully",
     data: result,
   });
-}
-)
+});
 
-const studentEnrollCourse =  catchAsync(async (req: Request, res: Response) => {
+const studentEnrollCourse = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.id;
 
   const result = await StudentService.studentEnrollCourse(userId);
@@ -158,25 +164,26 @@ const studentEnrollCourse =  catchAsync(async (req: Request, res: Response) => {
     message: "participation data retrieved successfully",
     data: result,
   });
-}
-)
+});
 
+const studentChapterQuizAttempt = catchAsync(
+  async (req: Request, res: Response) => {
+    const chapterId = req.params.chapterId;
+    const userId = req.user.id;
 
-const studentChapterQuizAttempt = catchAsync(async (req: Request, res: Response) => {
-  const chapterId = req.params.chapterId;
-  const userId = req.user.id;
+    const result = await StudentService.studentChapterQuizAttempt(
+      chapterId,
+      userId
+    );
 
-  const result = await StudentService.studentChapterQuizAttempt(chapterId, userId);
-
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: "Retrieved chapter quiz successfully",
-    data: result,
-  });
-}
-)
-
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Retrieved chapter quiz successfully",
+      data: result,
+    });
+  }
+);
 
 const studentProgress = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.id;
@@ -189,30 +196,33 @@ const studentProgress = catchAsync(async (req: Request, res: Response) => {
     message: "Retrieved student progress successfully",
     data: result,
   });
-}
-)
+});
 
-const subjectCourseProgress = catchAsync(async (req: Request, res: Response) => {
-  const userId = req.user.id;
+const subjectCourseProgress = catchAsync(
+  async (req: Request, res: Response) => {
+    const userId = req.user.id;
 
-  const result = await StudentService.subjectCourseProgress(userId);
+    const result = await StudentService.subjectCourseProgress(userId);
 
-  sendResponse(res, {
-    statusCode: httpStatus.OK,
-    success: true,
-    message: "Course progress successfully",
-    data: result,
-  });
-}
-)
+    sendResponse(res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: "Course progress successfully",
+      data: result,
+    });
+  }
+);
 
 const studentEnrollChapter = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user.id;
   const subjectId = req.params.subjectId;
 
-  console.log("subjectId",subjectId)
+  console.log("subjectId", subjectId);
 
-  const result = await StudentService.studentEnrollChapter(userId, subjectId as string);
+  const result = await StudentService.studentEnrollChapter(
+    userId,
+    subjectId as string
+  );
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -220,10 +230,7 @@ const studentEnrollChapter = catchAsync(async (req: Request, res: Response) => {
     message: "Chapte retrive successfully",
     data: result,
   });
-}
-)
-
-
+});
 
 export const StudentController = {
   registration,
@@ -238,5 +245,5 @@ export const StudentController = {
   studentChapterQuizAttempt,
   studentProgress,
   subjectCourseProgress,
-  studentEnrollChapter
+  studentEnrollChapter,
 };

@@ -6,13 +6,15 @@ import multer from "multer";
 import validateRequest from "../../middlewares/validateRequest";
 import { createProfileSchema } from "./student.validation";
 import { UserRole } from "@prisma/client";
+import { s3Uploader } from "../../../helpars/s3Bucket/fileUploadToS3";
 
 
 const router = express.Router();
 
-const upload = multer({ storage: createStorage("profile") });
+const fileUpload = s3Uploader.single("file");
 
-const fileUpload = upload.single("file");
+// const upload = multer({ storage: createStorage("profile") });
+// const fileUpload = upload.single("file");
 
 router.get('/profile',auth(), StudentController.getStudentProfile);
 

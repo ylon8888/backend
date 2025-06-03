@@ -3,13 +3,15 @@ import multer from "multer";
 import { createStorage } from "../../../helpars/fileUploader";
 import { SubjectController } from "./subject.controller";
 import auth from "../../middlewares/auth";
+import { s3Uploader } from "../../../helpars/s3Bucket/fileUploadToS3";
 
 
 const router = express.Router();
 
-const upload = multer({ storage: createStorage("subject") });
+const fileUpload = s3Uploader.single("file");
 
-const fileUpload = upload.single("file");
+// const upload = multer({ storage: createStorage("subject") });
+// const fileUpload = upload.single("file");
 
 router.post('/:classId', fileUpload, SubjectController.createSubject);
 router.get('/class-wise-subject/:classId', SubjectController.classWiseSubject);

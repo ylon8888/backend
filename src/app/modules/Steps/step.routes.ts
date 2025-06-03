@@ -3,19 +3,18 @@ import multer from "multer";
 import { createStorage } from "../../../helpars/fileUploader";
 import { StepController } from "./step.controller";
 import auth from "../../middlewares/auth";
+import { s3Uploader } from "../../../helpars/s3Bucket/fileUploadToS3";
 
 const router = express.Router();
 
+const fileUpload = s3Uploader.single("file");
+
 const upload = multer({ storage: createStorage("step") });
-const fileUpload = upload.single("file");
-
-
-
+// const fileUpload = upload.single("file");
 const uploadPodcast = upload.fields([
   { name: "poadcast", maxCount: 1 },
   { name: "thumbnail", maxCount: 1 },
 ]);
-
 
 const quizUpload = upload.single("quiz");
 
