@@ -499,6 +499,11 @@ const studentEnrollChapter = async (userId: string,subjectId: string) => {
 const studentChapterQuizAttempt = async (chapterId: string, userId: string) => {
   const chapter = await prisma.chapter.findUnique({
     where: { id: chapterId },
+    select:{
+      sLNumber: true,
+      chapterName: true,
+      chapterDescription: true
+    }
   });
 
   if (!chapter) {
@@ -510,6 +515,7 @@ const studentChapterQuizAttempt = async (chapterId: string, userId: string) => {
       chapterId,
     },
     select: {
+      id: true,
       questionType: true,
       questionDescription: true,
       stepEightQuizSessions: {
@@ -553,6 +559,7 @@ const studentChapterQuizAttempt = async (chapterId: string, userId: string) => {
     });
 
     return {
+      questionId: q.id,
       questionType: q.questionType,
       questionDescription: q.questionDescription,
       sessions,
@@ -560,6 +567,7 @@ const studentChapterQuizAttempt = async (chapterId: string, userId: string) => {
   });
 
   return {
+    chapter,
     quiz: enrichedQuiz,
   };
 };
