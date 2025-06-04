@@ -18,6 +18,9 @@ const fileUpload = s3Uploader.single("file");
 
 router.get('/profile',auth(), StudentController.getStudentProfile);
 
+// Hero Section
+router.get('/brain-drawer', StudentController.brainDrawerLearning);
+
 
 // Student Enroll course
 router.get('/enroll-course', auth(), StudentController.studentEnrollCourse);

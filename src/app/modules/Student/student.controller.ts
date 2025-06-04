@@ -232,6 +232,17 @@ const studentEnrollChapter = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const brainDrawerLearning = catchAsync(async (req: Request, res: Response) => {
+  const result = await StudentService.brainDrawerLearning();
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Chapte retrive successfully",
+    data: result,
+  });
+});
+
 export const StudentController = {
   registration,
   createUpdateProfile,
@@ -246,4 +257,5 @@ export const StudentController = {
   studentProgress,
   subjectCourseProgress,
   studentEnrollChapter,
+  brainDrawerLearning
 };
