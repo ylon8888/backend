@@ -238,7 +238,7 @@ const brainDrawerLearning = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: "Chapte retrive successfully",
+    message: "Course information retrive successfully",
     data: result,
   });
 });
