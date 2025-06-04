@@ -8,8 +8,9 @@ import { paginationFields } from "../../../constants/pagination";
 
 const courseDetails = catchAsync(async (req: Request, res: Response) => {
   const subjectId = req.params.subjectId;
+  const userId = req.user.id;
 
-  const classVisibility = await CourseService.courseDetails(subjectId);
+  const classVisibility = await CourseService.courseDetails(subjectId, userId);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

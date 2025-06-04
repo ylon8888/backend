@@ -12,7 +12,7 @@ import { EnrollStatus, Prisma, StepType, UserRole } from "@prisma/client";
 import { IPaginationOptions } from "../../../interfaces/paginations";
 import { paginationHelpers } from "../../../helpars/paginationHelper";
 
-const courseDetails = async (subjectId: string) => {
+const courseDetails = async (subjectId: string, userId: string) => {
   // Fetch course details
   const subject = await prisma.subject.findUnique({
     where: { id: subjectId },
@@ -84,6 +84,13 @@ const courseDetails = async (subjectId: string) => {
     },
   });
 
+  const enrollSuccess = await prisma.courseEnroll.findFirst({
+  where: {
+    userId,
+    subjectId,
+  },
+});
+
   return {
     success: true,
     message: "Course details retrieved successfully",
@@ -94,6 +101,7 @@ const courseDetails = async (subjectId: string) => {
       className: ratingData?.class?.className || null, // <-- added className here
       chapterCount,
       learnFromCourse,
+      isEnroll: !!enrollSuccess
     },
   };
 };
@@ -137,11 +145,11 @@ const getCourseReview = async (subjectId: string) => {
                   firstName: true,
                   lastName: true,
                   email: true,
-                  studentProfiles:{
+                  studentProfiles: {
                     select: {
-                      profileImage: true
-                    }
-                  }
+                      profileImage: true,
+                    },
+                  },
                 },
               },
             },
@@ -808,7 +816,6 @@ const capterQuizDetails = async (userId: string, chapterId: string) => {
   };
 };
 
-
 const resendOtp = async (userId: string, subjectId: string) => {
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -827,10 +834,7 @@ const resendOtp = async (userId: string, subjectId: string) => {
   });
 
   if (!existingEnroll) {
-    throw new ApiError(
-      httpStatus.BAD_REQUEST,
-      "You are already verified"
-    );
+    throw new ApiError(httpStatus.BAD_REQUEST, "You are already verified");
   }
 
   const randomOtp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -849,7 +853,6 @@ const resendOtp = async (userId: string, subjectId: string) => {
   };
 };
 
-
 export const CourseService = {
   courseDetails,
   courseReview,
@@ -861,5 +864,5 @@ export const CourseService = {
   getAllReview,
   chapterEnrollStudent,
   capterQuizDetails,
-  resendOtp
+  resendOtp,
 };

@@ -13,7 +13,7 @@ router.get('/chapter-quiz-details', CourseController.capterQuizDetails);
 
 
 // Course details
-router.get('/course-details/:subjectId', CourseController.courseDetails);
+router.get('/course-details/:subjectId', auth(), CourseController.courseDetails);
 
 // Checking enrollemnt
 router.get('/checking-enrollment/:subjectId', auth(), CourseController.checkingEnrollment);
