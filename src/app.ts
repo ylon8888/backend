@@ -10,7 +10,12 @@ import router from "./app/routes";
 const app: Application = express();
 
 export const corsOptions = {
-  origin: ["http://localhost:3000", "http://localhost:3001", "braindrawer.com", "www.braindrawer.com"],
+  origin: [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "braindrawer.com",
+    "www.braindrawer.com",
+  ],
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
