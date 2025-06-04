@@ -6,7 +6,7 @@ export const initiateSuperAdmin = async () => {
   const payload = {
     firstName: "Super",
     lastName: "Admin",
-    email: "superadmin@gmail10p.com",
+    email: "admin@gmail.com",
     password: "123456",
     role: UserRole.ADMIN,
   };
@@ -29,6 +29,7 @@ export const initiateSuperAdmin = async () => {
         email: payload.email,
         password: hashedPassword,
         role: payload.role,
+        isVerified: true,
       },
     });
   });
