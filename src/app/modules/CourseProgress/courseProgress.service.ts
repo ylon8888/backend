@@ -50,11 +50,9 @@ const createProgress = async (progressData: ICourseProgress) => {
 
     // ✅ Special rule for Step Eight: allow only if all quizzes are completed
     if (currentSerial === 8) {
-      const totalQuizzes = await prisma.stepEightQuiz.count({
+      const totalQuizzes = await prisma.stepEight.count({
         where: {
-          stepEight: {
-            chapterId: progressData.chapterId,
-          },
+          chapterId: progressData.chapterId,
         },
       });
 
@@ -65,6 +63,8 @@ const createProgress = async (progressData: ICourseProgress) => {
           userId: progressData.userId,
         },
       });
+
+      console.log(totalQuizzes, completedQuizzes)
 
       if (totalQuizzes !== completedQuizzes) {
         throw new ApiError(
