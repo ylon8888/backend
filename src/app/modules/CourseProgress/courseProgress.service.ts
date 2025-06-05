@@ -63,9 +63,7 @@ const createProgress = async (progressData: ICourseProgress) => {
           userId: progressData.userId,
         },
       });
-
-      console.log(totalQuizzes, completedQuizzes)
-
+      
       if (totalQuizzes !== completedQuizzes) {
         throw new ApiError(
           httpStatus.CONFLICT,
