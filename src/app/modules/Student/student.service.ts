@@ -736,7 +736,31 @@ const subjectCourseProgress = async (userId: string) => {
       if (chapter.stepNine) totalSteps += 1;
     }
 
+
     // 2. Count user's completed steps for this subject using correct relation field 'Chapter'
+
+    let studentStep = 0;
+    for (const chapter of subject.chapters) {
+      console.log("chapter", chapter);
+      const isExistStep = await prisma.userChapterProgress.findFirst({
+        where:{
+          userId,
+          chapter: {
+            subjectId: subject.id,
+          },
+        }
+      })
+
+      console.log("isExistStep: ",isExistStep)
+      const count = await prisma.userStepProgress.count({
+        where:{
+          userChapterProgressId: isExistStep?.id
+        }
+      })
+
+      studentStep += count;
+    }
+
     const completedSteps = await prisma.userStepProgress.count({
       where: {
         userId,
@@ -757,6 +781,7 @@ const subjectCourseProgress = async (userId: string) => {
       totalSteps,
       completedSteps,
       progress: progressPercentage,
+      studentStep
     });
   }
 
