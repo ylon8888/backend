@@ -772,16 +772,15 @@ const subjectCourseProgress = async (userId: string) => {
     });
 
     const progressPercentage =
-      totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+      totalSteps > 0 ? Math.round((studentStep / totalSteps) * 100) : 0;
 
     result.push({
       subjectId: subject.id,
       subjectName: subject.subjectName,
       subjectDescription: subject.subjectDescription,
       totalSteps,
-      completedSteps,
+      completedSteps: studentStep,
       progress: progressPercentage,
-      studentStep
     });
   }
 
