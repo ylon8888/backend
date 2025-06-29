@@ -12,6 +12,7 @@ const fileUpload = s3Uploader.single("file");
 // const fileUpload = upload.single("file");
 
 router.post("/", fileUpload, BlogController.blogCreate);
+router.post("/upload-image", fileUpload, BlogController.uploadImage);
 router.get("/", BlogController.getAllBlogs);
 router.get("/:id", BlogController.getSingleBlog);
 router.patch("/:id", fileUpload, BlogController.blogUpdate);

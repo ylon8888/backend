@@ -110,10 +110,34 @@ const getSingleBlog = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const uploadImage = catchAsync(async (req: Request, res: Response) => {
+  const { file } = req;
+
+  if (!file) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "File is required");
+  }
+
+  const image = await fileUploadToS3(
+    "blogFile",
+    "blog",
+    file.originalname,
+    file.mimetype,
+    file.path
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.CREATED,
+    success: true,
+    message: "Retive image successfully",
+    data: image,
+  });
+});
+
 export const BlogController = {
   blogCreate,
   blogUpdate,
   blogDelete,
   getAllBlogs,
   getSingleBlog,
+  uploadImage
 };
