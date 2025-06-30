@@ -229,9 +229,8 @@ const studentDetails = async () => {
 
     const totalCourse = await prisma.subject.count();
 
-    const newEnroll = await TX.user.count({
+    const newEnroll = await TX.courseEnroll.count({
       where: {
-        role: UserRole.STUDENT,
         createdAt: {
           gte: sevenDaysAgo,
         },

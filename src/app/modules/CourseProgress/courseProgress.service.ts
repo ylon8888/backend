@@ -59,10 +59,11 @@ const createProgress = async (progressData: ICourseProgress) => {
       const completedQuizzes = await prisma.completedQuiz.count({
         where: {
           chapterId: progressData.chapterId,
-          stepEightId: progressData.stepId,
+          // stepEightId: progressData.stepId,
           userId: progressData.userId,
         },
       });
+
       
       if (totalQuizzes !== completedQuizzes) {
         throw new ApiError(
