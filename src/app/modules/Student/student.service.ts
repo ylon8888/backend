@@ -697,6 +697,7 @@ const subjectCourseProgress = async (userId: string) => {
           id: true,
           subjectName: true,
           subjectDescription: true,
+          banner: true,
           chapters: {
             select: {
               id: true,
@@ -776,6 +777,7 @@ const subjectCourseProgress = async (userId: string) => {
     result.push({
       subjectId: subject.id,
       subjectName: subject.subjectName,
+      subjectImage: subject.banner,
       subjectDescription: subject.subjectDescription,
       totalSteps,
       completedSteps: studentStep,
