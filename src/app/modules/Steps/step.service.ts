@@ -696,8 +696,15 @@ const createStepEight = async (chapterId: string, stepData: IStepEight) => {
   });
 
   if (existingStep) {
-    // Optional: return or throw if you don't want to allow duplicates
-    return existingStep;
+    // Increment step count
+    await prisma.chapter.update({
+      where: { id: chapterId },
+      data: {
+        completeSteps: {
+          decrement: 1,
+        },
+      },
+    });
   }
 
   // Create new stepEight
