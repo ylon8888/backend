@@ -65,7 +65,21 @@ const getChapterWiseSteps = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const deleteChapter = catchAsync(async (req: Request, res: Response) => {
+  const chapterId = req.params.chapterId;
+
+  const blogs = await ChapterService.deleteChapter(chapterId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Chapter delete successfully",
+    data: blogs,
+  });
+});
+
 export const ChapterController = {
   createchapter,
   getChapterWiseSteps,
+  deleteChapter,
 };

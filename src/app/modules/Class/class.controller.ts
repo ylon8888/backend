@@ -79,10 +79,24 @@ const classVisibility = catchAsync(async (req: Request,res: Response) => {
   });
 })
 
+const deleteClass = catchAsync(async (req: Request,res: Response) => {
+  const classId = req.params.id; 
+
+  const classData = await ClassService.deleteClass(classId);
+
+ sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Delete class successfully",
+    data: classData,
+  });
+})
+
 export const classController = {
     createClass,
     getAllClasses,
     classWiseChapter,
     classVisibility,
-    studentAllClass
+    studentAllClass,
+    deleteClass
 }

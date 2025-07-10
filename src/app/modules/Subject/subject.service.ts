@@ -45,6 +45,7 @@ const classWiseSubject = async (classId: string) => {
   const subjects = await prisma.subject.findMany({
     where: {
       classId,
+      isVisible: true
     },
     include: {
       _count: {
@@ -184,14 +185,14 @@ const subjectWiseChapter = async (
       chapterName: true,
       chapterDescription: true,
       thumbnail: true,
-      userChapterProgress:{
-        select:{
+      userChapterProgress: {
+        select: {
           chapterId: true,
-          isCompleted: true
+          isCompleted: true,
         },
-        where:{
-          userId: userId
-        }
+        where: {
+          userId: userId,
+        },
       },
     },
     skip,
@@ -215,10 +216,32 @@ const subjectWiseChapter = async (
   };
 };
 
+const deletecourse = async (courseId: string) => {
+  const courseExist = await prisma.subject.findUnique({
+    where: {
+      id: courseId,
+    },
+  });
+
+  if (!courseExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Course not found");
+  }
+
+  await prisma.subject.update({
+    where: {
+      id: courseExist.id,
+    },
+    data: {
+      isVisible: false,
+    },
+  });
+};
+
 export const SubjectService = {
   createSubject,
   updatevisibility,
   getAllSubjects,
   subjectWiseChapter,
   classWiseSubject,
+  deletecourse
 };

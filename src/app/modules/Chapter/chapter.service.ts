@@ -73,7 +73,7 @@ const getChapterWiseSteps = async (
   }
 
   const whereConditions: Prisma.ChapterWhereInput = {
-    AND: [...andConditions, { isDeleted: false },],
+    AND: [...andConditions, { isDeleted: false }],
   };
 
   const chapters = await prisma.chapter.findMany({
@@ -96,17 +96,17 @@ const getChapterWiseSteps = async (
       stepNine: true,
       userChapterProgress: {
         where: {
-          userId: userId
+          userId: userId,
         },
-        include:{
-          userStepProgress:{
-            select:{
+        include: {
+          userStepProgress: {
+            select: {
               stepId: true,
-              isCompleted: true
-            }
-          }
-        }
-      }
+              isCompleted: true,
+            },
+          },
+        },
+      },
     },
     skip,
     take: limit,
@@ -130,11 +130,33 @@ const getChapterWiseSteps = async (
     //   limit,
     //   total,
     // },
-   chapters
+    chapters,
   };
+};
+
+const deleteChapter = async (chapterId: string) => {
+  const chapterExist = await prisma.chapter.findUnique({
+    where: {
+      id: chapterId,
+    },
+  });
+
+  if (!chapterExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, "chapter not found");
+  }
+
+  await prisma.chapter.update({
+    where: {
+      id: chapterExist.id,
+    },
+    data: {
+      isDeleted: true,
+    },
+  });
 };
 
 export const ChapterService = {
   createchapter,
   getChapterWiseSteps,
+  deleteChapter
 };

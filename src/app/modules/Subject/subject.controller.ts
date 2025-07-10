@@ -112,10 +112,24 @@ const classWiseSubject = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const deletecourse = catchAsync(async (req: Request, res: Response) => {
+  const subjectId = req.params.subjectId;
+
+  const classSubjects = await SubjectService.deletecourse(subjectId);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Delete course successfully",
+    data: classSubjects,
+  });
+});
+
 export const SubjectController = {
   createSubject,
   updatevisibility,
   getAllSubjects,
   subjectWiseChapter,
-  classWiseSubject
+  classWiseSubject,
+  deletecourse
 };

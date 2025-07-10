@@ -55,9 +55,8 @@ const getAllClass = async (
           chapters: {
             select: {
               _count: true,
-            
-            }
-          }
+            },
+          },
         },
       },
     },
@@ -77,20 +76,20 @@ const getAllClass = async (
     },
   });
 
-const enhancedClasses = classes.map((cls) => {
-  const totalSubjects = cls.subjects.length;
+  const enhancedClasses = classes.map((cls) => {
+    const totalSubjects = cls.subjects.length;
 
-  const totalChapters = cls.subjects.reduce((sum, subject) => {
-    return sum + subject._count.chapters;
-  }, 0);
+    const totalChapters = cls.subjects.reduce((sum, subject) => {
+      return sum + subject._count.chapters;
+    }, 0);
 
-  return {
-    ...cls,
-    totalSubjects,
-    totalChapters,
-    lessons: totalChapters * 9,
-  };
-});
+    return {
+      ...cls,
+      totalSubjects,
+      totalChapters,
+      lessons: totalChapters * 9,
+    };
+  });
 
   return {
     meta: {
@@ -186,8 +185,6 @@ const classWiseChapter = async (id: string) => {
 
   return { singleClass };
 };
-;
-
 const classVisibility = async (id: string) => {
   const isExist = await prisma.class.findUnique({
     where: {
@@ -211,10 +208,32 @@ const classVisibility = async (id: string) => {
   return { classVisibility };
 };
 
+const deleteClass = async (classId: string) => {
+  const classExist = await prisma.class.findUnique({
+    where: {
+      id: classId,
+    },
+  });
+
+  if (!classExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Class not found");
+  }
+
+  await prisma.class.update({
+    where: {
+      id: classExist.id,
+    },
+    data: {
+      isDeleted: true,
+    },
+  });
+};
+
 export const ClassService = {
   createClass,
   getAllClass,
   classWiseChapter,
   classVisibility,
-  studentAllClass
+  studentAllClass,
+  deleteClass
 };
