@@ -185,6 +185,7 @@ const subjectWiseChapter = async (
       chapterName: true,
       chapterDescription: true,
       thumbnail: true,
+      completeSteps: true,
       userChapterProgress: {
         select: {
           chapterId: true,
