@@ -9,85 +9,219 @@ import xlsx from "xlsx";
 import fs from "fs";
 import path from "path";
 
+// const createStepOne = async (chapterId: string, stepData: IStepOne) => {
+//   const chapter = await prisma.chapter.findUnique({
+//     where: {
+//       id: chapterId,
+//     },
+//   });
+
+//   if (!chapter) {
+//     throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
+//   }
+
+//   const step = await prisma.stepOne.upsert({
+//     where: {
+//       chapterId: chapterId, // assumes `chapterId` is a unique field in stepOne
+//     },
+//     update: {
+//       stepName: stepData.stepName,
+//       stepDescription: stepData.stepDescription,
+//       stepVideo: stepData.stepVideo,
+//     },
+//     create: {
+//       chapterId: chapterId,
+//       stepName: stepData.stepName,
+//       stepDescription: stepData.stepDescription,
+//       stepVideo: stepData.stepVideo,
+//     },
+//   });
+
+//   await prisma.chapter.update({
+//     where: {
+//       id: chapter.id,
+//     },
+//     data: {
+//       completeSteps: {
+//         increment: 1,
+//       },
+//     },
+//   });
+
+//   return step;
+// };
+
 const createStepOne = async (chapterId: string, stepData: IStepOne) => {
   const chapter = await prisma.chapter.findUnique({
-    where: {
-      id: chapterId,
-    },
+    where: { id: chapterId },
   });
 
   if (!chapter) {
     throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
   }
 
-  const step = await prisma.stepOne.upsert({
-    where: {
-      chapterId: chapterId, // assumes `chapterId` is a unique field in stepOne
-    },
-    update: {
-      stepName: stepData.stepName,
-      stepDescription: stepData.stepDescription,
-      stepVideo: stepData.stepVideo,
-    },
-    create: {
-      chapterId: chapterId,
-      stepName: stepData.stepName,
-      stepDescription: stepData.stepDescription,
-      stepVideo: stepData.stepVideo,
-    },
+  // Check if Step One already exists
+  const existingStep = await prisma.stepOne.findUnique({
+    where: { chapterId }, // assuming chapterId is unique in stepOne
   });
 
-  await prisma.chapter.update({
-    where: {
-      id: chapter.id,
-    },
-    data: {
-      completeSteps: {
-        increment: 1,
+  let step;
+
+  if (existingStep) {
+    // Step exists — update it only
+    step = await prisma.stepOne.update({
+      where: { chapterId },
+      data: {
+        stepName: stepData.stepName,
+        stepDescription: stepData.stepDescription,
+        stepVideo: stepData.stepVideo,
       },
-    },
-  });
+    });
+  } else {
+    // Step doesn't exist — create it and increment step count
+    step = await prisma.stepOne.create({
+      data: {
+        chapterId,
+        stepName: stepData.stepName,
+        stepDescription: stepData.stepDescription,
+        stepVideo: stepData.stepVideo,
+      },
+    });
+
+    await prisma.chapter.update({
+      where: { id: chapterId },
+      data: {
+        completeSteps: { increment: 1 },
+      },
+    });
+  }
 
   return step;
 };
+
+// const createStepTwo = async (chapterId: string, stepData: any) => {
+//   const chapter = await prisma.chapter.findUnique({
+//     where: {
+//       id: chapterId,
+//     },
+//   });
+
+//   if (!chapter) {
+//     throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
+//   }
+
+//   const step = await prisma.stepTwo.upsert({
+//     where: {
+//       chapterId, // Assumes chapterId is unique in stepTwo model
+//     },
+//     update: {
+//       ...stepData,
+//     },
+//     create: {
+//       chapterId,
+//       ...stepData,
+//     },
+//   });
+
+//   await prisma.chapter.update({
+//     where: {
+//       id: chapter.id,
+//     },
+//     data: {
+//       completeSteps: {
+//         increment: 1,
+//       },
+//     },
+//   });
+
+//   return step;
+// };
 
 const createStepTwo = async (chapterId: string, stepData: any) => {
   const chapter = await prisma.chapter.findUnique({
-    where: {
-      id: chapterId,
-    },
+    where: { id: chapterId },
   });
 
   if (!chapter) {
     throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
   }
 
-  const step = await prisma.stepTwo.upsert({
-    where: {
-      chapterId, // Assumes chapterId is unique in stepTwo model
-    },
-    update: {
-      ...stepData,
-    },
-    create: {
-      chapterId,
-      ...stepData,
-    },
+  // Check if Step Two already exists
+  const existingStep = await prisma.stepTwo.findUnique({
+    where: { chapterId }, // assuming chapterId is unique in stepTwo
   });
 
-  await prisma.chapter.update({
-    where: {
-      id: chapter.id,
-    },
-    data: {
-      completeSteps: {
-        increment: 1,
+  let step;
+
+  if (existingStep) {
+    // Update the existing step
+    step = await prisma.stepTwo.update({
+      where: { chapterId },
+      data: { ...stepData },
+    });
+  } else {
+    // Create new step and increment completeSteps
+    step = await prisma.stepTwo.create({
+      data: {
+        chapterId,
+        ...stepData,
       },
-    },
-  });
+    });
+
+    await prisma.chapter.update({
+      where: { id: chapterId },
+      data: {
+        completeSteps: {
+          increment: 1,
+        },
+      },
+    });
+  }
 
   return step;
 };
+
+// const createStepThree = async (chapterId: string, stepData: IStepOne) => {
+//   const chapter = await prisma.chapter.findUnique({
+//     where: {
+//       id: chapterId,
+//     },
+//   });
+
+//   if (!chapter) {
+//     throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
+//   }
+
+//   const step = await prisma.stepThree.upsert({
+//     where: {
+//       chapterId, // Assumes chapterId is unique in stepThree model
+//     },
+//     update: {
+//       stepName: stepData.stepName,
+//       stepDescription: stepData.stepDescription,
+//       stepVideo: stepData.stepVideo,
+//     },
+//     create: {
+//       chapterId: chapterId,
+//       stepName: stepData.stepName,
+//       stepDescription: stepData.stepDescription,
+//       stepVideo: stepData.stepVideo,
+//     },
+//   });
+
+//   await prisma.chapter.update({
+//     where: {
+//       id: chapter.id,
+//     },
+//     data: {
+//       completeSteps: {
+//         increment: 1,
+//       },
+//     },
+//   });
+
+//   return step;
+// };
 
 const createStepThree = async (chapterId: string, stepData: IStepOne) => {
   const chapter = await prisma.chapter.findUnique({
@@ -100,36 +234,90 @@ const createStepThree = async (chapterId: string, stepData: IStepOne) => {
     throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
   }
 
-  const step = await prisma.stepThree.upsert({
+  // Check if stepThree already exists
+  const existingStep = await prisma.stepThree.findUnique({
     where: {
-      chapterId, // Assumes chapterId is unique in stepThree model
-    },
-    update: {
-      stepName: stepData.stepName,
-      stepDescription: stepData.stepDescription,
-      stepVideo: stepData.stepVideo,
-    },
-    create: {
-      chapterId: chapterId,
-      stepName: stepData.stepName,
-      stepDescription: stepData.stepDescription,
-      stepVideo: stepData.stepVideo,
+      chapterId, // Assuming chapterId is unique in stepThree model
     },
   });
 
-  await prisma.chapter.update({
-    where: {
-      id: chapter.id,
-    },
-    data: {
-      completeSteps: {
-        increment: 1,
+  let step;
+
+  if (existingStep) {
+    // Update existing stepThree
+    step = await prisma.stepThree.update({
+      where: { chapterId },
+      data: {
+        stepName: stepData.stepName,
+        stepDescription: stepData.stepDescription,
+        stepVideo: stepData.stepVideo,
       },
-    },
-  });
+    });
+  } else {
+    // Create new stepThree and increment completeSteps
+    step = await prisma.stepThree.create({
+      data: {
+        chapterId,
+        stepName: stepData.stepName,
+        stepDescription: stepData.stepDescription,
+        stepVideo: stepData.stepVideo,
+      },
+    });
+
+    await prisma.chapter.update({
+      where: { id: chapterId },
+      data: {
+        completeSteps: {
+          increment: 1,
+        },
+      },
+    });
+  }
 
   return step;
 };
+
+// const createStepFour = async (chapterId: string, stepData: IStepOne) => {
+//   const chapter = await prisma.chapter.findUnique({
+//     where: {
+//       id: chapterId,
+//     },
+//   });
+
+//   if (!chapter) {
+//     throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
+//   }
+
+//   const step = await prisma.stepFour.upsert({
+//     where: {
+//       chapterId, // This works because chapterId is unique
+//     },
+//     update: {
+//       stepName: stepData.stepName,
+//       stepDescription: stepData.stepDescription,
+//       stepVideo: stepData.stepVideo,
+//     },
+//     create: {
+//       chapterId,
+//       stepName: stepData.stepName,
+//       stepDescription: stepData.stepDescription,
+//       stepVideo: stepData.stepVideo,
+//     },
+//   });
+
+//   await prisma.chapter.update({
+//     where: {
+//       id: chapter.id,
+//     },
+//     data: {
+//       completeSteps: {
+//         increment: 1,
+//       },
+//     },
+//   });
+
+//   return step;
+// };
 
 const createStepFour = async (chapterId: string, stepData: IStepOne) => {
   const chapter = await prisma.chapter.findUnique({
@@ -142,185 +330,388 @@ const createStepFour = async (chapterId: string, stepData: IStepOne) => {
     throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
   }
 
-  const step = await prisma.stepFour.upsert({
+  // Check if stepFour already exists
+  const existingStep = await prisma.stepFour.findUnique({
     where: {
-      chapterId, // This works because chapterId is unique
-    },
-    update: {
-      stepName: stepData.stepName,
-      stepDescription: stepData.stepDescription,
-      stepVideo: stepData.stepVideo,
-    },
-    create: {
-      chapterId,
-      stepName: stepData.stepName,
-      stepDescription: stepData.stepDescription,
-      stepVideo: stepData.stepVideo,
+      chapterId, // Assuming chapterId is unique in stepFour model
     },
   });
 
-  await prisma.chapter.update({
-    where: {
-      id: chapter.id,
-    },
-    data: {
-      completeSteps: {
-        increment: 1,
+  let step;
+
+  if (existingStep) {
+    // Update existing step
+    step = await prisma.stepFour.update({
+      where: { chapterId },
+      data: {
+        stepName: stepData.stepName,
+        stepDescription: stepData.stepDescription,
+        stepVideo: stepData.stepVideo,
       },
-    },
-  });
+    });
+  } else {
+    // Create new step and increment completeSteps
+    step = await prisma.stepFour.create({
+      data: {
+        chapterId,
+        stepName: stepData.stepName,
+        stepDescription: stepData.stepDescription,
+        stepVideo: stepData.stepVideo,
+      },
+    });
+
+    await prisma.chapter.update({
+      where: { id: chapterId },
+      data: {
+        completeSteps: {
+          increment: 1,
+        },
+      },
+    });
+  }
 
   return step;
 };
+
+// const createStepFive = async (chapterId: string, stepData: IStepFive) => {
+//   const chapter = await prisma.chapter.findUnique({
+//     where: {
+//       id: chapterId,
+//     },
+//   });
+
+//   if (!chapter) {
+//     throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
+//   }
+
+//   const step = await prisma.stepFive.upsert({
+//     where: {
+//       chapterId, // Assumes chapterId is unique in stepFive model
+//     },
+//     update: {
+//       stepName: stepData.stepName,
+//       stepVideo: stepData.stepVideo,
+//       questionAnswer: stepData.questionAnswer,
+//     },
+//     create: {
+//       chapterId: chapterId,
+//       stepName: stepData.stepName,
+//       stepVideo: stepData.stepVideo,
+//       questionAnswer: stepData.questionAnswer,
+//     },
+//   });
+
+//   await prisma.chapter.update({
+//     where: {
+//       id: chapter.id,
+//     },
+//     data: {
+//       completeSteps: {
+//         increment: 1,
+//       },
+//     },
+//   });
+
+//   return step;
+// };
 
 const createStepFive = async (chapterId: string, stepData: IStepFive) => {
   const chapter = await prisma.chapter.findUnique({
-    where: {
-      id: chapterId,
-    },
+    where: { id: chapterId },
   });
 
   if (!chapter) {
     throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
   }
 
-  const step = await prisma.stepFive.upsert({
-    where: {
-      chapterId, // Assumes chapterId is unique in stepFive model
-    },
-    update: {
-      stepName: stepData.stepName,
-      stepVideo: stepData.stepVideo,
-      questionAnswer: stepData.questionAnswer,
-    },
-    create: {
-      chapterId: chapterId,
-      stepName: stepData.stepName,
-      stepVideo: stepData.stepVideo,
-      questionAnswer: stepData.questionAnswer,
-    },
+  // Check if stepFive already exists
+  const existingStep = await prisma.stepFive.findUnique({
+    where: { chapterId }, // Ensure chapterId is unique in stepFive model
   });
 
-  await prisma.chapter.update({
-    where: {
-      id: chapter.id,
-    },
-    data: {
-      completeSteps: {
-        increment: 1,
+  let step;
+
+  if (existingStep) {
+    // Update existing step
+    step = await prisma.stepFive.update({
+      where: { chapterId },
+      data: {
+        stepName: stepData.stepName,
+        stepVideo: stepData.stepVideo,
+        questionAnswer: stepData.questionAnswer,
       },
-    },
-  });
+    });
+  } else {
+    // Create new step and increment completeSteps
+    step = await prisma.stepFive.create({
+      data: {
+        chapterId,
+        stepName: stepData.stepName,
+        stepVideo: stepData.stepVideo,
+        questionAnswer: stepData.questionAnswer,
+      },
+    });
+
+    await prisma.chapter.update({
+      where: { id: chapterId },
+      data: {
+        completeSteps: {
+          increment: 1,
+        },
+      },
+    });
+  }
 
   return step;
 };
+
+// const createStepSix = async (chapterId: string, stepData: IStepOne) => {
+//   const chapter = await prisma.chapter.findUnique({
+//     where: {
+//       id: chapterId,
+//     },
+//   });
+
+//   if (!chapter) {
+//     throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
+//   }
+
+//   const step = await prisma.stepSix.upsert({
+//     where: {
+//       chapterId, // Assumes chapterId is unique in stepSix model
+//     },
+//     update: {
+//       stepName: stepData.stepName,
+//       stepDescription: stepData.stepDescription,
+//       stepVideo: stepData.stepVideo,
+//     },
+//     create: {
+//       chapterId: chapterId,
+//       stepName: stepData.stepName,
+//       stepDescription: stepData.stepDescription,
+//       stepVideo: stepData.stepVideo,
+//     },
+//   });
+
+//   await prisma.chapter.update({
+//     where: {
+//       id: chapter.id,
+//     },
+//     data: {
+//       completeSteps: {
+//         increment: 1,
+//       },
+//     },
+//   });
+
+//   return step;
+// };
 
 const createStepSix = async (chapterId: string, stepData: IStepOne) => {
   const chapter = await prisma.chapter.findUnique({
-    where: {
-      id: chapterId,
-    },
+    where: { id: chapterId },
   });
 
   if (!chapter) {
     throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
   }
 
-  const step = await prisma.stepSix.upsert({
-    where: {
-      chapterId, // Assumes chapterId is unique in stepSix model
-    },
-    update: {
-      stepName: stepData.stepName,
-      stepDescription: stepData.stepDescription,
-      stepVideo: stepData.stepVideo,
-    },
-    create: {
-      chapterId: chapterId,
-      stepName: stepData.stepName,
-      stepDescription: stepData.stepDescription,
-      stepVideo: stepData.stepVideo,
-    },
+  // Check if stepSix already exists
+  const existingStep = await prisma.stepSix.findUnique({
+    where: { chapterId }, // Ensure chapterId is unique in stepSix model
   });
 
-  await prisma.chapter.update({
-    where: {
-      id: chapter.id,
-    },
-    data: {
-      completeSteps: {
-        increment: 1,
+  let step;
+
+  if (existingStep) {
+    // Update existing step
+    step = await prisma.stepSix.update({
+      where: { chapterId },
+      data: {
+        stepName: stepData.stepName,
+        stepDescription: stepData.stepDescription,
+        stepVideo: stepData.stepVideo,
       },
-    },
-  });
+    });
+  } else {
+    // Create new step and increment completeSteps
+    step = await prisma.stepSix.create({
+      data: {
+        chapterId,
+        stepName: stepData.stepName,
+        stepDescription: stepData.stepDescription,
+        stepVideo: stepData.stepVideo,
+      },
+    });
+
+    await prisma.chapter.update({
+      where: { id: chapterId },
+      data: {
+        completeSteps: {
+          increment: 1,
+        },
+      },
+    });
+  }
 
   return step;
 };
+
+// const createStepSeven = async (chapterId: string, stepData: IStepOne) => {
+//   const chapter = await prisma.chapter.findUnique({
+//     where: {
+//       id: chapterId,
+//     },
+//   });
+
+//   if (!chapter) {
+//     throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
+//   }
+
+//   const step = await prisma.stepSeven.upsert({
+//     where: {
+//       chapterId,
+//     },
+//     update: {
+//       stepName: stepData.stepName,
+//       stepDescription: stepData.stepDescription,
+//       stepVideo: stepData.stepVideo,
+//     },
+//     create: {
+//       chapterId: chapterId,
+//       stepName: stepData.stepName,
+//       stepDescription: stepData.stepDescription,
+//       stepVideo: stepData.stepVideo,
+//     },
+//   });
+//   await prisma.chapter.update({
+//     where: {
+//       id: chapter.id,
+//     },
+//     data: {
+//       completeSteps: {
+//         increment: 1,
+//       },
+//     },
+//   });
+
+//   return step;
+// };
 
 const createStepSeven = async (chapterId: string, stepData: IStepOne) => {
   const chapter = await prisma.chapter.findUnique({
-    where: {
-      id: chapterId,
-    },
+    where: { id: chapterId },
   });
 
   if (!chapter) {
     throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
   }
 
-  const step = await prisma.stepSeven.upsert({
-    where: {
-      chapterId,
-    },
-    update: {
-      stepName: stepData.stepName,
-      stepDescription: stepData.stepDescription,
-      stepVideo: stepData.stepVideo,
-    },
-    create: {
-      chapterId: chapterId,
-      stepName: stepData.stepName,
-      stepDescription: stepData.stepDescription,
-      stepVideo: stepData.stepVideo,
-    },
+  // Check if stepSeven already exists
+  const existingStep = await prisma.stepSeven.findUnique({
+    where: { chapterId }, // assuming chapterId is unique in stepSeven model
   });
-  await prisma.chapter.update({
-    where: {
-      id: chapter.id,
-    },
-    data: {
-      completeSteps: {
-        increment: 1,
+
+  let step;
+
+  if (existingStep) {
+    // Update the existing step
+    step = await prisma.stepSeven.update({
+      where: { chapterId },
+      data: {
+        stepName: stepData.stepName,
+        stepDescription: stepData.stepDescription,
+        stepVideo: stepData.stepVideo,
       },
-    },
-  });
+    });
+  } else {
+    // Create new step and increment completeSteps
+    step = await prisma.stepSeven.create({
+      data: {
+        chapterId,
+        stepName: stepData.stepName,
+        stepDescription: stepData.stepDescription,
+        stepVideo: stepData.stepVideo,
+      },
+    });
+
+    await prisma.chapter.update({
+      where: { id: chapterId },
+      data: {
+        completeSteps: {
+          increment: 1,
+        },
+      },
+    });
+  }
 
   return step;
 };
 
+// const createStepEight = async (chapterId: string, stepData: IStepEight) => {
+//   const chapter = await prisma.chapter.findUnique({
+//     where: {
+//       id: chapterId,
+//     },
+//   });
+
+//   if (!chapter) {
+//     throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
+//   }
+
+//   const step = await prisma.stepEight.create({
+//     data: {
+//       chapterId: chapterId,
+//       questionType: stepData.questionType,
+//       questionDescription: stepData.questionDescription,
+//     },
+//   });
+
+//   await prisma.chapter.update({
+//     where: {
+//       id: chapter.id,
+//     },
+//     data: {
+//       completeSteps: {
+//         increment: 1,
+//       },
+//     },
+//   });
+
+//   return step;
+// };
+
 const createStepEight = async (chapterId: string, stepData: IStepEight) => {
   const chapter = await prisma.chapter.findUnique({
-    where: {
-      id: chapterId,
-    },
+    where: { id: chapterId },
   });
 
   if (!chapter) {
     throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
   }
 
+  // Check if stepEight already exists
+  const existingStep = await prisma.stepEight.findFirst({
+    where: { chapterId }, // Assumes chapterId is unique in stepEight model
+  });
+
+  if (existingStep) {
+    // Optional: return or throw if you don't want to allow duplicates
+    return existingStep;
+  }
+
+  // Create new stepEight
   const step = await prisma.stepEight.create({
     data: {
-      chapterId: chapterId,
+      chapterId,
       questionType: stepData.questionType,
       questionDescription: stepData.questionDescription,
     },
   });
 
+  // Increment step count
   await prisma.chapter.update({
-    where: {
-      id: chapter.id,
-    },
+    where: { id: chapterId },
     data: {
       completeSteps: {
         increment: 1,
@@ -479,44 +870,94 @@ const uploadQuiz = async (quizId: string, file: Express.Multer.File) => {
   return transaction;
 };
 
+// const createStepNine = async (chapterId: string, stepData: IStepOne) => {
+//   const chapter = await prisma.chapter.findUnique({
+//     where: {
+//       id: chapterId,
+//     },
+//   });
+
+//   if (!chapter) {
+//     throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
+//   }
+
+//   const step = await prisma.stepNine.upsert({
+//     where: {
+//       chapterId, // Assumes chapterId is unique in stepFive model
+//     },
+//     update: {
+//       stepName: stepData.stepName,
+//       stepDescription: stepData.stepDescription,
+//       stepVideo: stepData.stepVideo,
+//     },
+//     create: {
+//       chapterId: chapterId,
+//       stepName: stepData.stepName,
+//       stepDescription: stepData.stepDescription,
+//       stepVideo: stepData.stepVideo,
+//     },
+//   });
+
+//   await prisma.chapter.update({
+//     where: {
+//       id: chapter.id,
+//     },
+//     data: {
+//       completeSteps: {
+//         increment: 1,
+//       },
+//     },
+//   });
+
+//   return step;
+// };
+
 const createStepNine = async (chapterId: string, stepData: IStepOne) => {
   const chapter = await prisma.chapter.findUnique({
-    where: {
-      id: chapterId,
-    },
+    where: { id: chapterId },
   });
 
   if (!chapter) {
     throw new ApiError(httpStatus.NOT_FOUND, "Chapter not found");
   }
 
-  const step = await prisma.stepNine.upsert({
-    where: {
-      chapterId, // Assumes chapterId is unique in stepFive model
-    },
-    update: {
-      stepName: stepData.stepName,
-      stepDescription: stepData.stepDescription,
-      stepVideo: stepData.stepVideo,
-    },
-    create: {
-      chapterId: chapterId,
-      stepName: stepData.stepName,
-      stepDescription: stepData.stepDescription,
-      stepVideo: stepData.stepVideo,
-    },
+  // Check if stepNine already exists
+  const existingStep = await prisma.stepNine.findUnique({
+    where: { chapterId }, // Assumes chapterId is unique in stepNine model
   });
 
-  await prisma.chapter.update({
-    where: {
-      id: chapter.id,
-    },
-    data: {
-      completeSteps: {
-        increment: 1,
+  let step;
+
+  if (existingStep) {
+    // Update existing step
+    step = await prisma.stepNine.update({
+      where: { chapterId },
+      data: {
+        stepName: stepData.stepName,
+        stepDescription: stepData.stepDescription,
+        stepVideo: stepData.stepVideo,
       },
-    },
-  });
+    });
+  } else {
+    // Create new step and increment completeSteps
+    step = await prisma.stepNine.create({
+      data: {
+        chapterId,
+        stepName: stepData.stepName,
+        stepDescription: stepData.stepDescription,
+        stepVideo: stepData.stepVideo,
+      },
+    });
+
+    await prisma.chapter.update({
+      where: { id: chapterId },
+      data: {
+        completeSteps: {
+          increment: 1,
+        },
+      },
+    });
+  }
 
   return step;
 };
