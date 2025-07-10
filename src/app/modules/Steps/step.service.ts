@@ -37,6 +37,17 @@ const createStepOne = async (chapterId: string, stepData: IStepOne) => {
     },
   });
 
+  await prisma.chapter.update({
+    where: {
+      id: chapter.id,
+    },
+    data: {
+      completeSteps: {
+        increment: 1,
+      },
+    },
+  });
+
   return step;
 };
 
@@ -61,6 +72,17 @@ const createStepTwo = async (chapterId: string, stepData: any) => {
     create: {
       chapterId,
       ...stepData,
+    },
+  });
+
+  await prisma.chapter.update({
+    where: {
+      id: chapter.id,
+    },
+    data: {
+      completeSteps: {
+        increment: 1,
+      },
     },
   });
 
@@ -95,6 +117,17 @@ const createStepThree = async (chapterId: string, stepData: IStepOne) => {
     },
   });
 
+  await prisma.chapter.update({
+    where: {
+      id: chapter.id,
+    },
+    data: {
+      completeSteps: {
+        increment: 1,
+      },
+    },
+  });
+
   return step;
 };
 
@@ -123,6 +156,17 @@ const createStepFour = async (chapterId: string, stepData: IStepOne) => {
       stepName: stepData.stepName,
       stepDescription: stepData.stepDescription,
       stepVideo: stepData.stepVideo,
+    },
+  });
+
+  await prisma.chapter.update({
+    where: {
+      id: chapter.id,
+    },
+    data: {
+      completeSteps: {
+        increment: 1,
+      },
     },
   });
 
@@ -157,6 +201,17 @@ const createStepFive = async (chapterId: string, stepData: IStepFive) => {
     },
   });
 
+  await prisma.chapter.update({
+    where: {
+      id: chapter.id,
+    },
+    data: {
+      completeSteps: {
+        increment: 1,
+      },
+    },
+  });
+
   return step;
 };
 
@@ -185,6 +240,17 @@ const createStepSix = async (chapterId: string, stepData: IStepOne) => {
       stepName: stepData.stepName,
       stepDescription: stepData.stepDescription,
       stepVideo: stepData.stepVideo,
+    },
+  });
+
+  await prisma.chapter.update({
+    where: {
+      id: chapter.id,
+    },
+    data: {
+      completeSteps: {
+        increment: 1,
+      },
     },
   });
 
@@ -218,6 +284,16 @@ const createStepSeven = async (chapterId: string, stepData: IStepOne) => {
       stepVideo: stepData.stepVideo,
     },
   });
+  await prisma.chapter.update({
+    where: {
+      id: chapter.id,
+    },
+    data: {
+      completeSteps: {
+        increment: 1,
+      },
+    },
+  });
 
   return step;
 };
@@ -240,6 +316,18 @@ const createStepEight = async (chapterId: string, stepData: IStepEight) => {
       questionDescription: stepData.questionDescription,
     },
   });
+
+  await prisma.chapter.update({
+    where: {
+      id: chapter.id,
+    },
+    data: {
+      completeSteps: {
+        increment: 1,
+      },
+    },
+  });
+
   return step;
 };
 
@@ -419,6 +507,17 @@ const createStepNine = async (chapterId: string, stepData: IStepOne) => {
     },
   });
 
+  await prisma.chapter.update({
+    where: {
+      id: chapter.id,
+    },
+    data: {
+      completeSteps: {
+        increment: 1,
+      },
+    },
+  });
+
   return step;
 };
 
@@ -488,22 +587,21 @@ export const submitQuizAnswers = async (
 
   // Create completed quiz
   await prisma.completedQuiz.upsert({
-  where: {
-    stepEightId_userId: {
+    where: {
+      stepEightId_userId: {
+        stepEightId,
+        userId,
+      },
+    },
+    update: {
+      chapterId: stepEight.chapterId, // in case chapter changed
+    },
+    create: {
       stepEightId,
       userId,
+      chapterId: stepEight.chapterId,
     },
-  },
-  update: {
-    chapterId: stepEight.chapterId, // in case chapter changed
-  },
-  create: {
-    stepEightId,
-    userId,
-    chapterId: stepEight.chapterId,
-  },
-});
-
+  });
 
   for (const answer of answers) {
     const quiz = await prisma.stepEightQuiz.findUnique({

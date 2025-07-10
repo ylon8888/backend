@@ -144,6 +144,7 @@ model Chapter {
   chapterDescription String
   thumbnail          String
   isDeleted          Boolean @default(false)
+  completeSteps      Int     @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -481,8 +482,8 @@ enum StepType {
 model UserChapterProgress {
   id String @id @default(cuid())
 
-  userId    String 
-  chapterId String 
+  userId    String
+  chapterId String
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
