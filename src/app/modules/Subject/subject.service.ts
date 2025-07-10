@@ -160,7 +160,7 @@ const subjectWiseChapter = async (
   // Construct filter conditions for Chapter
   const whereConditions: Prisma.ChapterWhereInput = {
     AND: [
-      { subjectId },
+      { subjectId, isDeleted: false },
       ...(searchTerm
         ? [
             {
