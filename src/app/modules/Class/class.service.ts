@@ -162,6 +162,7 @@ const classWiseChapter = async (id: string) => {
   const singleClass = await prisma.class.findUnique({
     where: {
       id,
+      isDeleted: false
     },
     select: {
       id: true,
@@ -179,6 +180,9 @@ const classWiseChapter = async (id: string) => {
             },
           },
         },
+        where:{
+          isVisible: false
+        }
       },
     },
   });
