@@ -1140,6 +1140,7 @@ const getQuizResult = async (userId: string, quizId: string) => {
                   optionB: true,
                   optionC: true,
                   optionD: true,
+                  correctAnswer: true
                 },
               },
             },
