@@ -8,6 +8,7 @@ export const fileFilter = (req: any, file: any, cb: any) => {
     "image/webp",
     "audio/mpeg",
     "video/mp4",
+    "audio/wav",
   ];
 
   if (
