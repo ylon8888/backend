@@ -13,10 +13,23 @@ const fileUpload = s3Uploader.single("file");
 // const upload = multer({ storage: createStorage("chapter") });
 // const fileUpload = upload.single("file");
 
-router.post('/:subjectId', fileUpload, ChapterController.createchapter);
-router.get('/chapter-wise-steps/:chapterId', auth(), ChapterController.getChapterWiseSteps);
+router.post(
+  "/:subjectId",
+  auth(UserRole.ADMIN),
+  fileUpload,
+  ChapterController.createchapter
+);
+router.get(
+  "/chapter-wise-steps/:chapterId",
+  auth(),
+  ChapterController.getChapterWiseSteps
+);
 
 // Delete Chapter
-router.patch('/delete/:chapterId', auth(UserRole.ADMIN), ChapterController.deleteChapter);
+router.patch(
+  "/delete/:chapterId",
+  auth(UserRole.ADMIN),
+  ChapterController.deleteChapter
+);
 
 export const ChapterRoutes = router;

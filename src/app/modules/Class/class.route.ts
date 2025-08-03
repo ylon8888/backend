@@ -10,8 +10,12 @@ const router = express.Router();
 router.get("/", classController.getAllClasses);
 router.get("/student-class", classController.studentAllClass);
 router.get("/class-wise-chapter/:id", classController.classWiseChapter);
-router.post("/", classController.createClass);
-router.patch("/class-visibility/:id", classController.classVisibility);
+router.post("/", auth(UserRole.ADMIN), classController.createClass);
+router.patch(
+  "/class-visibility/:id",
+  auth(UserRole.ADMIN),
+  classController.classVisibility
+);
 router.patch("/delete/:id", auth(UserRole.ADMIN), classController.deleteClass);
 
 export const classRoutes = router;

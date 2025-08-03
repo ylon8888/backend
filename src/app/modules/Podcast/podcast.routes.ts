@@ -3,6 +3,7 @@ import express from "express";
 import { PodcastController } from "./podcast.controller";
 import multer from "multer";
 import { createStorage } from "../../../helpars/fileUploader";
+import auth from "../../middlewares/auth";
 
 const router = express.Router();
 
@@ -10,7 +11,12 @@ const upload = multer({ storage: createStorage("podcast") });
 
 const fileUpload = upload.single("file");
 
-router.post("/", fileUpload, PodcastController.createPodcast);
+router.post(
+  "/",
+  auth(UserRole.ADMIN),
+  fileUpload,
+  PodcastController.createPodcast
+);
 router.get(
   "/chapters/:chapterId/topics/:topicId",
   PodcastController.getChapterPodcast
