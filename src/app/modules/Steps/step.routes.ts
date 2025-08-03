@@ -4,7 +4,12 @@ import { createStorage } from "../../../helpars/fileUploader";
 import { StepController } from "./step.controller";
 import auth from "../../middlewares/auth";
 import { s3Uploader } from "../../../helpars/s3Bucket/fileUploadToS3";
+<<<<<<< HEAD
 import { UserRole } from "@prisma/client";
+=======
+import validateRequest from "../../middlewares/validateRequest";
+import { quizValidationSchema } from "./step.validation";
+>>>>>>> 71112207b6602eec56a8c54893e37551954527e1
 
 const router = express.Router();
 
@@ -23,6 +28,7 @@ const upload = multer({ storage: createStorage("step") });
 
 const quizUpload = upload.single("quiz");
 
+<<<<<<< HEAD
 router.post(
   "/one/:chapterId",
   auth(UserRole.ADMIN),
@@ -76,6 +82,17 @@ router.post(
   fileUpload,
   StepController.createStepNine
 );
+=======
+router.post("/one/:chapterId", fileUpload, StepController.createStepOne);
+router.post("/two/:chapterId", uploadPodcast, StepController.createStepTwo);
+router.post("/three/:chapterId", fileUpload, StepController.createStepThree);
+router.post("/four/:chapterId", fileUpload, StepController.createStepFour);
+router.post("/five/:chapterId", fileUpload, StepController.createStepFive);
+router.post("/six/:chapterId", fileUpload, StepController.createStepSix);
+router.post("/seven/:chapterId", fileUpload, StepController.createStepSeven);
+router.post("/eight/:chapterId", StepController.createStepEight);
+router.post("/nine/:chapterId", fileUpload, StepController.createStepNine);
+>>>>>>> 71112207b6602eec56a8c54893e37551954527e1
 
 // Get all steps
 router.get("/one/:stepId", StepController.getStepOne);
@@ -98,7 +115,11 @@ router.patch("/disable-quiz/:quizId", StepController.disableQuize);
 // Create Quiz Question
 router.post(
   "/quiz/:quizId",
+<<<<<<< HEAD
   auth(UserRole.ADMIN),
+=======
+  validateRequest(quizValidationSchema),
+>>>>>>> 71112207b6602eec56a8c54893e37551954527e1
   quizUpload,
   StepController.uploadQuiz
 );
