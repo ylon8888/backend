@@ -75,6 +75,7 @@ export const s3Uploader = multer({
   }),
   fileFilter: fileFilter,
   limits: {
-    fileSize: 1 * 1024 * 1024 * 1024, // 1GB max file size
+    fileSize: 2 * 1024 * 1024 * 1024, // 2GB max file size
+    fieldSize: 1 * 1024 * 1024 * 1024, // 1GB field size
   },
 });
