@@ -13,7 +13,7 @@ export const corsOptions = {
   origin: [
     "http://localhost:3000",
     "http://localhost:3001",
-    "https://braindrawer.com"
+    "https://braindrawer.com",
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -23,9 +23,9 @@ export const corsOptions = {
 // Middleware setup
 app.use(cors(corsOptions));
 app.use(cookieParser());
-app.use(express.json());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.json({ limit: "300mb" }));
+app.use(bodyParser.json({ limit: "300mb" }));
+app.use(bodyParser.urlencoded({ extended: true, limit: "300mb" }));
 app.use(express.static("public"));
 
 // Route handler for the root endpoint
