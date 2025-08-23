@@ -64,7 +64,6 @@ const createProgress = async (progressData: ICourseProgress) => {
         },
       });
 
-      
       if (totalQuizzes !== completedQuizzes) {
         throw new ApiError(
           httpStatus.CONFLICT,
@@ -191,7 +190,8 @@ const createNextProgress = async (progressData: INextStepProgress) => {
   });
 
   if (!existingProgress) {
-    throw new ApiError(httpStatus.NOT_FOUND, "Chapter progress not found");
+    return;
+    // throw new ApiError(httpStatus.NOT_FOUND, "Chapter progress not found");
   }
 
   const lastStep = await prisma.userStepProgress.findFirst({
@@ -234,7 +234,6 @@ const createNextProgress = async (progressData: INextStepProgress) => {
 
   // console.log("nextChapter: ", nextChapter);
 
-
   if (!nextChapter) {
     return {
       success: true,
@@ -258,13 +257,13 @@ const createNextProgress = async (progressData: INextStepProgress) => {
 
   // update completed chapter when successfuly ceated next chapter
   await prisma.userChapterProgress.update({
-    where:{
-      id: existingProgress.id
+    where: {
+      id: existingProgress.id,
     },
-    data:{
-      isCompleted: true
-    }
-  })
+    data: {
+      isCompleted: true,
+    },
+  });
 
   return {
     success: true,
